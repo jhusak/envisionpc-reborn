@@ -1,0 +1,5 @@
+Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
+2011-01-29:
+- changed the way of exiting program (now you must press Y)
+- modified draw_char command (in draft) to reflect graphics mode and font modified by user.
+

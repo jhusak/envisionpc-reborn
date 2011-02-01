@@ -1,0 +1,389 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXApplicationTarget section */
+		29B97326FDCFA39411CA2CEA /* EnvisionOSX */ = {
+			isa = PBXApplicationTarget;
+			buildConfigurationList = 2D1A354709B6939B00FEE1D0 /* Build configuration list for PBXApplicationTarget "EnvisionOSX" */;
+			buildPhases = (
+				29B97327FDCFA39411CA2CEA /* Headers */,
+				29B97328FDCFA39411CA2CEA /* Resources */,
+				29B9732BFDCFA39411CA2CEA /* Sources */,
+				29B9732DFDCFA39411CA2CEA /* Frameworks */,
+			);
+			dependencies = (
+			);
+			name = EnvisionOSX;
+			productInstallPath = "$(HOME)/Applications";
+			productName = EnvisionOSX;
+			productReference = 17587328FF379C6511CA2CBB /* EnvisionOSX.app */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>EnvisionOSX</string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>0.1</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>
+";
+		};
+/* End PBXApplicationTarget section */
+
+/* Begin PBXBuildFile section */
+		089C165EFE840E0CC02AAC07 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
+		1058C7A3FEA54F0111CA2CBB /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		2D1A354609B6939B00FEE1D0 /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D1A354509B6939B00FEE1D0 /* util.c */; };
+		2DA801BB099059B900D40525 /* colours.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DA801AF099059B900D40525 /* colours.h */; };
+		2DA801BC099059B900D40525 /* dialogs.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801B0099059B900D40525 /* dialogs.c */; };
+		2DA801BD099059B900D40525 /* envision.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801B1099059B900D40525 /* envision.c */; };
+		2DA801BE099059B900D40525 /* envision.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DA801B2099059B900D40525 /* envision.h */; };
+		2DA801BF099059B900D40525 /* fileio.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801B3099059B900D40525 /* fileio.c */; };
+		2DA801C0099059B900D40525 /* font.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DA801B4099059B900D40525 /* font.h */; };
+		2DA801C1099059B900D40525 /* icon.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DA801B5099059B900D40525 /* icon.h */; };
+		2DA801C2099059B900D40525 /* map.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801B6099059B900D40525 /* map.c */; };
+		2DA801C3099059B900D40525 /* raw.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DA801B7099059B900D40525 /* raw.h */; };
+		2DA801C4099059B900D40525 /* SDLemu.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801B8099059B900D40525 /* SDLemu.c */; };
+		2DA801C5099059B900D40525 /* SDLemu.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DA801B9099059B900D40525 /* SDLemu.h */; };
+		2DA801C6099059B900D40525 /* title.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801BA099059B900D40525 /* title.c */; };
+		30DD217612F3E3B900B92FCD /* changes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 30DD217512F3E3B900B92FCD /* changes.txt */; };
+		F5A47AA101A0483001D3D55B /* SDLMain.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A47A9D01A0482F01D3D55B /* SDLMain.h */; };
+		F5A47AA301A0483001D3D55B /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = F5A47A9E01A0483001D3D55B /* SDLMain.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		17587328FF379C6511CA2CBB /* EnvisionOSX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = EnvisionOSX.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		2D1A354509B6939B00FEE1D0 /* util.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = util.c; path = ../util.c; sourceTree = SOURCE_ROOT; };
+		2DA801AF099059B900D40525 /* colours.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = colours.h; path = ../colours.h; sourceTree = SOURCE_ROOT; };
+		2DA801B0099059B900D40525 /* dialogs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = dialogs.c; path = ../dialogs.c; sourceTree = SOURCE_ROOT; };
+		2DA801B1099059B900D40525 /* envision.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = envision.c; path = ../envision.c; sourceTree = SOURCE_ROOT; };
+		2DA801B2099059B900D40525 /* envision.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = envision.h; path = ../envision.h; sourceTree = SOURCE_ROOT; };
+		2DA801B3099059B900D40525 /* fileio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = fileio.c; path = ../fileio.c; sourceTree = SOURCE_ROOT; };
+		2DA801B4099059B900D40525 /* font.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = font.h; path = ../font.h; sourceTree = SOURCE_ROOT; };
+		2DA801B5099059B900D40525 /* icon.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = icon.h; path = ../icon.h; sourceTree = SOURCE_ROOT; };
+		2DA801B6099059B900D40525 /* map.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = map.c; path = ../map.c; sourceTree = SOURCE_ROOT; };
+		2DA801B7099059B900D40525 /* raw.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = raw.h; path = ../raw.h; sourceTree = SOURCE_ROOT; };
+		2DA801B8099059B900D40525 /* SDLemu.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = SDLemu.c; path = ../SDLemu.c; sourceTree = SOURCE_ROOT; };
+		2DA801B9099059B900D40525 /* SDLemu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDLemu.h; path = ../SDLemu.h; sourceTree = SOURCE_ROOT; };
+		2DA801BA099059B900D40525 /* title.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = title.c; path = ../title.c; sourceTree = SOURCE_ROOT; };
+		30DD217512F3E3B900B92FCD /* changes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = changes.txt; path = ../changes.txt; sourceTree = SOURCE_ROOT; };
+		F5A47A9D01A0482F01D3D55B /* SDLMain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = SOURCE_ROOT; };
+		F5A47A9E01A0483001D3D55B /* SDLMain.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		29B9732DFDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1058C7A3FEA54F0111CA2CBB /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		080E96DDFE201D6D7F000001 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				F5A47A9D01A0482F01D3D55B /* SDLMain.h */,
+				F5A47A9E01A0483001D3D55B /* SDLMain.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				17587328FF379C6511CA2CBB /* EnvisionOSX.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* EnvisionOSX */ = {
+			isa = PBXGroup;
+			children = (
+				080E96DDFE201D6D7F000001 /* Classes */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = EnvisionOSX;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				2D1A354509B6939B00FEE1D0 /* util.c */,
+				2DA801AF099059B900D40525 /* colours.h */,
+				2DA801B0099059B900D40525 /* dialogs.c */,
+				2DA801B1099059B900D40525 /* envision.c */,
+				2DA801B2099059B900D40525 /* envision.h */,
+				2DA801B3099059B900D40525 /* fileio.c */,
+				2DA801B4099059B900D40525 /* font.h */,
+				2DA801B5099059B900D40525 /* icon.h */,
+				2DA801B6099059B900D40525 /* map.c */,
+				2DA801B7099059B900D40525 /* raw.h */,
+				2DA801B8099059B900D40525 /* SDLemu.c */,
+				2DA801B9099059B900D40525 /* SDLemu.h */,
+				2DA801BA099059B900D40525 /* title.c */,
+				30DD217512F3E3B900B92FCD /* changes.txt */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		29B97327FDCFA39411CA2CEA /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5A47AA101A0483001D3D55B /* SDLMain.h in Headers */,
+				2DA801BB099059B900D40525 /* colours.h in Headers */,
+				2DA801BE099059B900D40525 /* envision.h in Headers */,
+				2DA801C0099059B900D40525 /* font.h in Headers */,
+				2DA801C1099059B900D40525 /* icon.h in Headers */,
+				2DA801C3099059B900D40525 /* raw.h in Headers */,
+				2DA801C5099059B900D40525 /* SDLemu.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 2D1A354B09B6939B00FEE1D0 /* Build configuration list for PBXProject "EnvisionOSX" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 0;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* EnvisionOSX */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				29B97326FDCFA39411CA2CEA /* EnvisionOSX */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		29B97328FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				089C165EFE840E0CC02AAC07 /* InfoPlist.strings in Resources */,
+				30DD217612F3E3B900B92FCD /* changes.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		29B9732BFDCFA39411CA2CEA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5A47AA301A0483001D3D55B /* SDLMain.m in Sources */,
+				2DA801BC099059B900D40525 /* dialogs.c in Sources */,
+				2DA801BD099059B900D40525 /* envision.c in Sources */,
+				2DA801BF099059B900D40525 /* fileio.c in Sources */,
+				2DA801C2099059B900D40525 /* map.c in Sources */,
+				2DA801C4099059B900D40525 /* SDLemu.c in Sources */,
+				2DA801C6099059B900D40525 /* title.c in Sources */,
+				2D1A354609B6939B00FEE1D0 /* util.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C165DFE840E0CC02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		2D1A354809B6939B00FEE1D0 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "\"/Library/Frameworks\"";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = "\"/Library/Frameworks/SDL.framework/Headers\"";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SDL,
+				);
+				PRODUCT_NAME = EnvisionOSX;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		2D1A354909B6939B00FEE1D0 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = "\"/Library/Frameworks\"";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				HEADER_SEARCH_PATHS = "\"/Library/Frameworks/SDL.framework/Headers\"";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SDL,
+				);
+				PRODUCT_NAME = EnvisionOSX;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		2D1A354A09B6939B00FEE1D0 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "\"/Library/Frameworks\"";
+				HEADER_SEARCH_PATHS = "\"/Library/Frameworks/SDL.framework/Headers\"";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SDL,
+				);
+				PRODUCT_NAME = EnvisionOSX;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = app;
+			};
+			name = Default;
+		};
+		2D1A354C09B6939B00FEE1D0 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Development;
+		};
+		2D1A354D09B6939B00FEE1D0 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Deployment;
+		};
+		2D1A354E09B6939B00FEE1D0 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2D1A354709B6939B00FEE1D0 /* Build configuration list for PBXApplicationTarget "EnvisionOSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D1A354809B6939B00FEE1D0 /* Development */,
+				2D1A354909B6939B00FEE1D0 /* Deployment */,
+				2D1A354A09B6939B00FEE1D0 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		2D1A354B09B6939B00FEE1D0 /* Build configuration list for PBXProject "EnvisionOSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D1A354C09B6939B00FEE1D0 /* Development */,
+				2D1A354D09B6939B00FEE1D0 /* Deployment */,
+				2D1A354E09B6939B00FEE1D0 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}
