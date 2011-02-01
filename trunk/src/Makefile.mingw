@@ -1,0 +1,34 @@
+CFLAGS  = -O3 -Wall -mwindows -mtune=i486 -I ../../SDL-1.2.9/include
+L       = -L ../../SDL-1.2.9/lib  -lmingw32 -lSDLmain -lSDL.dll -mwindows
+CC      = gcc
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+.rc.o:
+	windres -i $< -o $@
+
+all:    prog
+
+OBJS    = \
+	title.o dialogs.o envision.o fileio.o map.o SDLemu.o icon.o util.o
+
+prog : $(OBJS)
+	$(CC) -o envision $(OBJS) $(L)
+
+clean:
+	del *.o
+
+icon.o:
+	windres -i icon.rc -o icon.o
+
+dialogs.o: SDLemu.h envision.h
+envision.o: SDLemu.h colours.h font.h envision.h
+fileio.o: envision.h
+map.o: SDLemu.h envision.h
+SDLemu.o: SDLemu.h envision.h icon.h
+title.o: SDLemu.h raw.h envision.h
+util.o: envision.h
+
+
+
