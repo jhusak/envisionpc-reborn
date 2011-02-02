@@ -26,33 +26,33 @@
  *==========================================================================*/
 int drawbutton(int x, int y, char *txt)
 {
-  int l,o,c;
-  char *f,btxt[16];
+	int l,o,c;
+	char *f,btxt[16];
 
-  btxt[0]=c=o=0;
-  f=strchr(txt,'*');
-  if (!f)
-    strcpy(btxt,txt);
-  else {
-    if (f-txt) {
-      strncpy(btxt,txt,f-txt);
-      btxt[f-txt]=0;
-    }
-    strcat(btxt,f+1);
-    c=*(f+1);
-    o=(f-txt)*8;
-  }
-  l=32-strlen(btxt)*4;
-  SDLBox(x+1,y+1,x+63,y+8,148);
-  SDLLine(x,y,x+64,y,152);
-  SDLLine(x+64,y,x+64,y+9,152);
-  SDLLine(x,y+9,x+64,y+9,144);
-  SDLLine(x,y+1,x,y+9,144);
-  SDLstring(x+l,y+1,btxt);
-  if (c) {
-    SDLplotchr(x+l+o,y+1,c-32,1,dfont);
-  }
-  return 1;
+	btxt[0]=c=o=0;
+	f=strchr(txt,'*');
+	if (!f)
+		strcpy(btxt,txt);
+	else {
+		if (f-txt) {
+			strncpy(btxt,txt,f-txt);
+			btxt[f-txt]=0;
+		}
+		strcat(btxt,f+1);
+		c=*(f+1);
+		o=(f-txt)*8;
+	}
+	l=32-strlen(btxt)*4;
+	SDLBox(x+1,y+1,x+63,y+8,148);
+	SDLLine(x,y,x+64,y,152);
+	SDLLine(x+64,y,x+64,y+9,152);
+	SDLLine(x,y+9,x+64,y+9,144);
+	SDLLine(x,y+1,x,y+9,144);
+	SDLstring(x+l,y+1,btxt);
+	if (c) {
+		SDLplotchr(x+l+o,y+1,c-32,1,dfont);
+	}
+	return 1;
 }
 
 /*===========================================================================
@@ -66,14 +66,14 @@ int drawbutton(int x, int y, char *txt)
  *==========================================================================*/
 int raisedbox(int x, int y, int w, int h)
 {
-  w=w-x;
-  h=h-y;
-  SDLBox(x+1,y+1,x+w-1,y+h-1,148);
-  SDLLine(x,y,x+w,y,152);
-  SDLLine(x+w,y,x+w,y+h,152);
-  SDLLine(x,y+h,x+w,y+h,144);
-  SDLLine(x,y+1,x,y+h,144);
-  return 1;
+	w=w-x;
+	h=h-y;
+	SDLBox(x+1,y+1,x+w-1,y+h-1,148);
+	SDLLine(x,y,x+w,y,152);
+	SDLLine(x+w,y,x+w,y+h,152);
+	SDLLine(x,y+h,x+w,y+h,144);
+	SDLLine(x,y+1,x,y+h,144);
+	return 1;
 }
 
 /*===========================================================================
@@ -84,9 +84,9 @@ int raisedbox(int x, int y, int w, int h)
  *==========================================================================*/
 char stoa(char s)
 {
-  if ((s>=32)&&(s<=96)) s-=32;
-  else if ((s<32)&&(s)) s+=64;
-  return s;
+	if ((s>=32)&&(s<=96)) s-=32;
+	else if ((s<32)&&(s)) s+=64;
+	return s;
 }
 
 /*===========================================================================
@@ -102,74 +102,74 @@ char stoa(char s)
  *==========================================================================*/
 char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 {
-  /* tp 0=normal 1=num 2=filename */
+	/* tp 0=normal 1=num 2=filename */
 
-  int cx, cc, dd, cp;
-  char buffer[256];
-  char c, *r;
+	int cx, cc, dd, cp;
+	char buffer[256];
+	char c, *r;
 
-  SDL_ShowCursor(SDL_DISABLE);
-  SDLBox(xp,yp,slen,yp+8,146);
-  SDLHLine(xp-1,slen+1,yp-1,144);
-  SDLHLine(xp-1,slen+1,yp+9,152);
-  SDLVLine(xp-1,yp,yp+8,144);
-  SDLVLine(slen+1,yp,yp+8,152);
+	SDL_ShowCursor(SDL_DISABLE);
+	SDLBox(xp,yp,slen,yp+8,146);
+	SDLHLine(xp-1,slen+1,yp-1,144);
+	SDLHLine(xp-1,slen+1,yp+9,152);
+	SDLVLine(xp-1,yp,yp+8,144);
+	SDLVLine(slen+1,yp,yp+8,152);
 
-  if (init) {
-    SDLstring(xp+1,yp,init);
-    cp=strlen(init);
-    cx=xp+1+8*cp;
-    strcpy(buffer,init);
-  } else {
-    cx=xp+1;
-    cp=0;
-    *buffer=0;
-  }
+	if (init) {
+		SDLstring(xp+1,yp,init);
+		cp=strlen(init);
+		cx=xp+1+8*cp;
+		strcpy(buffer,init);
+	} else {
+		cx=xp+1;
+		cp=0;
+		*buffer=0;
+	}
 
-  cc=10;
-  dd=500;
-
-  do {
-    SDLVLine(cx,yp,yp+7,cc);
-    c=SDLgetch(0);
-
-    if (!c) {
-      SDLgetch(0);
-    } else
-      if ((c==8)&&(cp)) {
-	cp--;
-	cx-=8;
-	SDLBox(cx,yp,cx+9,yp+7,146);
-	buffer[cp]=0;
 	cc=10;
 	dd=500;
-      } else if ((cp<len)&&(cx+8<slen)&&((isalnum(c))||(c=='.')
-					 ||(c=='\\')||(c=='/'))) {
-	if ((tp==1)&&(isalpha(c))) ;
-	else if ((tp==2)&&((c=='/')||(c=='\\')||(cp==12)
-			   ||((c=='.')&&(strchr(buffer,'.'))))) ;
-	else {
-	  if (tp==2) c=toupper(c);
-	  buffer[cp]=c;
-	  cp++;
-	  buffer[cp]=0;
-	  SDLVLine(cx,yp,yp+7,146);
-	  SDLplotchr(cx,yp,stoa(c),2,dfont);
-	  cx+=8;
-	  cc=10;
-	  dd=500;
-	}
-      }
-  } while (c!=13);
 
-  SDLVLine(cx,yp,yp+7,146);
+	do {
+		SDLVLine(cx,yp,yp+7,cc);
+		c=SDLgetch(0);
 
-  if (*buffer) {
-    r=(char *)malloc(strlen(buffer)+1);
-    strcpy(r,buffer);
-  } else r=NULL;
-  SDL_ShowCursor(SDL_ENABLE);
-  return r;
+		if (!c) {
+			SDLgetch(0);
+		} else
+			if ((c==8)&&(cp)) {
+				cp--;
+				cx-=8;
+				SDLBox(cx,yp,cx+9,yp+7,146);
+				buffer[cp]=0;
+				cc=10;
+				dd=500;
+			} else if ((cp<len)&&(cx+8<slen)&&((isalnum(c))||(c=='.')
+						||(c=='\\')||(c=='/'))) {
+				if ((tp==1)&&(isalpha(c))) ;
+				else if ((tp==2)&&((c=='/')||(c=='\\')||(cp==12)
+							||((c=='.')&&(strchr(buffer,'.'))))) ;
+				else {
+					if (tp==2) c=toupper(c);
+					buffer[cp]=c;
+					cp++;
+					buffer[cp]=0;
+					SDLVLine(cx,yp,yp+7,146);
+					SDLplotchr(cx,yp,stoa(c),2,dfont);
+					cx+=8;
+					cc=10;
+					dd=500;
+				}
+			}
+	} while (c!=13);
+
+	SDLVLine(cx,yp,yp+7,146);
+
+	if (*buffer) {
+		r=(char *)malloc(strlen(buffer)+1);
+		strcpy(r,buffer);
+	} else r=NULL;
+	SDL_ShowCursor(SDL_ENABLE);
+	return r;
 }
 
 /*===========================================================================
@@ -231,7 +231,7 @@ int do_options()
 	char *names[]={"Basic","MAE","Mac/65","Action!"};
 	char *hot="BM6A";
 	char *oldname=NULL;
-	
+
 	SDL_ShowCursor(SDL_DISABLE); /* 144 */
 	SDLNoUpdate();
 	raisedbox(79,16,258,112);
@@ -244,7 +244,7 @@ int do_options()
 	do {
 		c=toupper(SDLgetch(0));
 	} while ((c!='Y')&&(c!='N')&&(c!=27));
-	
+
 	if (c=='Y') {
 		SDLNoUpdate();
 		SDLBox(210,yp,255,yp+8,148);
@@ -341,23 +341,23 @@ int do_colors()
 	yp=30;
 	for(i=0;i<5;i++) {
 		SDLNoUpdate();
-		
+
 		SDLHollowBox(90,yp,100,yp+8,0);
 		SDLBox(91,yp+1,99,yp+7,clut[i]);
 		sprintf(buf,"PF%d:",i);
 		SDLstring(106,yp,buf);
 		SDLUpdate();
-		
+
 		sprintf(buf,"%d",clut[i]);
 		do { color=ginput(151,yp,178,5,buf,1); } while(!color);
 		SDLNoUpdate();
-		
+
 		SDLBox(150,yp-1,179,yp+9,148);
 		SDLstring(152,yp,color);
 		clut[i]=(atoi(color)&254);
 		SDLBox(91,yp+1,99,yp+7,clut[i]);
 		SDLUpdate();
-		
+
 		free(color);
 		yp+=10;
 	}
@@ -392,57 +392,57 @@ int select_draw(char *title)
 {
 	int i,sx,sy,yp;
 	int m=get_8x8_mode(mode);
-	
-  SDL_Event evt;
 
-  SDLNoUpdate();
-  raisedbox(24,32,296,120);
-  SDLstring(33,36,title);
-  yp=104;
-  SDLBox(31,48,289,yp+8,146);
-  SDLHLine(30,290,47,144);
-  SDLHLine(30,290,yp+9,152);
-  SDLVLine(30,48,yp+8,144);
-  SDLVLine(290,48,yp+8,152);
-  sx=0; sy=0;
+	SDL_Event evt;
 
-  for(i=0;i<256;i++) {
-    SDLmap_plotchr(32+sx,48+sy,i,m,font);
-    sx+=8;
-    if (sx>248) { sx=0; sy+=8; }
-  }
-  SDLUpdate();
+	SDLNoUpdate();
+	raisedbox(24,32,296,120);
+	SDLstring(33,36,title);
+	yp=104;
+	SDLBox(31,48,289,yp+8,146);
+	SDLHLine(30,290,47,144);
+	SDLHLine(30,290,yp+9,152);
+	SDLVLine(30,48,yp+8,144);
+	SDLVLine(290,48,yp+8,152);
+	sx=0; sy=0;
 
-  yp=0;
-  do {
-    SDL_WaitEvent(&evt);
-
-    switch(evt.type){
-      case SDL_KEYDOWN: {
-	i=stoa(evt.key.keysym.unicode&0x7f);
-	if ((i)||((evt.key.keysym.unicode==' '))) {
-          if ((evt.key.keysym.mod&KMOD_ALT))
-            i=i+128;
-          yp=1;
-        }
-      }
-      case SDL_MOUSEBUTTONUP: {
-	if (evt.button.button==1) {
-	  int mx,my;
-	  mx=SDLTranslateClick(evt.button.x);
-	  my=SDLTranslateClick(evt.button.y);
-	  if ((mx>=31)&&(mx<=289)&&(my>=48)&&(my<=112)) {
-	    sx=(mx-32)/8; sy=(my-48)/8;
-	    i=sy*32+sx;
-	    yp=1;
-	  }
+	for(i=0;i<256;i++) {
+		SDLmap_plotchr(32+sx,48+sy,i,m,font);
+		sx+=8;
+		if (sx>248) { sx=0; sy+=8; }
 	}
-      }
-      default:
-	break;
-    }
-  } while (!yp);
-  return i;
+	SDLUpdate();
+
+	yp=0;
+	do {
+		SDL_WaitEvent(&evt);
+
+		switch(evt.type){
+			case SDL_KEYDOWN: {
+						  i=stoa(evt.key.keysym.unicode&0x7f);
+						  if ((i)||((evt.key.keysym.unicode==' '))) {
+							  if ((evt.key.keysym.mod&KMOD_ALT))
+								  i=i+128;
+							  yp=1;
+						  }
+					  }
+			case SDL_MOUSEBUTTONUP: {
+							if (evt.button.button==1) {
+								int mx,my;
+								mx=SDLTranslateClick(evt.button.x);
+								my=SDLTranslateClick(evt.button.y);
+								if ((mx>=31)&&(mx<=289)&&(my>=48)&&(my<=112)) {
+									sx=(mx-32)/8; sy=(my-48)/8;
+									i=sy*32+sx;
+									yp=1;
+								}
+							}
+						}
+			default:
+						break;
+		}
+	} while (!yp);
+	return i;
 }
 
 /*===========================================================================
@@ -457,7 +457,7 @@ int get_number(char *title, int def, int max)
 {
 	char *r, buf[8];
 	int i;
-	
+
 	SDLContextBlt(DialogContext,0,0,MainContext,79,64,243,91);
 	SDLNoUpdate();
 	raisedbox(79,64,241,90);
@@ -466,7 +466,7 @@ int get_number(char *title, int def, int max)
 	SDLLine(243,66,243,91,0);
 	SDLstring(83,68,title);
 	SDLUpdate();
-	
+
 	if (def>=0)
 		sprintf(buf,"%d",def);
 	else *buf=0;
@@ -492,18 +492,18 @@ int do_size(int tmode)
 	int i, x, y, loop, tmax;
 	char buf[16], *size;
 	unsigned char *newmap,*look;
-	
+
 	if (tmode) {
 		tmode=8; tmax=16;
 	} else tmax=65536;
-	
+
 	SDLContextBlt(DialogContext,0,0,MainContext,79,64,243,91);
 	SDLNoUpdate();
 	raisedbox(79,64,241,90);
 	SDLLine(79,91,241,91,0);
 	SDLLine(242,65,242,91,0);
 	SDLLine(243,66,243,91,0);
-	
+
 	if (!tmode) {
 		SDLstring(83,68,"New Width:");
 		sprintf(buf,"%d",map->w);
@@ -542,7 +542,7 @@ int do_size(int tmode)
 		} else loop=1;
 	} while(loop);
 	SDLContextBlt(MainContext,79,64,DialogContext,0,0,164,27);
-	
+
 	if (tmode) {
 		tile_size(x,y);
 		return 0;
@@ -591,16 +591,16 @@ int do_move(view *map, int tmode)
 {
 	int mw, mh, x, y, loop;
 	char buf[16], *size;
-	
+
 	SDLContextBlt(DialogContext,0,0,MainContext,79,64,243,91);
 	SDLNoUpdate();
 	raisedbox(79,64,241,90);
 	SDLLine(79,91,241,91,0);
 	SDLLine(242,65,242,91,0);
 	SDLLine(243,66,243,91,0);
-	
+
 	if (tmode) {
-		
+
 		SDLstring(83,68,"Go to tile:");
 		SDLUpdate();
 		sprintf(buf,"%d",map->scx+map->cx);
@@ -644,13 +644,13 @@ int do_move(view *map, int tmode)
 			} else loop=1;
 		} while(loop);
 	}
-	
+
 	/*
-	 if (mode<6) mw=40;
-	 else mw=20;
-	 if ((mode==7)||(mode==5)) mh=11;
-	 else if (mode==3) mh=18; 
-	 else mh=22;
+	   if (mode<6) mw=40;
+	   else mw=20;
+	   if ((mode==7)||(mode==5)) mh=11;
+	   else if (mode==3) mh=18; 
+	   else mh=22;
 	 */
 	mw=320/map->cw;
 	mh=176/map->ch;
@@ -662,7 +662,7 @@ int do_move(view *map, int tmode)
 		map->scx=x-(mw>>1);
 	}
 	map->cx=x-map->scx;
-	
+
 	if (y<mh) {
 		map->scy=0;
 	} else if (y>map->h-mh) {
@@ -671,7 +671,7 @@ int do_move(view *map, int tmode)
 		map->scy=y-(mh>>1);
 	}
 	map->cy=y-map->scy;
-	
+
 	SDLContextBlt(MainContext,79,64,DialogContext,0,0,164,27);
 	return 1;
 }
@@ -685,13 +685,13 @@ int do_exit()
 {
 	int ch;
 	SDLNoUpdate();
-	
+
 	SDLContextBlt(DialogContext,0,0,MainContext,79,64,243,91);
 	raisedbox(79,64,241,90);
 	SDLLine(79,91,241,91,0);
 	SDLLine(242,65,242,91,0);
 	SDLLine(243,66,243,91,0);
-	
+
 	SDLstring(83+16,68,"Really Exit? Y/N");
 	SDLplotchr(83+128-8,68,stoa('Y'),1,dfont);
 	SDLUpdate();
@@ -700,6 +700,6 @@ int do_exit()
 	// this is bad idea
 	// return (!((ch=='n')||(ch=='N')));
 	return ((ch=='Y')||(ch=='y'));
-	
+
 }
 /*=========================================================================*/
