@@ -354,22 +354,23 @@ int corner(int all)
  *==========================================================================*/
 int update_font(int b)
 {
-	int i,sx,sy;
+	int i,sx,sy,m;
 
 	font=fontbank[b];
 	bank=b;
 	SDLSetContext(DialogContext);
-	SDLClear(0);
+	SDLClear(clut[0]);
 	sx=0; sy=0;
+	m=get_8x8_mode(mode);
 	for(i=0;i<128;i++) {
-		SDLplotchr(sx,sy,i,2,font);
+		SDLplotchr(sx,sy,i,m,font);
 		sx+=8;
 		if (sx>248) { sx=0; sy+=8; }
 	}
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,8,160,DialogContext,0,0,256,32);
 	SDLBox(284,168,292,175,144);
-	SDLplotchr(284,168,16+b,2,dfont);
+	SDLplotchr(284,168,16+b,1,dfont);
 	corner(1);
 	return 1;
 }
@@ -487,8 +488,8 @@ int update(int x, int y, int c)
 
 	topos(echr,&x,&y);
 	SDLSetContext(UpdContext);
-	SDLBox(0,0,7,7,148);
-	SDLplotchr(0,0,echr,2,font);
+	SDLBox(0,0,7,7,clut[0]);
+	SDLplotchr(0,0,echr,mode,font);
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,x,y,UpdContext,0,0,7,7);
 
@@ -604,16 +605,48 @@ int click(int x, int y, int b)
 				return 0;
 			}
 			grid(i,1);
-		} else
+		} else //edycja znaku
 			if ((x>=192)&&(x<256)&&(y>=32)&&(y<96)) {
-				x=(x/8)*8; y=(y/8)*8;
-				if (b)
-					SDLBox(x,y,x+7,y+7,10);
-				else {
-					if ((x/8+y/8)&1) i=144; else i=148;
-					SDLBox(x,y,x+7,y+7,i);
+				const int xe=x&0xfffffff8;
+				const int ye=y&0xfffffff8;
+				int col44,bit4,xe4;
+				switch (mode)
+				{
+					case 2:
+					case 3:
+					case 6:
+					case 7:
+						i=10+(1-b)*(138-((((xe>>3)+(ye>>3))&1)<<2));//true 144 false 148
+						SDLBox(xe,ye,xe+7,ye+7,i);
+						update((xe-192)>>3,(ye-32)>>3,b);
+						break;
+					case 4:
+						xe4=xe&0xfffffff0;
+						if (b)
+						{
+							col44=clut[act_col];
+							bit4=act_col;
+						}
+						else
+						{ col44=clut[0];bit4=0;}
+						SDLBox(xe4,ye,xe4+15,ye+7,col44);
+						update((xe4-192)>>3,(ye-32)>>3,bit4&2);
+
+				};
+
+
+			}
+			else if (mode>3 && mode<6)
+			{
+				if ((x>=192)&&(x<256)&&(y>=96)&&(y<104))
+				{
+					int j;
+					const int xe=x&0xfffffff0;
+					act_col=(xe-192)>>4;
+					for (j=0;j<4;++j)
+						SDLBox(192+(j<<4),96,207+(j<<4),104,clut[j]);
+					SDLHollowBox(192+(act_col<<4),96,207+(act_col<<4),104,10);
 				}
-				update((x-192)/8,(y-32)/8,b);
 			}
 
 

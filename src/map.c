@@ -206,7 +206,8 @@ int move(int dx, int dy)
 	}
 	if (tm) {
 		SDLBox(308,15,316,22,144);
-		SDLmap_plotchr(308,15,currentView->map[(currentView->cx+currentView->scx)+(currentView->cy+currentView->scy)*currentView->w],1,dfont);
+		m=get_8x8_mode(mode);
+		SDLmap_plotchr(308,15,currentView->map[(currentView->cx+currentView->scx)+(currentView->cy+currentView->scy)*currentView->w],m,font);
 	}
 	curs_pos();
 	if ((ox==currentView->cx)&&(oy==currentView->cy)) draw_screen(1);
