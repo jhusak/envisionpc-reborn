@@ -22,6 +22,9 @@ typedef struct view {
   unsigned char *map;
 } view;
 
+#define IN_RANGE(x,lx,rx) ((x)>=(lx)&&(x)<=(rx))
+#define IN_BOX(x,y,lx,rx,ly,ry) (IN_RANGE((x),(lx),(rx))&&IN_RANGE((y),(ly),(ry)))
+
 int title();
 
 int get_8x8_mode(int m);
