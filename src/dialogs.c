@@ -318,7 +318,7 @@ int do_options()
 	SDLgetch(1);
 	SDLNoUpdate();
 	SDLBox(79,16,258,112,0);
-	SDLstring(192,104,"Char");
+	SDLstring(192,112,"Char");
 	SDLUpdate();
 	SDL_ShowCursor(SDL_ENABLE);
 	return 1;
@@ -399,7 +399,7 @@ int select_draw(char *title)
 	raisedbox(24,32,296,120);
 	SDLstring(33,36,title);
 	yp=104;
-	SDLBox(31,48,289,yp+8,146);
+	SDLBox(31,48,289,yp+8,clut[0]);
 	SDLHLine(30,290,47,144);
 	SDLHLine(30,290,yp+9,152);
 	SDLVLine(30,48,yp+8,144);
@@ -609,7 +609,7 @@ int do_move(view *map, int tmode)
 			size=ginput(167+8,68,210,6,buf,1);
 			if (size) {
 				x=atoi(size);
-				if ((x>=0)&&(x<256))
+				if (IN_RANGE(x,0,255))
 					loop=0;
 			} else loop=1;
 		} while(loop);
@@ -624,7 +624,7 @@ int do_move(view *map, int tmode)
 			size=ginput(167,68,210,6,buf,1);
 			if (size) {
 				x=atoi(size);
-				if ((x>=0)&&(x<map->w))
+				if (IN_RANGE(x,0,map->w-1))
 					loop=0;
 			} else loop=1;
 		} while(loop);

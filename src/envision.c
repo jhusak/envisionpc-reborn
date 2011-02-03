@@ -64,6 +64,8 @@ table(ltab5,2);
 table(ltab6,1);
 table(ltab7,0);
 
+int  corneroffset[]={3,2,1,1,0,0,0,0};
+
 /*===========================================================================
  * txterr
  * display an error and exit
@@ -319,10 +321,8 @@ int corner(int all)
 	} else { w=16; h=8; msk=63; }
 
 	match=echr&msk;
-	//SDLNoUpdate();
-	//frame(96,32,64,64,0);
-	//SDLUpdate();
-
+	SDLNoUpdate();
+	frame(96,32,64,64,0);
 	
 	if (all) {
 		SDLSetContext(BackContext);
@@ -330,6 +330,7 @@ int corner(int all)
 	} else {
 		SDLSetContext(UpdContext);
 		SDLBox(0,0,w*4,h,clut[0]);
+		// hack
 		SDLmap_plotchr(0,0,match,mode,font);
 		SDLmap_plotchr(w,0,match+64,mode,font);
 		SDLmap_plotchr(w*2,0,match+128,mode,font);
@@ -339,18 +340,32 @@ int corner(int all)
 	memset(peek,0,64);
 	memset(plot,0,64);
 	i=0;
+	// peek = got fragment of the map 8x8
+	// plot = flag showing whenewer there is char or empty wield
+	int mx=currentView->cx/*(currentView->ch/8)*/+currentView->scx; //-corneroffset[tsx];
+	int my=currentView->cy/*(currentView->cw/8)*/+currentView->scy; //-corneroffset[tsy];
+	if (mx<0) mx=0;
+	if (my<0) my=0;
+	//if (tsx==2) if (mx>(currentView->w/tsx)*tsx-8/tsx) mx=(currentView->w/tsx)*tsx - 8/tsx;
+	//if (tsx>=4) if (mx>currentView->w-2) mx=currentView->w - 2;
+	//if (my>currentView->h-8) my=currentView->h-8;
+	//if (tsy>=4) if (my>currentView->h-2) my=currentView->h - 2;
+	if (mx>currentView->w) mx=currentView->w;
+	if (my>currentView->h) my=currentView->h;
 	for(y=0;y<8;y++) {
-		if (y>=currentView->h)
+		x=0;
+		if (my+y>=currentView->h)
 			break;
-		look=&currentView->map[y*currentView->w];
+		look=&currentView->map[mx+x+(my+y)*currentView->w];
 		i=y*8;
 		for(x=0;x<8;x++) {
-			if (x>=currentView->w)
+			if (mx+x>=currentView->w)
 				break;
 			peek[i]=*look++;
 			plot[i++]=1;
 		}
 	}
+	
 	if ((tsx>1)||(tsy>1)) {
 		unsigned char work[128];
 
@@ -383,14 +398,15 @@ int corner(int all)
 		}
 	}
 	idx=y=0;
+	// copying to the screen
 	while (y<64) {
 		look=&peek[idx<<3];
 		check=&plot[idx<<3];
 		x=0;
 		while (x<64) {
 			i=*look++;
-			if (*check++) {
-				if (all) {
+			if (*check++) { // if tile is to be copied
+				if (all) { // what is all?
 					f=1;
 					SDLmap_plotchr(x,y,i,mode,font);
 				} else if ((i&msk)==match) {
@@ -405,9 +421,13 @@ int corner(int all)
 		y+=h;
 		idx++;
 	}
+	
 	SDLSetContext(MainContext);
-	if (f)
+	//if (f)
 		SDLContextBlt(MainContext,96,32,BackContext,0,0,63,63);
+	SDLUpdate();
+	
+	
 	return 1;
 }
 
@@ -456,6 +476,13 @@ int draw_edit()
 	SDLstring(272,160,"Font");
 	SDLplotchr(272,168,126,1,dfont);
 	SDLplotchr(296,168,127,1,dfont);
+	
+	SDLBox(271,176,305,191,144);
+	SDLstring(272,176,"Mode");
+	SDLplotchr(272,184,126,1,dfont);
+	SDLplotchr(296,184,127,1,dfont);
+	SDLplotchr(284,184,16+mode,1,dfont);
+	
 	update_font(bank);
 	i=echr;
 	echr=0;
@@ -479,6 +506,8 @@ int setup(int zoom, int fullScreen)
 	CONFIG.checkersLo=144;
 	CONFIG.checkersHi=148;
 	CONFIG.whiteColor=10;
+	CONFIG.screenWidth=320;
+	CONFIG.screenHeight=200;
 	
 
 	dfont=FONT;
@@ -649,7 +678,17 @@ int click(int x, int y, int b)
 		if (bank>9) bank=0;
 		command(48+bank,0);
 		return 0;
-	// menu 
+		// decrease mode
+	} else if (IN_BOX(x,y,272,280,184,192)) {
+		if (mode>2) mode--;
+		draw_edit();
+		return 0;
+		// increase font set number
+	} else if (IN_BOX(x,y,296,304,184,192)) {
+		if (mode<7) mode++;
+		draw_edit();
+		return 0;
+		// menu 
 	} else if (IN_BOX(x,y,8,72,32,cmds[0])) {
 		i=(y-22)/10;
 		y=(y/10)*10;

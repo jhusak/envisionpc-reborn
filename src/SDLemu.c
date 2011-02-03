@@ -98,7 +98,7 @@ int SDLNoUpdate()
 int SDLUpdate()
 {
 	mainScreen->update=1;
-	SDL_UpdateRect(mainScreen->surfaces[0],0,0,0,0);
+	SDL_UpdateRect(mainScreen->surfaces[MainContext],0,0,0,0);
 	return 1;
 }
 
@@ -116,9 +116,9 @@ int SDLClip(int hidden) {
 	else {
 		r.x=0; r.y=24*mainScreen->zoom;
 		if (hidden==1) {
-			r.h=200*mainScreen->zoom; r.w=248*mainScreen->zoom;
+			r.h=CONFIG.screenHeight*mainScreen->zoom; r.w=(CONFIG.screenWidth-72)*mainScreen->zoom;
 		} else {
-			r.h=200*mainScreen->zoom; r.w=320*mainScreen->zoom;
+			r.h=CONFIG.screenHeight*mainScreen->zoom; r.w=CONFIG.screenWidth*mainScreen->zoom;
 		}
 		SDL_SetClipRect(mainScreen->current,&r);
 	}
@@ -185,8 +185,8 @@ int SDLstring(int x, int y, char *str)
  *==========================================================================*/
 int SDLsetPalette(int idx, int r, int g, int b)
 {
-	if ((idx>=0)&&(idx<256)) {
-		mainScreen->clut[idx]=SDL_MapRGB(mainScreen->surfaces[0]->format,r,g,b);
+	if (IN_RANGE(idx,0,255)) {
+		mainScreen->clut[idx]=SDL_MapRGB(mainScreen->surfaces[MainContext]->format,r,g,b);
 		mainScreen->rgb[idx]=((r&0xff)<<16)|((g&0xff)<<8)|(b&0xff);
 		return 1;
 	}
@@ -882,29 +882,29 @@ int toggleFullScreen()
 	SDL_InitSubSystem(SDL_INIT_VIDEO);
 
 	if (!mainScreen->fullScreen) {
-		mainScreen->surfaces[0]=SDL_SetVideoMode(320*mainScreen->zoom,200*mainScreen->zoom,0,SDL_SWSURFACE);
+		mainScreen->surfaces[MainContext]=SDL_SetVideoMode(CONFIG.screenWidth*mainScreen->zoom,CONFIG.screenHeight*mainScreen->zoom,0,SDL_SWSURFACE);
 	} else {
-		mainScreen->surfaces[0]=SDL_SetVideoMode(320*mainScreen->zoom,200*mainScreen->zoom,32,SDL_SWSURFACE|SDL_FULLSCREEN);
+		mainScreen->surfaces[MainContext]=SDL_SetVideoMode(CONFIG.screenWidth*mainScreen->zoom,CONFIG.screenHeight*mainScreen->zoom,32,SDL_SWSURFACE|SDL_FULLSCREEN);
 	}
-	if (!mainScreen->surfaces[0]) {
+	if (!mainScreen->surfaces[MainContext]) {
 		fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
 		return 0;
 	}
-	mainScreen->current=mainScreen->surfaces[0];
+	mainScreen->current=mainScreen->surfaces[MainContext];
 
-	if (mainScreen->surfaces[1]) SDL_FreeSurface(mainScreen->surfaces[1]);
+	if (mainScreen->surfaces[UpdContext]) SDL_FreeSurface(mainScreen->surfaces[UpdContext]);
 	s=SDL_CreateRGBSurface(SDL_SWSURFACE,68*mainScreen->zoom,146*mainScreen->zoom,32,rmask, gmask, bmask, amask);  // upd
-	mainScreen->surfaces[1]=SDL_DisplayFormat(s);
+	mainScreen->surfaces[UpdContext]=SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 
-	if (mainScreen->surfaces[2]) SDL_FreeSurface(mainScreen->surfaces[2]);
+	if (mainScreen->surfaces[DialogContext]) SDL_FreeSurface(mainScreen->surfaces[DialogContext]);
 	s=SDL_CreateRGBSurface(SDL_SWSURFACE,256*mainScreen->zoom,32*mainScreen->zoom,32,rmask, gmask, bmask, amask);  // dialog
-	mainScreen->surfaces[2]=SDL_DisplayFormat(s);
+	mainScreen->surfaces[DialogContext]=SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 
-	if (mainScreen->surfaces[3]) SDL_FreeSurface(mainScreen->surfaces[3]);
+	if (mainScreen->surfaces[BackContext]) SDL_FreeSurface(mainScreen->surfaces[BackContext]);
 	s=SDL_CreateRGBSurface(SDL_SWSURFACE,64*mainScreen->zoom,64*mainScreen->zoom,32,rmask, gmask, bmask, amask);  // back
-	mainScreen->surfaces[3]=SDL_DisplayFormat(s);
+	mainScreen->surfaces[BackContext]=SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 
 	// reset palette...
@@ -913,7 +913,7 @@ int toggleFullScreen()
 		r=(mainScreen->rgb[i]>>16)&0xff;
 		g=(mainScreen->rgb[i]>>8)&0xff;
 		b=mainScreen->rgb[i]&0xff;
-		mainScreen->clut[i]=SDL_MapRGB(mainScreen->surfaces[0]->format,r,g,b);
+		mainScreen->clut[i]=SDL_MapRGB(mainScreen->surfaces[MainContext]->format,r,g,b);
 	}
 	return 1;
 }

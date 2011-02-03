@@ -27,6 +27,8 @@ typedef struct config
 		int checkersHi;
 		int checkersLo;
 		int whiteColor;
+		int screenHeight;
+		int screenWidth;
 	} config;
 
 #define IN_RANGE(x,lx,rx) ((x)>=(lx)&&(x)<=(rx))
