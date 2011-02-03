@@ -461,7 +461,7 @@ int map_click(int x, int y, int b, int *down)
 {
 	int i,ox,oy;
 
-	if ((!hidden)&&(x>=251)&&(x<=315)&&(y>=24)&&(y<=cmds[0])) {
+	if ((!hidden)&&(IN_BOX(x,y,251,315,24,cmds[0]))) {
 		i=(y-14)/10;
 		SDLrelease(); /* wait for mouse to unclick */
 		*down=0;
