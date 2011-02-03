@@ -169,7 +169,7 @@ int curs_pos()
  *==========================================================================*/
 int move(int dx, int dy)
 {
-	int ox,oy;
+	int ox,oy,m;
 
 	SDLNoUpdate();
 	if ((currentView->cx+currentView->scx+dx>=currentView->w)||
