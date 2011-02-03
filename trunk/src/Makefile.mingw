@@ -1,12 +1,12 @@
-CFLAGS  = -O3 -Wall -mwindows -mtune=i486 -I ../../SDL-1.2.9/include
-L       = -L ../../SDL-1.2.9/lib  -lmingw32 -lSDLmain -lSDL.dll -mwindows
-CC      = gcc
+CFLAGS  = -O3 -Wall -mwindows -mtune=i486 -I ../../SDL-1.2.14/include/SDL
+L       = -L ../../SDL-1.2.14/lib -static -lmingw32 -lSDLmain -lSDL.dll -mwindows
+CC      = i386-mingw32-gcc
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
 .rc.o:
-	windres -i $< -o $@
+	i386-mingw32-windres -i $< -o $@
 
 all:    prog
 
@@ -14,13 +14,13 @@ OBJS    = \
 	title.o dialogs.o envision.o fileio.o map.o SDLemu.o icon.o util.o
 
 prog : $(OBJS)
-	$(CC) -o envision $(OBJS) $(L)
+	$(CC) -o envisionPCreborn.exe $(OBJS) $(L)
 
 clean:
 	del *.o
 
 icon.o:
-	windres -i icon.rc -o icon.o
+	i386-mingw32-windres -i icon.rc -o icon.o
 
 dialogs.o: SDLemu.h envision.h
 envision.o: SDLemu.h colours.h font.h envision.h
