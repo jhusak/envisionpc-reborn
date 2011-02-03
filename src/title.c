@@ -29,7 +29,7 @@ int credits()
 	SDLBox(8,191,319-8,200,1);
 	SDLstring(44,126,"Atari Font Editor");
 	SDLstring(250,120,"-Reborn");
-	SDLstring(12,181,"v0.8.7 by Jakub Husak and STC.");
+	SDLstring(12,181,"v0.8.13 by Jakub Husak and STC.");
 	SDLstring(12,191,"v0.8 Programmed by Mark Schmelzenbach");
 	return 1;
 }
