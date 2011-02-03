@@ -364,7 +364,7 @@ int do_colors()
 	drawbutton(136,94,"Okay");
 	SDLgetch(1);
 	SDLBox(79,16,258,112,0);
-	SDLstring(192,104,"Char");
+	SDLstring(192,112,"Char");
 	SDL_ShowCursor(SDL_ENABLE);
 	return 1;
 }

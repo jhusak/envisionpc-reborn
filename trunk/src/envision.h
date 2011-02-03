@@ -22,8 +22,17 @@ typedef struct view {
   unsigned char *map;
 } view;
 
+typedef struct config
+	{
+		int checkersHi;
+		int checkersLo;
+		int whiteColor;
+	} config;
+
 #define IN_RANGE(x,lx,rx) ((x)>=(lx)&&(x)<=(rx))
 #define IN_BOX(x,y,lx,rx,ly,ry) (IN_RANGE((x),(lx),(rx))&&IN_RANGE((y),(ly),(ry)))
+
+extern config CONFIG;
 
 int title();
 

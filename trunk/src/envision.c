@@ -36,6 +36,8 @@ unsigned char clut[9]={0,40,202,148,70,0,0,0,0};
 int orit[8]={128,64,32,16,8,4,2,1};
 int andit[8]={127,191,223,239,247,251,253,254};
 
+config CONFIG;
+
 int corner(int all);
 /*=========================================================================*
  * Define rotation look-up tables.
@@ -116,6 +118,45 @@ int topos(int c, int *sx, int *sy)
 	*sy=160+(c>>5)*8;
 	return 1;
 }
+/*===========================================================================
+ * frame
+ * draws frame around box
+ * param x,y: coords of the frame
+ * param width, height: dimensions of the frame
+ * param col: inner color of the frame;
+ * returns: nothing
+ *==========================================================================*/
+
+void frame(int x, int y, int width, int height, int col)
+{
+	SDLBox(x-2,y-2,x+width+1,y+height+1,4);
+	SDLBox(x-1,y-1,x+width,y+height,2);
+	SDLBox(x,y,x+width-1,y+height-1,col);
+}
+
+/*===========================================================================
+ * show_char_graphics
+ * draws char set in various graphic modes with frame around
+ * supposed to be painted on subview.
+ * param echr: edited chr in current font;
+ * returns: nothing
+ *==========================================================================*/
+
+void show_char_graphics(int echr)
+{
+	frame(2,2,16,8,clut[0]);
+	SDLplotchr(2,2,echr,6,font);
+	
+	frame(2,15,16,16,clut[0]);
+	SDLplotchr(2,15,echr,7,font);
+	
+	frame(6,36,8,8,clut[0]);
+	SDLplotchr(6,36,echr,4,font);
+	
+	frame(6,49,8,16,clut[0]);
+	SDLplotchr(6,49,echr,5,font);
+}
+
 
 /*===========================================================================
  * grid
@@ -128,45 +169,65 @@ int grid(int chr, int rem)
 {
 	unsigned char *dat,c;
 	char num[16];
-	int x,y,clr;
+	int x,y,clr,m;
 
 	if (chr==echr) return 0;
-
+	m=get_8x8_mode(mode);
+	
 	SDLNoUpdate();
 	dat=font+(chr*8);
 
 	if (rem) {
 		memcpy(undo,dat,8);
 	}
+	frame(192,32,64,64,0);
 
-	for(y=0;y<8;y++) {
-		c=*(dat+y);
-		for(x=0;x<8;x++) {
-			if ((x+y)&1) clr=144; else clr=148;
-			if (c&128) clr=10;
-			SDLBox(192+x*8,32+y*8,192+x*8+7,39+y*8,clr);
-			c=c<<1;
+	if (m==2)
+	{
+		for(y=0;y<8;y++) {
+			c=*(dat+y);
+			for(x=0;x<8;x++) {
+				if ((x+y)&1) clr=CONFIG.checkersLo; else clr=CONFIG.checkersHi;
+				if (c&128) clr=CONFIG.whiteColor;
+				SDLBox(192+x*8,32+y*8,192+x*8+7,39+y*8,clr);
+				c=c<<1;
+			}
+		}
+	}
+	else if (m==4){
+		for(y=0;y<8;y++) {
+			c=*(dat+y);
+			for(x=0;x<4;x++) {
+				clr=clut[(c&0xc0)>>6];
+				SDLBox(192+x*16,32+y*8,192+x*16+15,39+y*8,clr);
+				c<<=2;
+			}
 		}
 	}
 	topos(echr,&x,&y);
 	SDLBox(x,y,x+7,y+7,0);
-	SDLplotchr(x,y,echr,2,font);
+	SDLplotchr(x,y,echr,m,font);
 	echr=chr;
 	topos(echr,&x,&y);
 	SDLBox(x,y,x+7,y+7,148);
-	SDLplotchr(x,y,echr,2,font);
+	SDLplotchr(x,y,echr,m,font);
 
-	SDLBox(264,32,280,64,0);
-	SDLplotchr(264,32,echr,6,font);
-	SDLplotchr(264,40,echr,7,font);
-	SDLplotchr(264,56,echr,4,font);
-
-	SDLBox(224,104,272,111,0);
+	SDLSetContext(UpdContext);
+	SDLClear(0);
+	
+	show_char_graphics(echr);
+	
+	SDLSetContext(MainContext);
+	SDLContextBlt(MainContext,264,30,UpdContext,0,0,32,66);
+	
+	
+//	SDLBox(264,32,280,64,0); /*#*/
+	SDLBox(224,112,272,119,0);
 	sprintf(num,": %d",echr);
-	SDLstring(224,104,num);
-	SDLplotchr(264,104,echr,2,dfont);
-	corner(0);
+	SDLstring(224,112,num);
+	SDLplotchr(264,112,echr,2,dfont);
 	SDLUpdate();
+	corner(0);
 	return 1;
 }
 
@@ -258,7 +319,11 @@ int corner(int all)
 	} else { w=16; h=8; msk=63; }
 
 	match=echr&msk;
+	//SDLNoUpdate();
+	//frame(96,32,64,64,0);
+	//SDLUpdate();
 
+	
 	if (all) {
 		SDLSetContext(BackContext);
 		SDLBox(0,0,63,63,clut[0]);
@@ -386,7 +451,7 @@ int draw_edit()
 
 	SDLNoUpdate();
 	SDLClear(0);
-	SDLstring(192,104,"Char");
+	SDLstring(192,112,"Char");
 	SDLBox(271,159,305,175,144);
 	SDLstring(272,160,"Font");
 	SDLplotchr(272,168,126,1,dfont);
@@ -410,6 +475,11 @@ int draw_edit()
 int setup(int zoom, int fullScreen)
 {
 	int i;
+		
+	CONFIG.checkersLo=144;
+	CONFIG.checkersHi=148;
+	CONFIG.whiteColor=10;
+	
 
 	dfont=FONT;
 	font=fontbank[0];
@@ -470,6 +540,45 @@ int setup(int zoom, int fullScreen)
 	return 1;
 }
 
+
+/*===========================================================================
+ * update2bits
+ * update a character int 2-bit mode, reflecting change on map, etc.
+ * param x: grid x-position to change
+ * param y: grid y-position to change
+ * param c: color (0-3)
+ * returns: nothing useful
+ *==========================================================================*/
+int update2bits(int x, int y, int c)
+{
+	unsigned char *dat;
+	int shift;
+	
+	dat=font+echr*8+y;
+	shift=(6-((x&3)<<1));
+	*dat=*dat&~(3<<shift);
+	*dat=*dat|(c<<shift);
+	//if (c) *dat=*dat|orit[x];
+	//else *dat=*dat&andit[x];
+	
+	topos(echr,&x,&y);
+	SDLSetContext(UpdContext);
+	SDLBox(0,0,7,7,clut[0]);
+	SDLplotchr(0,0,echr,mode,font);
+	SDLSetContext(MainContext);
+	SDLContextBlt(MainContext,x,y,UpdContext,0,0,7,7);
+	
+	SDLSetContext(UpdContext);
+	SDLClear(0);
+
+	show_char_graphics(echr);
+	
+	SDLSetContext(MainContext);
+	SDLContextBlt(MainContext,264,30,UpdContext,0,0,32,66);
+	corner(0);
+	return 1;
+}
+
 /*===========================================================================
  * update
  * update a character, reflecting change on map, etc.
@@ -495,11 +604,11 @@ int update(int x, int y, int c)
 
 	SDLSetContext(UpdContext);
 	SDLClear(0);
-	SDLplotchr(0,0,echr,6,font);
-	SDLplotchr(0,8,echr,7,font);
-	SDLplotchr(0,24,echr,4,font);
+	
+	show_char_graphics(echr);
+	
 	SDLSetContext(MainContext);
-	SDLContextBlt(MainContext,264,32,UpdContext,0,0,32,56);
+	SDLContextBlt(MainContext,264,30,UpdContext,0,0,32,66);
 	corner(0);
 	return 1;
 }
@@ -574,7 +683,7 @@ int click(int x, int y, int b)
 	ox=x/8; oy=y/8;
 	done=0;
 	do {
-		if (IN_BOX(x,y,8,264,160,192)) {
+		if (IN_BOX(x,y,8,263,160,191)) {
 			x=(x-8)/8; y=(y-160)/8;
 			i=y*32+x;
 			if (copy_from) {
@@ -611,22 +720,40 @@ int click(int x, int y, int b)
 				return 0;
 			}
 			grid(i,1);
-		} else //edycja znaku
-			if (IN_BOX(x,y,192,256,32,96)) {
+		} else { //char edit
+		/*
+			 * mode 2 - 8x8 2 col 8x8
+			 * mode 3 - 8x8 2 col 8x10	wrap to 8x8
+			 * mode 4 - 4x8 4 col 8x8	
+			 * mode 5 - 4x8 4 col 8x16	shrink height 
+			 * mode 6 - 8x8 4 col 16x8  shrink width
+			 * mode 7 - 8x8 4 col 16x16 shrink height and width
+			 */
+			if (IN_BOX(x,y,192,255,32,95)) {
 				const int xe=x&0xfffffff8;
 				const int ye=y&0xfffffff8;
 				int col44,bit4,xe4;
+				int grid_checker;
 				switch (mode)
 				{
 					case 2:
 					case 3:
 					case 6:
 					case 7:
-						i=10+(1-b)*(138-((((xe>>3)+(ye>>3))&1)<<2));//true 144 false 148
+						// I hate such constructs (JH)
+						//i=10+(1-b)*(138-((((xe>>3)+(ye>>3))&1)<<2));//true 144 false 148
+						grid_checker=(xe&8)^(ye&8);
+						if (b)
+							i=CONFIG.whiteColor;
+						else 
+							i=(grid_checker?CONFIG.checkersLo:CONFIG.checkersHi);
+						SDLNoUpdate();
 						SDLBox(xe,ye,xe+7,ye+7,i);
 						update((xe-192)>>3,(ye-32)>>3,b);
+						SDLUpdate();
 						break;
 					case 4:
+					case 5:
 						xe4=xe&0xfffffff0;
 						if (b)
 						{
@@ -634,27 +761,38 @@ int click(int x, int y, int b)
 							bit4=act_col;
 						}
 						else
-						{ col44=clut[0];bit4=0;}
+						{
+							col44=clut[0];
+							bit4=0;
+						}
+						SDLNoUpdate();
 						SDLBox(xe4,ye,xe4+15,ye+7,col44);
-						update((xe4-192)>>3,(ye-32)>>3,bit4&2);
+						update2bits((xe4-192)>>4,(ye-32)>>3,bit4&3);
+						SDLUpdate();
 
 				};
 
 
 			}
-			else if (mode>3 && mode<6)
+			
+			if (mode==4 || mode==5)
 			{
-				if (IN_BOX(x,y,192,256,96,104))
-				{
-					int j;
-					const int xe=x&0xfffffff0;
-					act_col=(xe-192)>>4;
-					for (j=0;j<4;++j)
-						SDLBox(192+(j<<4),96,207+(j<<4),104,clut[j]);
-					SDLHollowBox(192+(act_col<<4),96,207+(act_col<<4),104,10);
-				}
-			}
+				int j;
+				const int xe=x&0xfffffff0;
+				SDLNoUpdate();
+				for (j=0;j<4;++j)
+					SDLBox(192+(j<<4),100,207+(j<<4),108,clut[j]);
+				if (IN_BOX(x,y,192,255,100,107))
+					{
+						act_col=(xe-192)>>4;
+						SDLHollowBox(192+(act_col<<4),100,207+(act_col<<4),108,10);
+					}
+				else
+					SDLHollowBox(192+(act_col<<4),100,207+(act_col<<4),108,10);
+				SDLUpdate();
 
+			}
+		}
 
 		do {
 			int err=SDL_WaitEvent(&event);
@@ -965,6 +1103,7 @@ int command(int cmd, int sym)
 			  }
 		case 'p': {
 				  do_colors();
+				  update_font(bank);
 				  corner(1);
 				  break;
 			  }
