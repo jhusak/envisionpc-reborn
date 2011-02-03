@@ -15,9 +15,11 @@ OBJS    = \
 
 prog : $(OBJS)
 	$(CC) -o envisionPCreborn.exe $(OBJS) $(L)
+	zip envisionPCreborn.exe.zip envisionPCreborn.exe
+	mv envisionPCreborn.exe.zip ../app/win32
 
 clean:
-	del *.o
+	rm *.o
 
 icon.o:
 	i386-mingw32-windres -i icon.rc -o icon.o
