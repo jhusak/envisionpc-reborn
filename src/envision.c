@@ -26,7 +26,7 @@
 
 unsigned char *dfont, *font, *copy_from, *fontbank[10];
 char bank_mod[10];
-int echr, bank, copy_size, values;
+int echr, bank, copy_size, values, act_col=1;
 
 int cmds[13];
 unsigned char undo[8];
@@ -520,23 +520,28 @@ int click(int x, int y, int b)
 	if (b!=1)
 		b=0;
 
-	if ((cmds[0]==140)&&(x>=41)&&(x<=72)&&(y>=27)&&(y<=31)) {
+	// select panel 2 Disk
+	if ((cmds[0]==140)&&IN_BOX(x,y,41,72,27,31)) {
 		panel(2);
 		return 0;
-	} else if ((cmds[0]==82)&&(x>=9)&&(x<=38)&&(y>=27)&&(y<=31)) {
+	// select panel 1 Edit
+	} else if ((cmds[0]==82)&&IN_BOX(x,y,9,38,27,31)) {
 		panel(1);
 		return 0;
-	} else if ((x>=272)&&(x<=280)&&(y>=168)&&(y<=176)) {
+	// decrease font set number
+	} else if (IN_BOX(x,y,272,280,168,176)) {
 		bank--;
 		if (bank<0) bank=9;
 		command(48+bank,0);
 		return 0;
-	} else if ((x>=296)&&(x<=304)&&(y>=168)&&(y<=176)) {
+	// increase font set number
+	} else if (IN_BOX(x,y,296,304,168,176)) {
 		bank++;
 		if (bank>9) bank=0;
 		command(48+bank,0);
 		return 0;
-	} else if ((x>=8)&&(x<=72)&&(y>=32)&&(y<=cmds[0])) {
+	// menu 
+	} else if (IN_BOX(x,y,8,72,32,cmds[0])) {
 		i=(y-22)/10;
 		y=(y/10)*10;
 		SDLrelease();
@@ -551,7 +556,8 @@ int click(int x, int y, int b)
 		return 0;
 	}
 
-	if ((x>=96)&&(x<=159)&&(y>=32)&&(y<=95)) {
+	// Click on the charmap in edit char mode
+	if (IN_BOX(x,y,96,159,32,95)) {
 		x=(x-96)/8;
 		if (mode==3) y=(y-32)/10;
 		else y=(y-32)/8;
@@ -568,7 +574,7 @@ int click(int x, int y, int b)
 	ox=x/8; oy=y/8;
 	done=0;
 	do {
-		if ((x>=8)&&(x<264)&&(y>=160)&&(y<192)) {
+		if (IN_BOX(x,y,8,264,160,192)) {
 			x=(x-8)/8; y=(y-160)/8;
 			i=y*32+x;
 			if (copy_from) {
@@ -606,7 +612,7 @@ int click(int x, int y, int b)
 			}
 			grid(i,1);
 		} else //edycja znaku
-			if ((x>=192)&&(x<256)&&(y>=32)&&(y<96)) {
+			if (IN_BOX(x,y,192,256,32,96)) {
 				const int xe=x&0xfffffff8;
 				const int ye=y&0xfffffff8;
 				int col44,bit4,xe4;
@@ -638,7 +644,7 @@ int click(int x, int y, int b)
 			}
 			else if (mode>3 && mode<6)
 			{
-				if ((x>=192)&&(x<256)&&(y>=96)&&(y<104))
+				if (IN_BOX(x,y,192,256,96,104))
 				{
 					int j;
 					const int xe=x&0xfffffff0;
