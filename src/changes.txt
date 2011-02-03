@@ -6,3 +6,9 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 2011-02-01 (rev2)
 - speed-up some dialogs
 
+2011-02-03 (rev15)
+- speed up some dialogs
+- added and fixed char edit in 4-color mode
+- fixed forgotten changes during introducing edit in 4-color mode
+- added some frames around chars
+- pc version: cross-compile with mingw on mac
