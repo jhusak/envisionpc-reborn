@@ -43,7 +43,7 @@ typedef struct config
 #define EDIT_OFFSET_X 64
 #define EDIT_OFFSET_Y 64
 
-#define EDIT_GRID_X (248+EDIT_OFFSET_X)
+#define EDIT_GRID_X (240+EDIT_OFFSET_X)
 #define EDIT_GRID_Y (32+EDIT_OFFSET_Y)
 
 #define EDIT_FONTSEL_X (312+EDIT_OFFSET_X)
