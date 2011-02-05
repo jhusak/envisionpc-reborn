@@ -18,9 +18,9 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - added mode change to char edit screen
 - added background color instead of blue to select char window
 
-2011-02-04
+2011-02-04 (rev25)
 - Dialog code simplify
-- bfixed bug that caused garbage on the map during map scroll
+- fixed bug that caused garbage on the map during map scroll
 - parametrisation of some hard-coded values
 - added support for wider screen (64 chars, but this is variable now)
 - added support for wider taller screen (46 chars, but this is variable now)
@@ -28,3 +28,10 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - removed handling ctrl-q due to unexpected results in type mode 
 - added C format export for font sets 
 - added color register change with pallettes.
+
+2011-02-05 (rev)
+- added textual representation of colors in the pallette
+- one can click on the rtextual representation to change the format of display (hex/dec)
+- fixed bug that prevented palette chooser from display before char editing in modes 4 and 5
+- fixed small bug causing wrong painted boxes with colors in poke dialog.
+- fixed small issue with drawing background during char clicking on the font palette.

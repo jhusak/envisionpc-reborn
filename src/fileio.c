@@ -458,7 +458,7 @@ int write_data(char *file, unsigned char *font, int start, int end, int a)
 int write_xfd_data(char *image, char *file, unsigned char *data, int start, int end)
 {
   char *fname="~nvision.~mp";
-  char buf[128];
+  unsigned char buf[128];
   FILE *in;
   long len;
 
@@ -620,7 +620,7 @@ int write_map(char *file, unsigned char *font, view *map, int raw)
 int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw)
 {
   char *fname="~nvision.~mp";
-  char buf[128];
+  unsigned char buf[128];
   FILE *in;
   long len;
 

@@ -33,6 +33,7 @@ int cmds[32];
 unsigned char undo[8];
 unsigned char peek[64], plot[64];
 opt options;
+
 unsigned char clut[9]={0,40,202,148,70,0,0,0,0};
 int orit[8]={128,64,32,16,8,4,2,1};
 int andit[8]={127,191,223,239,247,251,253,254};
@@ -139,14 +140,14 @@ void frame(int x, int y, int width, int height, int col)
 }
 
 /*===========================================================================
- * show_char_graphics
+ * show_char_typefaces
  * draws char set in various graphic modes with frame around
  * supposed to be painted on subview.
  * param echr: edited chr in current font;
  * returns: nothing
  *==========================================================================*/
 
-void show_char_graphics(int echr)
+void show_char_typefaces(int echr)
 {
 	frame(10,2,16,8,clut[0]);
 	SDLplotchr(10,2,echr,6,font);
@@ -161,6 +162,19 @@ void show_char_graphics(int echr)
 	SDLplotchr(14,49,echr,5,font);
 }
 
+/*===========================================================================
+ * update_color_chooser
+ * updates the color chooser in sertain mode graphics
+ * param act_col: actual draw color;
+ *==========================================================================*/
+
+void update_color_chooser(int act_col){
+	int j;
+	for (j=0;j<4;++j)
+		SDLBox(EDIT_GRID_X+(j<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(j<<4),EDIT_GRID_Y+78,clut[j]);
+	
+	SDLHollowBox(EDIT_GRID_X+(act_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(act_col<<4),EDIT_GRID_Y+78,10);
+}
 
 /*===========================================================================
  * grid
@@ -207,9 +221,11 @@ int grid(int chr, int rem)
 				c<<=2;
 			}
 		}
+		update_color_chooser(act_col);
+		
 	}
 	topos(echr,&x,&y);
-	SDLBox(x,y,x+7,y+7,0);
+	SDLBox(x,y,x+7,y+7,(mode==4||mode==5)?clut[0]:0);
 	SDLplotchr(x,y,echr,m,font);
 	echr=chr;
 	topos(echr,&x,&y);
@@ -219,7 +235,7 @@ int grid(int chr, int rem)
 	SDLSetContext(UpdContext);
 	SDLClear(0);
 	
-	show_char_graphics(echr);
+	show_char_typefaces(echr);
 	
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,EDIT_GRID_X+72,EDIT_GRID_Y-2,UpdContext,0,0,32,66);
@@ -442,24 +458,37 @@ int corner(int all)
 
 int colors()
 {
-	char * buf[32];
+	char buf[32];
 	int i;
-#define EDIT_COLOR_X (86+EDIT_OFFSET_X)
-#define EDIT_COLOR_Y (180+EDIT_OFFSET_Y)
+
 	SDLNoUpdate();
+	SDLBox(EDIT_COLOR_X-3,EDIT_COLOR_Y,EDIT_COLOR_X+4*44+36,EDIT_COLOR_Y+33,0);
 	
 	//SDLstring(tmpx+18,yp,"Color Registers");
 	for(i=0;i<5;i++) {
-		SDLHollowBox(EDIT_COLOR_X+i*44,EDIT_COLOR_Y+12,EDIT_COLOR_X+i*44+33,EDIT_COLOR_Y+29
+		SDLHollowBox(EDIT_COLOR_X+i*44,EDIT_COLOR_Y+17,EDIT_COLOR_X+i*44+33,EDIT_COLOR_Y+33
 					 ,144);
-		SDLBox(EDIT_COLOR_X+i*44+1,EDIT_COLOR_Y+13,EDIT_COLOR_X+i*44+32,EDIT_COLOR_Y+28,clut[i]);
-		sprintf(buf,"PF%d:",i);
-		SDLstring(EDIT_COLOR_X+i*44+1,EDIT_COLOR_Y,buf);
+		SDLBox(EDIT_COLOR_X+i*44+1,EDIT_COLOR_Y+18,EDIT_COLOR_X+i*44+32,EDIT_COLOR_Y+32,clut[i]);
+		sprintf(buf,"PF%d",(int)i);
+		SDLstring(EDIT_COLOR_X+i*44+5
+				  ,EDIT_COLOR_Y,buf);
+		switch (CONFIG.color_display_mode) {
+			case COLOR_DISPLAY_HEX:
+				sprintf(buf,"$%02X",clut[i]);
+				SDLstring(EDIT_COLOR_X+i*44+5,EDIT_COLOR_Y+8,buf);
+				break;
+			case COLOR_DISPLAY_DEC:
+				sprintf(buf,"%03d",clut[i]);
+				SDLstring(EDIT_COLOR_X+i*44+5,EDIT_COLOR_Y+8,buf);
+				break;
+			default:
+				break;
+		}
 		//sprintf(buf,"%d",clut[i]);
 	}
 	
 	SDLUpdate();
-	
+	return 1;
 }
 /*===========================================================================
  * update_font
@@ -474,7 +503,7 @@ int update_font(int b)
 	font=fontbank[b];
 	bank=b;
 	SDLSetContext(DialogContext);
-	SDLClear(clut[0]);
+	SDLClear((mode==4 || mode==5)?clut[0]:0);
 	sx=0; sy=0;
 	m=get_8x8_mode(mode);
 	for(i=0;i<128;i++) {
@@ -484,10 +513,13 @@ int update_font(int b)
 	}
 	SDLSetContext(MainContext);
 	frame(EDIT_CHARMAP_X,EDIT_CHARMAP_Y,256,32,0);
+	// copying painted fonts to the main screen
 	SDLContextBlt(MainContext,EDIT_CHARMAP_X,EDIT_CHARMAP_Y,DialogContext,0,0,255,31);
+	corner(1);
+
+	// font set number plotting
 	SDLBox(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,EDIT_FONTSEL_X+20,EDIT_FONTSEL_Y+15,144);
 	SDLplotchr(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,16+b,1,dfont);
-	corner(1);
 	return 1;
 }
 
@@ -544,6 +576,7 @@ int setup(int zoom, int fullScreen)
 	CONFIG.screenHeight=368;
 	CONFIG.defaultMapWidth=40;
 	CONFIG.defaultMapHeight=24;
+	CONFIG.color_display_mode=0;
 	
 
 	dfont=FONT;
@@ -627,7 +660,7 @@ int update(int x, int y)
 	SDLSetContext(UpdContext);
 	SDLClear(0);
 	
-	show_char_graphics(echr);
+	show_char_typefaces(echr);
 	
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,EDIT_GRID_X+72,EDIT_GRID_Y-2,UpdContext,0,0,32,66);
@@ -667,6 +700,7 @@ int update1bit(int x, int y, int c)
 	return update(x,y);
 }
 
+
 /*===========================================================================
  * click
  * handle a click on the edit screen
@@ -695,7 +729,7 @@ int click(int x, int y, int b)
 	} else*/
 	
 	for(i=0;i<5;i++) {
-		if (IN_BOX(x-EDIT_COLOR_X,y-EDIT_COLOR_Y,i*44,i*44+33,12,29))
+		if (IN_BOX(x-EDIT_COLOR_X,y-EDIT_COLOR_Y,i*44,i*44+33,17,33))
 		{
 			show_palette(i,EDIT_COLOR_X+i*44, EDIT_COLOR_Y+33);
 
@@ -704,6 +738,14 @@ int click(int x, int y, int b)
 		//sprintf(buf,"%d",clut[i]);
 		return 0;
 		}
+		if (IN_BOX(x-EDIT_COLOR_X,y-EDIT_COLOR_Y,i*44,i*44+33,0,16))
+		{
+			CONFIG.color_display_mode++;
+			if (CONFIG.color_display_mode>=COLOR_DISPLAY_MAX) CONFIG.color_display_mode=0;			
+			colors();
+			return 0;
+		}
+		
 	}
 	
 	
@@ -764,7 +806,7 @@ int click(int x, int y, int b)
 
 	ox=x/8; oy=y/8;
 	done=0;
-	do {
+	do { // click in font area
 		if (IN_BOX(x-EDIT_CHARMAP_X,y-EDIT_CHARMAP_Y,0,255,0,31)) {
 			x=(x-EDIT_CHARMAP_X)/8; y=(y-EDIT_CHARMAP_Y)/8;
 			i=y*32+x;
@@ -858,16 +900,14 @@ int click(int x, int y, int b)
 			
 			if (mode==4 || mode==5)
 			{
-				int j;
 				const int xe=x&0xfffffff0;
 				SDLNoUpdate();
-				for (j=0;j<4;++j)
-					SDLBox(EDIT_GRID_X+(j<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(j<<4),EDIT_GRID_Y+78,clut[j]);
 				if (IN_BOX(x-EDIT_GRID_X,y-EDIT_GRID_Y,0,63,68,78))
 					{
 						act_col=(xe-EDIT_GRID_X)>>4;
 					}
-				SDLHollowBox(EDIT_GRID_X+(act_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(act_col<<4),EDIT_GRID_Y+78,10);
+				update_color_chooser(act_col);
+				
 				SDLUpdate();
 
 			}
@@ -1180,8 +1220,9 @@ int command(int cmd, int sym)
 		case 'p':
 				do_colors();
 				update_font(bank);
-				corner(1);
-				draw_numbers(values,work);
+				//corner(1);
+				//draw_numbers(values,work);
+			colors();
 				break;
 		case 'm':				  do_map();
 				  draw_edit();
