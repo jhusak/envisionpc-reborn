@@ -114,7 +114,7 @@ int SDLClip(int hidden) {
 	if (hidden<=0)
 		SDL_SetClipRect(mainScreen->current,NULL);
 	else {
-		r.x=0; r.y=24*mainScreen->zoom;
+		r.x=0; r.y=MAP_TOP_OFFSET*mainScreen->zoom;
 		if (hidden==1) {
 			r.h=CONFIG.screenHeight*mainScreen->zoom; r.w=(CONFIG.screenWidth-72)*mainScreen->zoom;
 		} else {
@@ -402,6 +402,10 @@ int SDLplotchr(int sx, int sy, int chr, int typ, unsigned char *fnt)
 
 	unsigned char clr, *dat;
 	dat=fnt+(chr*8);
+	if (typ>16) {
+		typ-=16;
+	}
+	
 	if (typ==1) {
 		clr=46;
 	} else if (typ==2) {
@@ -442,13 +446,33 @@ int SDLmap_plotchr(int sx, int sy, int chr, int typ, unsigned char *fnt)
 	return SDLCharEngine(sx,sy,chr,typ,clr,dat);
 }
 
+int SDLmap_plot8x8chr(int sx, int sy, int chr, int typ, unsigned char *fnt)
+{
+	unsigned char clr,*dat;
+	
+	clr=0;
+	if ((typ==6)||(typ==7)) {
+		dat=fnt+(chr&63)*8+base;
+		clr=(chr>>6)+1;
+	} else {
+		if (typ==1)
+			clr=10;
+		else if ((typ==2)||(typ==3)) {
+			clr=(clut[3]&240)+(clut[2]&15);
+		}
+		dat=fnt+(chr&127)*8;
+	}
+	
+	return SDLCharEngine(sx,sy,chr,typ,clr,dat);
+}
+
 /*===========================================================================
  * unpack
  * unpack title screen
  * param look: titlescreen data
  * returns: nothing useful
  *==========================================================================*/
-int unpack(unsigned char *look)
+int unpack(unsigned char *look, int xs, int ys)
 {
 	int i,x,y,c,t;
 
@@ -467,7 +491,7 @@ int unpack(unsigned char *look)
 				t--;
 			}
 		} else t--;
-		SDLPlot(x,y,c);
+		SDLPlot(x+xs,y+ys,c);
 		x++;
 		if (x==253) { x=44; y++; }
 	} while(y<130);
@@ -893,17 +917,17 @@ int toggleFullScreen()
 	mainScreen->current=mainScreen->surfaces[MainContext];
 
 	if (mainScreen->surfaces[UpdContext]) SDL_FreeSurface(mainScreen->surfaces[UpdContext]);
-	s=SDL_CreateRGBSurface(SDL_SWSURFACE,68*mainScreen->zoom,146*mainScreen->zoom,32,rmask, gmask, bmask, amask);  // upd
+	s=SDL_CreateRGBSurface(SDL_SWSURFACE,224*mainScreen->zoom,192*mainScreen->zoom,32,rmask, gmask, bmask, amask);
 	mainScreen->surfaces[UpdContext]=SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 
 	if (mainScreen->surfaces[DialogContext]) SDL_FreeSurface(mainScreen->surfaces[DialogContext]);
-	s=SDL_CreateRGBSurface(SDL_SWSURFACE,256*mainScreen->zoom,32*mainScreen->zoom,32,rmask, gmask, bmask, amask);  // dialog
+	s=SDL_CreateRGBSurface(SDL_SWSURFACE,MAX_DIALOG_WIDTH*mainScreen->zoom,MAX_DIALOG_HEIGHT*mainScreen->zoom,32,rmask, gmask, bmask, amask);
 	mainScreen->surfaces[DialogContext]=SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 
 	if (mainScreen->surfaces[BackContext]) SDL_FreeSurface(mainScreen->surfaces[BackContext]);
-	s=SDL_CreateRGBSurface(SDL_SWSURFACE,64*mainScreen->zoom,64*mainScreen->zoom,32,rmask, gmask, bmask, amask);  // back
+	s=SDL_CreateRGBSurface(SDL_SWSURFACE,64*mainScreen->zoom,64*mainScreen->zoom,32,rmask, gmask, bmask, amask);
 	mainScreen->surfaces[BackContext]=SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 

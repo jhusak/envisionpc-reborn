@@ -24,13 +24,16 @@ void titlepal()
 	}
 }
 
-int credits()
+int credits(int x, int y)
 {
-	SDLBox(8,191,319-8,200,1);
-	SDLstring(44,126,"Atari Font Editor");
-	SDLstring(250,120,"-Reborn");
-	SDLstring(12,181,"v0.8.17 by Jakub Husak and STC.");
-	SDLstring(12,191,"v0.8 Programmed by Mark Schmelzenbach");
+	currentView->dc=2;
+	SDLstring(44+x,127+y,"Atari Font Editor");
+	SDLstring(250+x,120+y,"-Reborn");
+	int center=(CONFIG.screenWidth-280)/2;
+	SDLBox(8,CONFIG.screenHeight-12,CONFIG.screenWidth-8,CONFIG.screenHeight-5,1);
+	SDLBox(8,CONFIG.screenHeight-24,CONFIG.screenWidth-8,CONFIG.screenHeight-17,1);
+	SDLstring(center,CONFIG.screenHeight-24,"v0.8.17 by Jakub Husak and STC.");
+	SDLstring(center,CONFIG.screenHeight-12,"v0.8 Programmed by Mark Schmelzenbach");
 	return 1;
 }
 
@@ -38,8 +41,10 @@ int title()
 {
 	SDLNoUpdate();
 	titlepal();
-	unpack(titles);
-	credits();
+	int cx=CONFIG.screenWidth/2-180;
+	int cy=CONFIG.screenHeight/2-130;
+	unpack(titles,cx,cy);
+	credits(cx,cy);
 	SDLUpdate();
 	SDLgetch(1);
 	return 1;

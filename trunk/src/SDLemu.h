@@ -38,11 +38,12 @@ int SDLrelease();
 int SDLTranslateClick(int x);
 
 int SDLCreateCharsContext(int w, int h);
+int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned char *dat);
 
 int SDLContextBlt(int dst, int dx, int dy, int src, int sx1, int sy1, int sx2, int sy2);
 int SDLCharBlt(int dst, int dx, int dy, int idx);
 
-int unpack(unsigned char *look);
+int unpack(unsigned char *look, int, int);
 
 int initSDL(int zoom, int fullScreen);
 int toggleFullScreen();
