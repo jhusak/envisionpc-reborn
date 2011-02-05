@@ -409,30 +409,48 @@ int write_data(char *file, unsigned char *font, int start, int end, int a)
   switch (options.write_tp) {
     case 1: { fprintf(out,"FONT%c",cr); break; }
     case 2: { fprintf(out,"%d FONT%c",line,cr); line+=options.step; break; }
-    case 3: { fprintf(out,"byte array FONT=[%c",cr); break; }
+	  case 3: { fprintf(out,"byte array FONT=[%c",cr); break; }
+	  case 4: { fprintf(out,"unsigned char FONT[]={%c",cr); break; }
   }
-  for(i=start;i<=end;i++) {
-    switch (options.write_tp) {
-      case 0: { fprintf(out,"%d DATA ",line); break; }
-      case 1: { fprintf(out,"%c.BY ",tb); break; }
-      case 2: { fprintf(out,"%d%c.BYTE ",line,tb); break; }
-      case 3: { fprintf(out,"%c",tb); break; }
-    }
-    line+=options.step;
-    for(j=0;j<8;j++) {
-      c=*font;
-      font++;
-      fprintf(out,"%d",c);
-      if (j!=7) {
-	if (options.write_tp!=3) fprintf(out,",");
-	else fprintf(out," ");
-      } else fprintf(out,"%c",cr);
-    }
-    if ((options.write_tp==1)&&(!((i+1)%32)))
-      fprintf(out,"%c",cr);
-  }
+	for(i=start;i<=end;i++) {
+		switch (options.write_tp) {
+			case 0: { fprintf(out,"%d DATA ",line); break; }
+			case 1: { fprintf(out,"%c.BY ",tb); break; }
+			case 2: { fprintf(out,"%d%c.BYTE ",line,tb); break; }
+			case 3: { fprintf(out,"%c",tb); break; }
+			case 4: { fprintf(out,"%c",tb); break; }
+		}
+		line+=options.step;
+		for(j=0;j<8;j++) {
+			c=*font;
+			font++;
+			
+			if (options.write_tp==4)
+				fprintf(out,"0x%02x",c);
+			else
+				fprintf(out,"%d",c);
+			
+			if (j!=7) {
+				if (options.write_tp!=3) fprintf(out,",");
+				else fprintf(out," ");
+			} else {
+				if (j==7) {
+					if (options.write_tp==4)
+						if (i!=end)
+							fprintf(out,",");
+				}
+				fprintf(out,"%c",cr);
+			}
+		}
+		
+		if ((options.write_tp==1)&&(!((i+1)%32)))
+			fprintf(out,"%c",cr);
+	}
   if (options.write_tp==3)
     fprintf(out,"]");
+	if (options.write_tp==4)
+		fprintf(out,"};");
+
   fclose(out);
   return 0;
 }
@@ -565,7 +583,7 @@ int write_map(char *file, unsigned char *font, view *map, int raw)
   fwrite(map->map,map->w*map->h,1,out);
   if (!raw) {
     fwrite(font,1024,1,out);
-    if ((!tmode)&&((tsx>1)||(tsy>1))) {
+    if ((!tileMode)&&((tsx>1)||(tsy>1))) {
       int i;
       unsigned char *look;
 
@@ -606,7 +624,7 @@ int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int r
   FILE *in;
   long len;
 
-  if ((!tmode)&&((tsx>1)||(tsy>1))) {
+  if ((!tileMode)&&((tsx>1)||(tsy>1))) {
     error_dialog("No tilemap.XFD save");
     return -1;    
   }
