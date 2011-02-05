@@ -238,13 +238,15 @@ char *get_filename(char *title, char *image)
 {
 	char *r;
 	int tmpx;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64, 164, 32);
-	SDLstring(tmpx+4,68,title);
+	int tmpy=EDIT_OFFSET_Y;
+
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
+	SDLstring(tmpx+4,68+tmpy,title);
 	SDLUpdate();
 	if (image)
-		r=ginput(tmpx+4,78,tmpx+156,24,NULL,2);
+		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,NULL,2);
 	else
-		r=ginput(tmpx+4,78,tmpx+156,24,NULL,0);
+		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,NULL,0);
 	closeLastDblBufferDialog();
 	return r;
 }
@@ -258,9 +260,10 @@ char *get_filename(char *title, char *image)
 int error_dialog(char *error)
 {
 	int tmpx;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64, 164, 32);
-	SDLstring(tmpx+4,68,error);
-	drawbutton(tmpx+(164-16)/2,78,"Okay");
+	int tmpy=EDIT_OFFSET_Y+64;
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
+	SDLstring(tmpx+4,68+tmpy,error);
+	drawbutton(tmpx+(164-16)/2,78+tmpy,"Okay");
 	SDLUpdate();
 	SDLgetch(1);
 	closeLastDblBufferDialog();
@@ -280,7 +283,7 @@ int do_options()
 	char *oldname=NULL;
 	int tmpx;
 
-	yp=EDIT_OFFSET_Y+30;
+	yp=EDIT_OFFSET_Y+64;
 	
 	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 200, 108);
 	SDL_ShowCursor(SDL_DISABLE); /* 144 */
@@ -455,7 +458,7 @@ int do_colors()
 	char buf[16],*color;
 	int tmpx;
 
-	yp=84;
+	yp=64+EDIT_OFFSET_Y;
 	tmpx = openDblBufferDialog(DIALOG_CENTER,yp, 178, 96);
 	SDL_ShowCursor(SDL_DISABLE);
 	yp+=2;
@@ -588,15 +591,16 @@ int get_number(char *title, int def, int max)
 	int i;
 
 	int tmpx;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64, 164, 32);
-	SDLstring(tmpx+4,68,title);
+	int tmpy=EDIT_OFFSET_Y;
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
+	SDLstring(tmpx+4,68+tmpy,title);
 	SDLUpdate();
 
 	if (def>=0)
 		sprintf(buf,"%d",def);
 	else *buf=0;
 	do {
-		r=ginput(tmpx+4,80,tmpx+156,24,buf,1);
+		r=ginput(tmpx+4,80+tmpy,tmpx+156,24,buf,1);
 		if (r) {
 			i=atoi(r);
 			free(r);
@@ -617,25 +621,25 @@ int do_size(int tileMode)
 	int i, x, y, loop, tmax;
 	char buf[16], *size;
 	unsigned char *newmap,*look;
-
 	if (tileMode) {
 		tileMode=8; tmax=16;
 	} else tmax=65536;
 
 	int tmpx;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64, 160, 32);
+	int tmpy=EDIT_OFFSET_Y;
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 160, 32);
 	
 	if (!tileMode) {
-		SDLstring(tmpx+4,68,"New Width:");
+		SDLstring(tmpx+4,68+tmpy,"New Width:");
 		sprintf(buf,"%d",map->w);
 	} else {
-		SDLstring(tmpx+4,68,"Tile Width:");
+		SDLstring(tmpx+4,68+tmpy,"Tile Width:");
 		sprintf(buf,"%d",tsx);
 	}
 	SDLUpdate();
 	loop=1;
 	do {
-		size=ginput(tmpx+92+4+tileMode,68,tmpx+92+64-tileMode,6,buf,1);
+		size=ginput(tmpx+92+4+tileMode,68+tmpy,tmpx+92+64-tileMode,6,buf,1);
 		if (size) {
 			x=atoi(size);
 			if ((x)&&(x<=tmax))
@@ -643,19 +647,19 @@ int do_size(int tileMode)
 		} else loop=1;
 	} while(loop);
 	SDLNoUpdate();
-	SDLBox(tmpx+4+91,67,tmpx+93+64-tileMode,77,148);
-	SDLstring(tmpx+4+93+tileMode,68,size);
+	SDLBox(tmpx+4+91,67+tmpy,tmpx+93+64-tileMode,77+tmpy,148);
+	SDLstring(tmpx+4+93+tileMode,68+tmpy,size);
 	if (!tileMode) {
-		SDLstring(tmpx+4,78,"New Height:");
+		SDLstring(tmpx+4,78+tmpy,"New Height:");
 		sprintf(buf,"%d",map->h);
 	} else {
-		SDLstring(tmpx+4,78,"Tile Height:");
+		SDLstring(tmpx+4,78+tmpy,"Tile Height:");
 		sprintf(buf,"%d",tsy);
 	}
 	SDLUpdate();
 	loop=1;
 	do {
-		size=ginput(tmpx+4+92+tileMode,78,tmpx+92+64-tileMode,6,buf,1);
+		size=ginput(tmpx+4+92+tileMode,78+tmpy,tmpx+92+64-tileMode,6,buf,1);
 		if (size) {
 			y=atoi(size);
 			if ((y)&&(y<=tmax))
@@ -715,11 +719,13 @@ int do_move(view *map, int tileMode)
 	char buf[16], *size;
 
 	int tmpx;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64, 168, 32);
+	int tmpy=EDIT_OFFSET_Y;
+
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 168, 32);
 	
 	if (tileMode) {
 
-		SDLstring(tmpx+4,68,"Go to tile:");
+		SDLstring(tmpx+4,68+tmpy,"Go to tile:");
 		SDLUpdate();
 		int tx, ty;
 		tx=((currentView->scx+currentView->cx)/tsx);
@@ -727,7 +733,7 @@ int do_move(view *map, int tileMode)
 		sprintf(buf,"%d",tx+ty*16);
 		loop=1;
 		do {
-			size=ginput(tmpx+100,68,tmpx+164,6,buf,1);
+			size=ginput(tmpx+100,68+tmpy,tmpx+164,6,buf,1);
 			if (size) {
 				x=atoi(size);
 				if (IN_RANGE(x,0,255))
@@ -737,12 +743,12 @@ int do_move(view *map, int tileMode)
 		y=x/16; x=x-y*16;
 		x=x*tsx; y=y*tsy;
 	} else {
-		SDLstring(tmpx+4,68,"Move to X:");
+		SDLstring(tmpx+4,68+tmpy,"Move to X:");
 		SDLUpdate();
 		sprintf(buf,"%d",map->scx+map->cx);
 		loop=1;
 		do {
-			size=ginput(tmpx+92,68,tmpx+92+64,6,buf,1);
+			size=ginput(tmpx+92,68+tmpy,tmpx+92+64,6,buf,1);
 			if (size) {
 				x=atoi(size);
 				if (IN_RANGE(x,0,map->w-1))
@@ -750,14 +756,14 @@ int do_move(view *map, int tileMode)
 			} else loop=1;
 		} while(loop);
 		SDLNoUpdate();
-		SDLBox(tmpx+91,67,tmpx+92+65,77,148);
-		SDLstring(tmpx+93,68,size);
-		SDLstring(tmpx+4,78,"Move to Y:");
+		SDLBox(tmpx+91,67+tmpy,tmpx+92+65,77+tmpy,148);
+		SDLstring(tmpx+93,68+tmpy,size);
+		SDLstring(tmpx+4,78+tmpy,"Move to Y:");
 		SDLUpdate();
 		sprintf(buf,"%d",map->scy+map->cy);
 		loop=1;
 		do {
-			size=ginput(tmpx+92,78,tmpx+92+64,6,buf,1);
+			size=ginput(tmpx+92,78+tmpy,tmpx+92+64,6,buf,1);
 			if (size) {
 				y=atoi(size);
 				if ((y>=0)&&(y<map->h))
@@ -805,13 +811,13 @@ int do_move(view *map, int tileMode)
  *==========================================================================*/
 int do_exit()
 {
-	return 1;
 	int ch;
 	int x;
 
-	x=openDblBufferDialog(DIALOG_CENTER, 64, 164, 32);
-	SDLstring(x+4+16,76,"Really Exit? Y/N");
-	SDLplotchr(x+4+128-8,76,stoa('Y'),1,dfont);
+	int tmpy=EDIT_OFFSET_Y;
+	x=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
+	SDLstring(x+4+16,76+tmpy,"Really Exit? Y/N");
+	SDLplotchr(x+4+128-8,76+tmpy,stoa('Y'),1,dfont);
 	SDLUpdate();
 	ch=SDLgetch(1);
 	closeLastDblBufferDialog();
