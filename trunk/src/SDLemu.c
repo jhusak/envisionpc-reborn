@@ -277,8 +277,7 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 					c=*(dat+y);
 					if (chr>=128) c=255-c;
 					for(x=0;x<8;x++) {
-						if (c&128) SDLPlot(sx+x,sy+y,clr);
-						else SDLPlot(sx+x,sy+y,clut[3]);
+						SDLPlot(sx+x,sy+y,c&128?clr:clut[3]);
 						c=c<<1;
 					}
 				}

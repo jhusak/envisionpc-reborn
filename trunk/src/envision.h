@@ -22,6 +22,8 @@ typedef struct view {
   unsigned char *map;
 } view;
 
+typedef enum {COLOR_DISPLAY_HEX, COLOR_DISPLAY_DEC, COLOR_DISPLAY_MAX} color_display_type;
+
 typedef struct config
 	{
 		int checkersHi;
@@ -31,6 +33,7 @@ typedef struct config
 		int screenWidth;
 		int defaultMapWidth;
 		int defaultMapHeight;
+		color_display_type color_display_mode;
 	} config;
 
 #define IN_RANGE(x,lx,rx) ((x)>=(lx)&&(x)<=(rx))
@@ -61,9 +64,7 @@ typedef struct config
 #define EDIT_MENU_Y (24+EDIT_OFFSET_Y)
 
 #define EDIT_COLOR_X (86+EDIT_OFFSET_X)
-#define EDIT_COLOR_Y (180+EDIT_OFFSET_Y)
-
-
+#define EDIT_COLOR_Y (176+EDIT_OFFSET_Y)
 
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 

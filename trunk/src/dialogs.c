@@ -445,6 +445,7 @@ int show_palette(i,x,y)
 		clut[i]=col;
 	
 	closeLastDblBufferDialog();
+	return 1;
 }
 
 /*===========================================================================
@@ -481,7 +482,7 @@ int do_colors()
 		SDLBox(tmpx+61,yp-1,tmpx+100,yp+9,148);
 		SDLstring(tmpx+63,yp,color);
 		clut[i]=(atoi(color)&254);
-		SDLBox(tmpx+12,yp+1,tmpx+17,yp+7,clut[i]);
+		SDLBox(tmpx+12,yp+1,tmpx+20,yp+7,clut[i]);
 		SDLUpdate();
 
 		free(color);
@@ -813,7 +814,7 @@ int do_exit()
 {
 	int ch;
 	int x;
-
+	
 	int tmpy=EDIT_OFFSET_Y;
 	x=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
 	SDLstring(x+4+16,76+tmpy,"Really Exit? Y/N");
