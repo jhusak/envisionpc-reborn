@@ -38,6 +38,8 @@ unsigned char clut[9]={0,40,202,148,70,0,0,0,0};
 int orit[8]={128,64,32,16,8,4,2,1};
 int andit[8]={127,191,223,239,247,251,253,254};
 
+char * preferences_filepath;
+
 config CONFIG;
 
 int corner(int all);
@@ -1298,6 +1300,8 @@ int edit()
 int main(int argc, char *argv[])
 {
 	int i,zoom, fullScreen;
+	
+	preferences_filepath=get_preferences_filepath();
 
 	zoom=2;
 	fullScreen=0;

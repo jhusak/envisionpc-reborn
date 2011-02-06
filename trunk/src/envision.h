@@ -71,6 +71,7 @@ enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 extern config CONFIG;
 extern int MAP_MENU_HEIGHT;
 
+
 int title();
 
 int get_8x8_mode(int m);
@@ -119,6 +120,7 @@ int untile_map(view *map, view *tile);
 
 int unpack(unsigned char *look, int xs, int ys);
 
+char * get_preferences_filepath();
 
 extern view *currentView, *map, *tile;
 extern unsigned char *dfont, *font, *cache;
