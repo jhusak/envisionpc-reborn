@@ -261,9 +261,13 @@ int error_dialog(char *error)
 {
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y+64;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
-	SDLstring(tmpx+4,68+tmpy,error);
-	drawbutton(tmpx+(164-16)/2,78+tmpy,"Okay");
+	
+	int width=strlen(error) *8;
+	
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, width+8, 40);
+	SDLstring(tmpx+(width+8-24)/2,68+tmpy,"ERROR!");
+	SDLstring(tmpx+4,76+tmpy,error);
+	drawbutton(tmpx+(width+8-16)/2,88+tmpy,"Okay");
 	SDLUpdate();
 	SDLgetch(1);
 	closeLastDblBufferDialog();

@@ -66,6 +66,8 @@
 		2DA801C4099059B900D40525 /* SDLemu.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801B8099059B900D40525 /* SDLemu.c */; };
 		2DA801C5099059B900D40525 /* SDLemu.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DA801B9099059B900D40525 /* SDLemu.h */; };
 		2DA801C6099059B900D40525 /* title.c in Sources */ = {isa = PBXBuildFile; fileRef = 2DA801BA099059B900D40525 /* title.c */; };
+		308284EA12FEBF390096A207 /* preferences.c in Sources */ = {isa = PBXBuildFile; fileRef = 308284E812FEBF390096A207 /* preferences.c */; };
+		308284EB12FEBF390096A207 /* preferences.h in Headers */ = {isa = PBXBuildFile; fileRef = 308284E912FEBF390096A207 /* preferences.h */; };
 		30DD217612F3E3B900B92FCD /* changes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 30DD217512F3E3B900B92FCD /* changes.txt */; };
 		F5A47AA101A0483001D3D55B /* SDLMain.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A47A9D01A0482F01D3D55B /* SDLMain.h */; };
 		F5A47AA301A0483001D3D55B /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = F5A47A9E01A0483001D3D55B /* SDLMain.m */; };
@@ -90,6 +92,8 @@
 		2DA801B8099059B900D40525 /* SDLemu.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = SDLemu.c; path = ../SDLemu.c; sourceTree = SOURCE_ROOT; };
 		2DA801B9099059B900D40525 /* SDLemu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDLemu.h; path = ../SDLemu.h; sourceTree = SOURCE_ROOT; };
 		2DA801BA099059B900D40525 /* title.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = title.c; path = ../title.c; sourceTree = SOURCE_ROOT; };
+		308284E812FEBF390096A207 /* preferences.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = preferences.c; path = ../preferences.c; sourceTree = SOURCE_ROOT; };
+		308284E912FEBF390096A207 /* preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = preferences.h; path = ../preferences.h; sourceTree = SOURCE_ROOT; };
 		30DD217512F3E3B900B92FCD /* changes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = changes.txt; path = ../changes.txt; sourceTree = SOURCE_ROOT; };
 		F5A47A9D01A0482F01D3D55B /* SDLMain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = SOURCE_ROOT; };
 		F5A47A9E01A0483001D3D55B /* SDLMain.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = SOURCE_ROOT; };
@@ -158,6 +162,8 @@
 			children = (
 				2D1A354509B6939B00FEE1D0 /* util.c */,
 				2DA801AF099059B900D40525 /* colours.h */,
+				308284E812FEBF390096A207 /* preferences.c */,
+				308284E912FEBF390096A207 /* preferences.h */,
 				2DA801B0099059B900D40525 /* dialogs.c */,
 				2DA801B1099059B900D40525 /* envision.c */,
 				2DA801B2099059B900D40525 /* envision.h */,
@@ -205,6 +211,7 @@
 				2DA801C1099059B900D40525 /* icon.h in Headers */,
 				2DA801C3099059B900D40525 /* raw.h in Headers */,
 				2DA801C5099059B900D40525 /* SDLemu.h in Headers */,
+				308284EB12FEBF390096A207 /* preferences.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,6 +257,7 @@
 				2DA801C4099059B900D40525 /* SDLemu.c in Sources */,
 				2DA801C6099059B900D40525 /* title.c in Sources */,
 				2D1A354609B6939B00FEE1D0 /* util.c in Sources */,
+				308284EA12FEBF390096A207 /* preferences.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
