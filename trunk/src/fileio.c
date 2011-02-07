@@ -21,18 +21,27 @@
 
 unsigned char secbuf[256];
 unsigned char VTOCsec[128];
+
+
+long flength(FILE * in)
+{
+	long len;
+	fseek(in,0L,SEEK_END);
+	len=ftell(in);
+	rewind(in);
+	return len;
+}
+
+
 /*=========================================================================*/
 int is_xfd(FILE *image)
 {
-  long lof;
-
-  fseek(image,0L,SEEK_END);
-  lof=ftell(image);
-  rewind(image);
-
-  if (lof==92160) return 1;
+  if (flength(image)==92160) return 1;
 	else return 0;
 }
+
+
+
 /*=========================================================================*/
 void convertfname(char *in, char *out)
 {
@@ -359,6 +368,34 @@ int write_xfd_font(char *image, char *file, unsigned char *data, int max, FILE *
   return 0;
 }
 /*=========================================================================*/
+int import_palette(char *file, rgb_color * colortable)
+{
+	FILE *in;
+	long len;
+		
+	in=fopen(file,"rb");
+	if (!in) {
+		error_dialog("Cannot open file");
+		return -1;
+	}
+	
+	if (flength(in)!=768) {
+		error_dialog("Incorrect palette file (length<>768)");
+		fclose(in);
+	} else {
+		len=fread(colortable,1,768,in);
+		if (len!=768) 
+		{
+			error_dialog("Could not read. Reset to default.");
+			fclose(in);
+			handler_palette_reset();
+			return 0;
+		}
+	}
+	fclose(in);
+	return 1;
+}
+/*=========================================================================*/
 int read_font(char *file, unsigned char *font)
 {
   FILE *in;
@@ -468,9 +505,7 @@ int write_xfd_data(char *image, char *file, unsigned char *data, int start, int 
     error_dialog("Cannot write font");
     return -1;
   }
-  fseek(in,0L,SEEK_END);
-  len=ftell(in);
-  rewind(in);
+  len=flength(in);
   write_xfd_font(image,file,buf,len,in);
   fclose(in);
   remove(fname);
@@ -635,9 +670,7 @@ int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int r
     error_dialog("Cannot write map");
     return -1;
   }
-  fseek(in,0L,SEEK_END);
-  len=ftell(in);
-  rewind(in);
+  len=flength(in);
   write_xfd_font(image,file,buf,len,in);
   fclose(in);
   remove(fname);

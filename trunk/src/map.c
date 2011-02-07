@@ -114,7 +114,7 @@ int map_panel()
 	SDLClear(0);
 	
 	int cmdcnt=0;
-	drawbutton(0,cmdcnt*10,"*Edit");	cmds[++cmdcnt]='e';
+	drawbutton(0,cmdcnt*10,"Go to *Edit");	cmds[++cmdcnt]='e';
 	drawbutton(0,cmdcnt*10,"Resi*Ze");	cmds[++cmdcnt]='z';
 	drawbutton(0,cmdcnt*10,"*Mode");	cmds[++cmdcnt]='m';
 	drawbutton(0,cmdcnt*10,"*U Base");	cmds[++cmdcnt]='u';
@@ -477,7 +477,7 @@ int map_click(int x, int y, int b, int *down)
 {
 	int i,ox,oy;
 
-	if ((!hidden)&&(IN_BOX(x,y,CONFIG.screenWidth-69,CONFIG.screenWidth-5,MAP_TOP_OFFSET,cmds[0]))) {
+	if ((!hidden)&&(IN_BOX(x,y,CONFIG.screenWidth-BUTTON_WIDTH*8-5,CONFIG.screenWidth-5,MAP_TOP_OFFSET,cmds[0]))) {
 		i=(y-MAP_TOP_OFFSET+10)/10;
 		SDLrelease(); /* wait for mouse to unclick */
 		*down=0;
@@ -499,7 +499,7 @@ int map_click(int x, int y, int b, int *down)
 			} else {
 				SDLCharBlt(MainContext,x,y,currentView->dc);
 			}
-			if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-70))
+			if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
 				draw_screen(b);
 		}
 		move(ox-currentView->cx,oy-currentView->cy);
@@ -574,8 +574,8 @@ int draw_screen(int b)
 	} 
 	SDLClip(0);
 	if (!hidden) {
-		SDLBox(CONFIG.screenWidth-72,MAP_TOP_OFFSET,CONFIG.screenWidth-1,CONFIG.screenHeight,0);
-		SDLContextBlt(MainContext,CONFIG.screenWidth-69,MAP_TOP_OFFSET,UpdContext,0,0,64,MAP_MENU_HEIGHT-1);
+		SDLBox(CONFIG.screenWidth-BUTTON_WIDTH*8-8,MAP_TOP_OFFSET,CONFIG.screenWidth-1,CONFIG.screenHeight,0);
+		SDLContextBlt(MainContext,CONFIG.screenWidth-BUTTON_WIDTH*8-5,MAP_TOP_OFFSET,UpdContext,0,0,BUTTON_WIDTH*8+8,MAP_MENU_HEIGHT-1);
 	}
 	draw_cursor();
 	//SDLUpdate();
@@ -740,7 +740,7 @@ int do_map()
 							      my=SDLTranslateClick(event.button.y);
 							      oy=(my-MAP_TOP_OFFSET)/currentView->ch;
 							      ox=mx/currentView->cw;
-							      if (((hidden)||(mx<CONFIG.screenWidth-70))&&((ox!=currentView->cx)||(oy!=currentView->cy))) {
+							      if (((hidden)||(mx<CONFIG.screenWidth-BUTTON_WIDTH*8-6))&&((ox!=currentView->cx)||(oy!=currentView->cy))) {
 								      done=map_click(mx,my,down==1,&down);
 							      }
 						      }

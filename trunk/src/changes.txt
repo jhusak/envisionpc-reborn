@@ -29,9 +29,23 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - added C format export for font sets 
 - added color register change with pallettes.
 
-2011-02-05 (rev)
+2011-02-05 (rev26)
 - added textual representation of colors in the pallette
-- one can click on the rtextual representation to change the format of display (hex/dec)
+- one can click on the textual representation to change the format of display (hex/dec)
 - fixed bug that prevented palette chooser from display before char editing in modes 4 and 5
 - fixed small bug causing wrong painted boxes with colors in poke dialog.
 - fixed small issue with drawing background during char clicking on the font palette.
+
+2011-02-06 (rev28)
+- added preferences file operations
+- fixed some memory leaks during dialog handling
+- added possibility to enter hex number everywhere when number prompt
+- added erasing of text field when key other than backspace and enter pressed
+- added config and pallette to preferences file
+- menu buttons got wider due to bigger screen.
+- reorganized menu, added Import Color Table (G2F and Atari800 palette format of 768 bytes length)
+- added Defaults button to reset some values to default ones - removed RestoreFont button and moved here
+- renamed some menus to more meaning form.
+- storing CLUT (color lookup table) in preferences
+- so does color palette
+- added Makefile.linux (thanks sebako)

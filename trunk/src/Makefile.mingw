@@ -11,7 +11,7 @@ CC      = i386-mingw32-gcc
 all:    prog
 
 OBJS    = \
-	title.o dialogs.o envision.o fileio.o map.o SDLemu.o icon.o util.o
+	title.o dialogs.o envision.o fileio.o map.o SDLemu.o icon.o util.o preferences.o
 
 prog : $(OBJS)
 	$(CC) -o envisionPCreborn.exe $(OBJS) $(L)
@@ -25,12 +25,13 @@ icon.o:
 	i386-mingw32-windres -i icon.rc -o icon.o
 
 dialogs.o: SDLemu.h envision.h
-envision.o: SDLemu.h colours.h font.h envision.h
+envision.o: SDLemu.h colours.h font.h envision.h preferences.h
 fileio.o: envision.h
 map.o: SDLemu.h envision.h
 SDLemu.o: SDLemu.h envision.h icon.h
 title.o: SDLemu.h raw.h envision.h
 util.o: envision.h
+preferences.o: preferences.h envision.h
 
 
 

@@ -116,7 +116,7 @@ int SDLClip(int hidden) {
 	else {
 		r.x=0; r.y=MAP_TOP_OFFSET*mainScreen->zoom;
 		if (hidden==1) {
-			r.h=CONFIG.screenHeight*mainScreen->zoom; r.w=(CONFIG.screenWidth-72)*mainScreen->zoom;
+			r.h=CONFIG.screenHeight*mainScreen->zoom; r.w=(CONFIG.screenWidth-BUTTON_WIDTH*8-8)*mainScreen->zoom;
 		} else {
 			r.h=CONFIG.screenHeight*mainScreen->zoom; r.w=CONFIG.screenWidth*mainScreen->zoom;
 		}
@@ -974,7 +974,7 @@ int initSDL(int zoom, int fullScreen)
 
 	SDL_EnableUNICODE(1);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,SDL_DEFAULT_REPEAT_INTERVAL);
-	SDL_WM_SetCaption("EnvisionPC","EnvisionPC");
+	SDL_WM_SetCaption("EnvisionPCreborn","EnvisionPCreborn");
 
 	return 1;
 }

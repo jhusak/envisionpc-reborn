@@ -16,6 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/types.h>
 
 #include "SDL.h"
 
@@ -24,6 +25,7 @@
 #include "font.h"
 
 #include "envision.h"
+#include "preferences.h"
 
 unsigned char *dfont, *font, *copy_from, *fontbank[10];
 char bank_mod[10];
@@ -34,7 +36,10 @@ unsigned char undo[8];
 unsigned char peek[64], plot[64];
 opt options;
 
+rgb_color colortable[256];
+
 unsigned char clut[9]={0,40,202,148,70,0,0,0,0};
+unsigned char clut_default[9]={0,40,202,148,70,0,0,0,0};
 int orit[8]={128,64,32,16,8,4,2,1};
 int andit[8]={127,191,223,239,247,251,253,254};
 
@@ -93,7 +98,9 @@ void setpal()
 	int x;
 
 	for(x=0;x<256;x++) {
-		SDLsetPalette(x,(colortable[x]>>16)&0xff,(colortable[x]>>8)&0xff,(colortable[x])&0xff);
+		
+		//SDLsetPalette(x,(colortable[x]>>16)&0xff,(colortable[x]>>8)&0xff,(colortable[x])&0xff);
+		SDLsetPalette(x,colortable[x].r,colortable[x].g,colortable[x].b);
 	}
 }
 
@@ -179,6 +186,31 @@ void update_color_chooser(int act_col){
 }
 
 /*===========================================================================
+ * hex2dec
+ * converts hex char to value
+ * param hex: hex char to get value of; uppercase or lowercase;
+ * returns value of hex char or <0 if error
+ *==========================================================================*/
+
+int hex2dec(char hex)
+{
+	hex=toupper(hex);
+	if (hex=='\n') return -1;
+	if (!((hex>='0' && hex<='9') ||(hex>='A' && hex<='F'))) return -2;
+	if (hex<='9') return hex-'0';
+	return hex-'A'+10;
+}
+
+int num2val(char * chrval)
+{
+	if (*chrval=='$')
+		return strtol(++chrval,NULL,16);
+	else
+		return strtol(chrval,NULL,10);
+}
+
+
+/*===========================================================================
  * grid
  * update the character grid
  * param chr: character id
@@ -226,6 +258,7 @@ int grid(int chr, int rem)
 		update_color_chooser(act_col);
 		
 	}
+
 	topos(echr,&x,&y);
 	SDLBox(x,y,x+7,y+7,(mode==4||mode==5)?clut[0]:0);
 	SDLplotchr(x,y,echr,m,font);
@@ -249,6 +282,9 @@ int grid(int chr, int rem)
 	SDLstring(EDIT_GRID_X+18,EDIT_GRID_Y+82,num);
 	frame(EDIT_GRID_X+86,EDIT_GRID_Y+82,8,8,0);
 	SDLplotchr(EDIT_GRID_X+86,EDIT_GRID_Y+82,echr,2,dfont);
+	
+	draw_numbers(values,dat);
+
 	SDLUpdate();
 	corner(0);
 	return 1;
@@ -270,56 +306,30 @@ int panel(int tp)
 	menuPanel=tp;
 	SDLSetContext(UpdContext);
 	SDLClear(0);
-	switch(tp) {
-		case 1: {
-				idxcnt=0;
-				//SDLBox(14,2,25,7,147);
-				//SDLBox(32,2,64,7,147);
-				//SDLstring(32,2,"Disk");
-				drawbutton(0,idxcnt*10+8,"*Blank"); cmds[++idxcnt]='b';
-				drawbutton(0,idxcnt*10+8,"*Inverse"); cmds[++idxcnt]='i';
-				drawbutton(0,idxcnt*10+8,"*Undo"); cmds[++idxcnt]='u';
-				drawbutton(0,idxcnt*10+8,"*Atari"); cmds[++idxcnt]='a';
-				drawbutton(0,idxcnt*10+8,"Flip *H"); cmds[++idxcnt]='h';
-				drawbutton(0,idxcnt*10+8,"Flip *V"); cmds[++idxcnt]='v';
-				drawbutton(0,idxcnt*10+8,"*Rotate"); cmds[++idxcnt]='r';
-				drawbutton(0,idxcnt*10+8,"*Copy"); cmds[++idxcnt]='c';
-				drawbutton(0,idxcnt*10+8,"*X-copy"); cmds[++idxcnt]='x';
-				drawbutton(0,idxcnt*10+8,"*T-copy"); cmds[++idxcnt]='t';
-				drawbutton(0,idxcnt*10+8,"*Poke"); cmds[++idxcnt]='p';
-
-			/*
-				SDLBox(1,1,32,8,148);
-				SDLLine(0,1,0,8,144);
-				SDLLine(0,0,33,0,152);
-				SDLLine(33,1,33,7,152);
-				SDLstring(1,1,"Edit");
-
-				cmds[0]=idxcnt*10+8;
-				break;
-			}
-		case 2: {
-				SDLBox(1,2,32,7,147);
-				SDLstring(1,2,"Edit");
-				idxcnt=0;
-			 */
-				drawbutton(0,idxcnt*10+8,"RestrFnt"); cmds[++idxcnt]='A';
-				drawbutton(0,idxcnt*10+8,"*Save"); cmds[++idxcnt]='s';
-				drawbutton(0,idxcnt*10+8,"*Load"); cmds[++idxcnt]='l';
-				drawbutton(0,idxcnt*10+8,"*Export"); cmds[++idxcnt]='e';
-				drawbutton(0,idxcnt*10+8,"*Options"); cmds[++idxcnt]='o';
-			//	SDLBox(32,1,64,8,148);
-			//	SDLLine(31,0,31,7,144);
-			//	SDLLine(32,0,64,0,152);
-			//	SDLLine(64,1,64,8,152);
-				//SDLplotchr(35,1,36,2,dfont);
-			//	SDLstring(32,1,"Disk");
-				cmds[0]=idxcnt*10+8;
-				break;
-			}
-	}
+	idxcnt=0;
+	drawbutton(0,idxcnt*10+8,"Go to *Map"); cmds[++idxcnt]='m';
+	drawbutton(0,idxcnt*10+8,"*Blank"); cmds[++idxcnt]='b';
+	drawbutton(0,idxcnt*10+8,"*inverse"); cmds[++idxcnt]='i';
+	drawbutton(0,idxcnt*10+8,"*Undo"); cmds[++idxcnt]='u';
+	drawbutton(0,idxcnt*10+8,"*Atari"); cmds[++idxcnt]='a';
+	drawbutton(0,idxcnt*10+8,"Flip *Horiz"); cmds[++idxcnt]='h';
+	drawbutton(0,idxcnt*10+8,"Flip *Vert"); cmds[++idxcnt]='v';
+	drawbutton(0,idxcnt*10+8,"*Rotate"); cmds[++idxcnt]='r';
+	drawbutton(0,idxcnt*10+8,"*Copy"); cmds[++idxcnt]='c';
+	drawbutton(0,idxcnt*10+8,"*X-copy"); cmds[++idxcnt]='x';
+	drawbutton(0,idxcnt*10+8,"*Transcopy"); cmds[++idxcnt]='t';
+	drawbutton(0,idxcnt*10+8,"*PickColors"); cmds[++idxcnt]='p';
+	//drawbutton(0,idxcnt*10+8,"RestorFont"); cmds[++idxcnt]='A';
+	drawbutton(0,idxcnt*10+8,"*Save Font"); cmds[++idxcnt]='s';
+	drawbutton(0,idxcnt*10+8,"*Load Font"); cmds[++idxcnt]='l';
+	drawbutton(0,idxcnt*10+8,"*Export"); cmds[++idxcnt]='e';
+	drawbutton(0,idxcnt*10+8,"*ImportCTAB"); cmds[++idxcnt]='I';
+	drawbutton(0,idxcnt*10+8,"*Options"); cmds[++idxcnt]='o';
+	drawbutton(0,idxcnt*10+8,"De*faults"); cmds[++idxcnt]='f';
+	// dfgjknqwyz
+	cmds[0]=idxcnt*10+8;
 	SDLSetContext(MainContext);
-	SDLContextBlt(MainContext,EDIT_MENU_X,EDIT_MENU_Y,UpdContext,0,0,64,cmds[0]);
+	SDLContextBlt(MainContext,EDIT_MENU_X,EDIT_MENU_Y,UpdContext,0,0,BUTTON_WIDTH*8,cmds[0]);
 	return 1;
 }
 
@@ -569,18 +579,48 @@ int draw_edit()
  *==========================================================================*/
 int setup(int zoom, int fullScreen)
 {
-	int i;
-		
-	CONFIG.checkersLo=144;
-	CONFIG.checkersHi=146;
-	CONFIG.whiteColor=10;
-	CONFIG.screenWidth=512;
-	CONFIG.screenHeight=368;
-	CONFIG.defaultMapWidth=40;
-	CONFIG.defaultMapHeight=24;
-	CONFIG.color_display_mode=0;
+	int i, ce, res;
 	
 
+	ce=0;
+	strcpy(CONFIG_ENTRIES[ce].pref_id,"MAIN_SETUP");
+	CONFIG_ENTRIES[ce].len=sizeof(CONFIG);
+	CONFIG_ENTRIES[ce++].buffer=&CONFIG;
+	
+	strcpy(CONFIG_ENTRIES[ce].pref_id,"COLOR_TABLE");
+	CONFIG_ENTRIES[ce].len=sizeof(colortable);
+	CONFIG_ENTRIES[ce++].buffer=colortable;
+
+	strcpy(CONFIG_ENTRIES[ce].pref_id,"CLUT");
+	CONFIG_ENTRIES[ce].len=sizeof(clut);
+	CONFIG_ENTRIES[ce++].buffer=clut;
+	
+	res = getprefs();
+	
+	if (!res)
+	{
+
+		CONFIG.checkersLo=144;
+		CONFIG.checkersHi=146;
+		CONFIG.whiteColor=10;
+		CONFIG.screenWidth=512;
+		CONFIG.screenHeight=368;
+		CONFIG.defaultMapWidth=40;
+		CONFIG.defaultMapHeight=24;
+		CONFIG.color_display_mode=0;
+		
+		handler_palette_reset();
+		
+		handler_clut_reset();
+		
+		setprefs();
+	}
+
+	
+	if (!initSDL(zoom,fullScreen))
+		return 0;
+
+	
 	dfont=FONT;
 	font=fontbank[0];
 
@@ -590,8 +630,6 @@ int setup(int zoom, int fullScreen)
 		memcpy(fontbank[i],dfont,1024);
 	}
 
-	if (!initSDL(zoom,fullScreen))
-		return 0;
 
 	copy_from=cache=NULL;
 	options.disk_image=NULL;
@@ -639,6 +677,8 @@ int setup(int zoom, int fullScreen)
 
 	setpal();
 	draw_edit();
+	if (get_error())	error_dialog(get_error());
+
 	return 1;
 }
 /*===========================================================================
@@ -812,6 +852,7 @@ int click(int x, int y, int b)
 		if (IN_BOX(x-EDIT_CHARMAP_X,y-EDIT_CHARMAP_Y,0,255,0,31)) {
 			x=(x-EDIT_CHARMAP_X)/8; y=(y-EDIT_CHARMAP_Y)/8;
 			i=y*32+x;
+
 			if (copy_from) {
 				if (copy_size) {
 					memcpy(undo,font+i*8,8);
@@ -1084,19 +1125,15 @@ int command(int cmd, int sym)
 				break;
 			case SDLK_LEFT:
 				left(dat,work);
-				draw_numbers(values, dat);
 				break;
 			case SDLK_RIGHT:
 				right(dat,work);
-				draw_numbers(values, dat);
 				break;
 			case SDLK_UP:
 				up(dat,work);
-				draw_numbers(values, dat);
 				break;
 			case SDLK_DOWN:
 				down(dat,work);
-				draw_numbers(values, dat);
 				break;
 		}
 	}
@@ -1116,30 +1153,24 @@ int command(int cmd, int sym)
 				  break;
 		case 'b':
 				  memset(dat,0,8);
-			      draw_numbers(values, dat);
 				  break;
 		case 'i':
 				  for(i=0;i<8;i++)
 					  *(dat+i)=255-*(dat+i);
-	              draw_numbers(values, dat);
                   break;
 		case 'a':
 				  memcpy(dat,dfont+echr*8,8);
-					draw_numbers(values, dat);
 					break;
 		case 'v':
 				  for(i=0;i<8;i++)
 					  *(dat+i)=work[7-i];
-			      draw_numbers(values, dat);
 				  break;
 		case 'r':
 				  rotate8x8(work,1,dat,1);
-		          draw_numbers(values, dat);
 				  break;
 		case 'u':
 				  memcpy(dat,undo,8);
 				  memcpy(undo,work,8);
-			      draw_numbers(values, dat);
                   break;
 		case 'h':
 				  for(i=0;i<8;i++) {
@@ -1148,7 +1179,6 @@ int command(int cmd, int sym)
 					  for(j=0;j<8;j++)
 						  if (l&orit[j]) *(dat+i)+=orit[7-j];
 				  }
-                  draw_numbers(values, dat);
 				  break;
 		case 'c':
 				  copy_from=dat;
@@ -1176,13 +1206,15 @@ int command(int cmd, int sym)
 				  SDLUpdate();
 				  break;
 		case 'A':
-				  memcpy(font,dfont,1024);
-				  update_font(bank);
+			memcpy(font,dfont,1024);
+			update_font(bank);
+			break;
+		case 'f':
+			do_defaults();
 				  break;
 		case 'n':
 				  values++;
 				  if (values==3) values=0;
-				  draw_numbers(values,work);
 				  break;
 		case 's':
 				  fname=get_filename("Save font:",options.disk_image);
@@ -1204,6 +1236,20 @@ int command(int cmd, int sym)
 					  update_font(bank);
 				  }
 				  break;
+		case 'I':
+			fname=get_filename("Import color table:",0);
+			if (fname) {
+				if (import_palette(fname,colortable)) {
+					setpal();
+					setprefs();
+					draw_edit();
+				}
+				free(fname);
+				
+			
+			}
+			break;
+			
 		case 'e':
 				  fname=get_filename("Export font:",options.disk_image);
 				  if (fname) {
@@ -1216,14 +1262,12 @@ int command(int cmd, int sym)
 				  break;
 		case 'o':
 			do_options();
-			draw_numbers(values,work);
 			
 			break;
 		case 'p':
 				do_colors();
 				update_font(bank);
 				//corner(1);
-				//draw_numbers(values,work);
 			colors();
 				break;
 		case 'm':				  do_map();
@@ -1240,6 +1284,7 @@ int command(int cmd, int sym)
 				 if (!sym)
 					 return 0;
 	}
+	
 	i=echr; echr=0; grid(i,0);
 	return 0;
 }
@@ -1310,7 +1355,7 @@ int main(int argc, char *argv[])
 		if ((!strcmp(argv[i],"-z"))||(!strcmp(argv[i],"-zoom"))) {
 			if (i<argc-1) {
 				i++;
-				zoom=atoi(argv[i]);
+				zoom=num2val(argv[i]);
 				if (zoom<1)
 					zoom=3;
 				if (zoom>8)
