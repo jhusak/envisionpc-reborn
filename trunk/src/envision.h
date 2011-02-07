@@ -135,8 +135,8 @@ int write_font(char *file, unsigned char *font);
 int write_data(char *file, unsigned char *font, int start, int end, int a);
 
 int write_map(char *file, unsigned char *font, view *map, int raw);
-view *read_map(char *file, unsigned char *font, view *map);
-view *read_xfd_map(char *image, char *file, unsigned char *font, view *map);
+view *read_map(char *file, unsigned char *font, view *map, int raw);
+view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
 int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
 long flength(FILE * fd);
 int import_palette(char *file, rgb_color * colortable);

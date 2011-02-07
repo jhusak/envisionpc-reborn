@@ -36,7 +36,7 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - fixed small bug causing wrong painted boxes with colors in poke dialog.
 - fixed small issue with drawing background during char clicking on the font palette.
 
-2011-02-06 (rev28)
+2011-02-07 (rev29)
 - added preferences file operations
 - fixed some memory leaks during dialog handling
 - added possibility to enter hex number everywhere when number prompt
@@ -49,3 +49,7 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - storing CLUT (color lookup table) in preferences
 - so does color palette
 - added Makefile.linux (thanks sebako)
+2011-02-07 (rev30)
+- fixed bug in read_xfd_map
+- added save raw map to the menu
+- added read raw map function (well, that was easy) - should work either on plain file or xfd

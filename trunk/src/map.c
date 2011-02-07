@@ -118,12 +118,13 @@ int map_panel()
 	drawbutton(0,cmdcnt*10,"Resi*Ze");	cmds[++cmdcnt]='z';
 	drawbutton(0,cmdcnt*10,"*Mode");	cmds[++cmdcnt]='m';
 	drawbutton(0,cmdcnt*10,"*U Base");	cmds[++cmdcnt]='u';
-	drawbutton(0,cmdcnt*10,"*Ratio");	cmds[++cmdcnt]='r';
+	drawbutton(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
 	drawbutton(0,cmdcnt*10,"*Find");	cmds[++cmdcnt]='f';
 	drawbutton(0,cmdcnt*10,"*Draw ch"); cmds[++cmdcnt]='d';
-	//drawbutton(0,cmdcnt*10,"SaveRa*WM");	cmds[++cmdcnt]='w';
-	drawbutton(0,cmdcnt*10,"*Save");	cmds[++cmdcnt]='s';
-	drawbutton(0,cmdcnt*10,"*Load");	cmds[++cmdcnt]='l';
+	drawbutton(0,cmdcnt*10,"*Save map");	cmds[++cmdcnt]='s';
+	drawbutton(0,cmdcnt*10,"*WriteRawMp");	cmds[++cmdcnt]='w';
+	drawbutton(0,cmdcnt*10,"*Load map");	cmds[++cmdcnt]='l';
+	drawbutton(0,cmdcnt*10,"*ReadRawMap");	cmds[++cmdcnt]='R';
 	drawbutton(0,cmdcnt*10,"*Clear");	cmds[++cmdcnt]='c';
 	drawbutton(0,cmdcnt*10,"*Block");	cmds[++cmdcnt]='b';
 	drawbutton(0,cmdcnt*10,"*Go to");	cmds[++cmdcnt]='g';
@@ -289,12 +290,12 @@ int map_command(int cmd, int sym)
 	}
 
 	switch (cmd) {
-		case 'h': {
+		case 'h': 
 				  hidden=!hidden;
 				  cacheOk=0;
 				  break;
-			  }
-		case 'f': {
+			  
+		case 'f': 
 				  if ((!tileMode)&&((tsx>1)||(tsy>1)))
 					  f=currentView->dc=get_number("Tile to replace:", 1,255);
 				  else
@@ -311,8 +312,8 @@ int map_command(int cmd, int sym)
 				  cacheOk=0;
 				  draw_header(0);
 				  break;
-			  }
-		case 'c': {
+			  
+		case 'c': 
 				  if (ratio==100) {
 					  memset(currentView->map,currentView->dc,currentView->w*currentView->h);
 				  } else {
@@ -326,12 +327,12 @@ int map_command(int cmd, int sym)
 				  }
 				  cacheOk=0;
 				  break;
-			  }
-		case 'r': {
+			  
+		case 'r': 
 				  ratio=get_number("Enter ratio:",ratio,100);
 				  return 0;
-			  }
-		case 'd': {
+			  
+		case 'd': 
 				  if ((!tileMode)&&((tsx>1)||(tsy>1)))
 					  currentView->dc=get_number("New draw tile:", currentView->dc,255);
 				  else
@@ -339,8 +340,8 @@ int map_command(int cmd, int sym)
 				  draw_header(0);
 				  cacheOk=0;
 				  break;
-			  }
-		case 'm': {
+			  
+		case 'm': 
 				  do {
 					  i=get_number("Enter ANTIC mode:",mode,-1);
 				  } while ((i>=0)&&((i<2)||(i>7)));
@@ -352,13 +353,13 @@ int map_command(int cmd, int sym)
 					  do_mode(mode);
 				  }
 				  break;
-			  }
-		case 'z': {
+			  
+		case 'z': 
 				  do_size(tileMode);
 				  draw_header(0);
 				  cacheOk=0;
 				  break;
-			  }
+			  
 		case 'i': {
 				  int itsx, itsy;
 				  if (tileMode)
@@ -385,54 +386,44 @@ int map_command(int cmd, int sym)
 				  set_mapview(0);
 				  draw_header(0);
 				  break;
-			  }
-		case 'u': {
+		}
+		case 'u': 
 				  if (base) base=0;
 				  else base=64*8;
 				  do_mode(mode);
 				  break;
-			  }
-		case 'e': {
+			  
+		case 'e': 
 				  return 1;
-			  }
-		case 's': {
-				  fname=get_filename("Save map:",options.disk_image);
+			  
+		case 's':
+		case 'w':
+			fname=get_filename(cmd=='s'?"Save map:":"Write raw map:",options.disk_image);
 				  if (fname) {
 					  if (options.disk_image)
-						  i=write_xfd_map(options.disk_image,fname,font,map,0);
+						  i=write_xfd_map(options.disk_image,fname,font,map,cmd=='w');
 					  else
-						  i=write_map(fname,font,map,0);
+						  i=write_map(fname,font,map,cmd=='w');
 					  free(fname);
 				  }
 				  return 0;
 				  break;
-			  }
-		case 'w': {
-				  fname=get_filename("Save raw map:",options.disk_image);
+			  
+		case 'l':
+		case 'R':
+				  fname=get_filename(cmd=='R'?"Read raw map:":"Load map:",options.disk_image);
 				  if (fname) {
 					  if (options.disk_image)
-						  i=write_xfd_map(options.disk_image,fname,font,map,1);
+						  read_xfd_map(options.disk_image,fname,font,map,cmd=='R');
 					  else
-						  i=write_map(fname,font,map,1);
-					  free(fname);
-				  }
-				  return 0;
-				  break;
-			  }
-		case 'l': {
-				  fname=get_filename("Load map:",options.disk_image);
-				  if (fname) {
-					  if (options.disk_image)
-						  read_xfd_map(options.disk_image,fname,font,map);
-					  else
-						  read_map(fname,font,map);
+						  read_map(fname,font,map,cmd=='R');
 					  free(fname);
 					  draw_header(0);
 					  do_mode(mode);
 				  }
 				  break;
-			  }
-		case 't': {
+			  
+		case 't': 
 				  if ((!tileMode)&&((tsx>1)||(tsy>1)))
 					  break;
 				  tm=1;
@@ -443,22 +434,22 @@ int map_command(int cmd, int sym)
 				  cacheOk=0;
 				  hidden=1;
 				  break;
-			  }
-		case 'g': {
+			  
+		case 'g': 
 				  do_move(currentView,tileMode);
 				  cacheOk=0;
 				  curs_pos();
 				  break;
-			  }
-		case 'b': {
+			  
+		case 'b': 
 				  set_mapview(!tileMode);
 				  if (!cacheOk)
 					  draw_header(0);
 				  break;
-			  }
-		default: {
+			  
+		default: 
 				 return 0;
-			 }
+			 
 	}
 	draw_screen(1);
 	return 0;
