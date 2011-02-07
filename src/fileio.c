@@ -512,82 +512,87 @@ int write_xfd_data(char *image, char *file, unsigned char *data, int start, int 
   return 0;
 }
 /*=========================================================================*/
-view *read_map(char *file, unsigned char *font, view *map)
+view *read_map(char *file, unsigned char *font, view *map, int raw)
 {
   FILE *in;
   unsigned char head[16];
   int tp,i;
 
-  in=fopen(file,"rb");
-  if (!in) {
-    error_dialog("Cannot open map");
-    return NULL;
-  }
-  fread(head,10,1,in);
-  mode=head[0];
-  map->cx=map->cy=map->scx=map->scy=0;
-  map->cw=map->ch=0;
-  map->w=head[1]+head[2]*256;
-  map->h=head[3]+head[4]*256;
-  clut[0]=head[5];
-  clut[1]=head[6];
-  clut[2]=head[7];
-  clut[3]=head[8];
-  clut[4]=head[9];
-
-  if (map->map) {
+	in=fopen(file,"rb");
+	if (!in) {
+		error_dialog("Cannot open map");
+		return NULL;
+	}
+	if (!raw) {
+		fread(head,10,1,in);
+		mode=head[0];
+		map->cx=map->cy=map->scx=map->scy=0;
+		map->cw=map->ch=0;
+		map->w=head[1]+head[2]*256;
+		map->h=head[3]+head[4]*256;
+		clut[0]=head[5];
+		clut[1]=head[6];
+		clut[2]=head[7];
+		clut[3]=head[8];
+		clut[4]=head[9];
+		
+	}
+	if (map->map) {
     free(map->map);
   }
   map->map=(unsigned char *)malloc(map->w*map->h);
   fread(map->map,map->w*map->h,1,in);
-  fread(font,1024,1,in);
-
-  tsx=tsy=1;
-  tile->w=16; tile->h=16;
-  tile->dc=1;
-  tile->ch=tile->cw=0;
-  tile->cx=tile->cy=tile->scx=tile->scy=0;
-  if (tile->map)
-    free(tile->map);
-  tile->map=NULL;
-
-  tp=fgetc(in);
-  if (tp!=EOF) {
-    switch(tp) {
-      case 1: {
-	int i,num;
-	unsigned char *look;
-
-	fread(head,6,1,in);
-	tsx=head[1]*256+head[0];
-	tsy=head[3]*256+head[2];
-	num=head[5]*256+head[4]+1;
-	tile->w=16*tsx; tile->h=16*tsy;
-	tile->ch=map->ch;
-	tile->cw=map->cw;
-	tile->map=(unsigned char *)malloc(256*tsx*tsy);
-	memset(tile->map,256*tsx*tsy,0);
-	for(i=0;i<num;i++) {
-	  int tx,ty,w,h;
-	  ty=i/16;
-	  tx=i-ty*16;
-	  look=tile->map+tx*tsx+ty*tsy*tsx*16;
-	  for(h=0;h<tsy;h++) {
-	    for(w=0;w<tsx;w++) {
-	      *look=fgetc(in);
-	      look++;
-	    }
-	    look+=tile->w-tsx;
-	  }	  
+	
+	if (!raw) {
+		fread(font,1024,1,in);
+		
+		tsx=tsy=1;
+		tile->w=16; tile->h=16;
+		tile->dc=1;
+		tile->ch=tile->cw=0;
+		tile->cx=tile->cy=tile->scx=tile->scy=0;
+		if (tile->map)
+			free(tile->map);
+		tile->map=NULL;
+		
+		tp=fgetc(in);
+		if (tp!=EOF) {
+			switch(tp) {
+				case 1: {
+					int i,num;
+					unsigned char *look;
+					
+					fread(head,6,1,in);
+					tsx=head[1]*256+head[0];
+					tsy=head[3]*256+head[2];
+					num=head[5]*256+head[4]+1;
+					tile->w=16*tsx; tile->h=16*tsy;
+					tile->ch=map->ch;
+					tile->cw=map->cw;
+					tile->map=(unsigned char *)malloc(256*tsx*tsy);
+					memset(tile->map,256*tsx*tsy,0);
+					for(i=0;i<num;i++) {
+						int tx,ty,w,h;
+						ty=i/16;
+						tx=i-ty*16;
+						look=tile->map+tx*tsx+ty*tsy*tsx*16;
+						for(h=0;h<tsy;h++) {
+							for(w=0;w<tsx;w++) {
+								*look=fgetc(in);
+								look++;
+							}
+							look+=tile->w-tsx;
+						}	  
+					}
+				}
+			}
+		}
+		if (!tile->map) {
+			tile->map=(unsigned char *)malloc(tile->w*tile->h);
+			for(i=0;i<256;i++)
+				tile->map[i]=i;
+		}
 	}
-      }
-    }
-  }
-  if (!tile->map) {
-    tile->map=(unsigned char *)malloc(tile->w*tile->h);
-    for(i=0;i<256;i++)
-      tile->map[i]=i;
-  }
   fclose(in);
   return map;
 }
@@ -677,30 +682,33 @@ int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int r
   return 0;
 }
 /*=========================================================================*/
-view *read_xfd_map(char *image, char *file, unsigned char *font, view *map)
+view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw)
 {
   unsigned char head[128];
   int i;
-
-  i=read_xfd_font(image,file,head,10);
-  if (i<0) return NULL;
-  mode=head[0];
-  map->cx=map->cy=map->scx=map->scy=0;
-  map->w=head[1]+head[2]*256;
-  map->h=head[3]+head[4]*256;
-  clut[0]=head[5];
-  clut[1]=head[6];
-  clut[2]=head[7];
-  clut[3]=head[8];
-  clut[4]=head[9];
+	if (!raw) {
+		i=read_xfd_font(image,file,head,10);
+		if (i<0) return NULL;
+		mode=head[0];
+		map->cx=map->cy=map->scx=map->scy=0;
+		map->w=head[1]+head[2]*256;
+		map->h=head[3]+head[4]*256;
+		clut[0]=head[5];
+		clut[1]=head[6];
+		clut[2]=head[7];
+		clut[3]=head[8];
+		clut[4]=head[9];
+	}
   if (map->map) {
     free(map->map);
   }
   map->map=(unsigned char *)malloc(map->w*map->h+1034);
-  i=read_xfd_font(image,file,map->map,map->w*map->w*1034);
+  i=read_xfd_font(image,file,map->map,map->w*map->h+1034);
   if (i<0) return NULL;
-  memmove(map->map,map->map+10,map->w*map->h);
-  memcpy(font,map->map+10+map->w*map->h,1024);
+	if (!raw) {
+		memmove(map->map,map->map+10,map->w*map->h);
+		memcpy(font,map->map+10+map->w*map->h,1024);
+	}
   return map;
 }
 /*=========================================================================*/
