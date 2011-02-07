@@ -1,0 +1,30 @@
+INCDIR	=	-I/usr/include/SDL
+LIBDIR	=	-L/usr/lib
+LIBS	=	-lSDL 
+CFLAGS	=	-O3 -Wall
+CC	=	gcc
+
+TARGET	=	envision
+
+SOURCE	=\
+	 SDLemu.c\
+	 dialogs.c\
+	 fileio.c\
+	 map.c\
+	 preferences.c\
+	 title.c\
+	 util.c\
+	 envision.c
+
+
+OBJECTS = $(SOURCE:.c=.o)
+
+%.o : %.c
+	$(CC) -c $(CFLAGS) $(INCDIR) -o $@ $<
+
+all: $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS) $(LIBDIR) $(LIBS)
+
+clean:
+	rm -f $(OBJECTS)
+	rm -f $(TARGET)
