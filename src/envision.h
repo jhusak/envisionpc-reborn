@@ -36,6 +36,10 @@ typedef struct config
 		color_display_type color_display_mode;
 	} config;
 
+typedef struct rgb_color {
+	unsigned char r,g,b;
+} rgb_color;// __attribute__((__packed__));
+
 #define IN_RANGE(x,lx,rx) ((x)>=(lx)&&(x)<=(rx))
 #define IN_BOX(x,y,lx,rx,ly,ry) (IN_RANGE((x),(lx),(rx))&&IN_RANGE((y),(ly),(ry)))
 
@@ -46,30 +50,34 @@ typedef struct config
 #define EDIT_OFFSET_X 64
 #define EDIT_OFFSET_Y 64
 
-#define EDIT_GRID_X (240+EDIT_OFFSET_X)
+#define EDIT_GRID_X (256+EDIT_OFFSET_X)
 #define EDIT_GRID_Y (32+EDIT_OFFSET_Y)
 
-#define EDIT_FONTSEL_X (312+EDIT_OFFSET_X)
+#define EDIT_FONTSEL_X (328+EDIT_OFFSET_X)
 #define EDIT_FONTSEL_Y (176+EDIT_OFFSET_Y)
-#define EDIT_MODESEL_X (312+EDIT_OFFSET_X)
+#define EDIT_MODESEL_X (328+EDIT_OFFSET_X)
 #define EDIT_MODESEL_Y (194+EDIT_OFFSET_Y)
 
-#define EDIT_CHARMAP_X (88+EDIT_OFFSET_X)
+#define EDIT_CHARMAP_X (104+EDIT_OFFSET_X)
 #define EDIT_CHARMAP_Y (136+EDIT_OFFSET_Y)
 
-#define EDIT_CORNER_X (120+EDIT_OFFSET_X)
+#define EDIT_CORNER_X (136+EDIT_OFFSET_X)
 #define EDIT_CORNER_Y (32+EDIT_OFFSET_Y)
 
-#define EDIT_MENU_X (8+EDIT_OFFSET_X)
+#define EDIT_MENU_X (EDIT_OFFSET_X)
 #define EDIT_MENU_Y (24+EDIT_OFFSET_Y)
 
-#define EDIT_COLOR_X (86+EDIT_OFFSET_X)
+#define EDIT_COLOR_X (102+EDIT_OFFSET_X)
 #define EDIT_COLOR_Y (176+EDIT_OFFSET_Y)
+
+#define BUTTON_WIDTH 10
 
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 
 extern config CONFIG;
 extern int MAP_MENU_HEIGHT;
+extern int bank;
+extern rgb_color colortable[256];
 
 
 int title();
@@ -85,11 +93,19 @@ int error_dialog(char *error);
 char stoa(char s);
 int tile_size(int w, int h);
 int raisedbox(int x, int y, int w, int h);
+int do_defaults();
 
 
 int do_mode(int m);
 int draw_screen(int b);
 int draw_header(int update);
+// handlers for "reset" dialog
+void handler_chmap_reset();
+void handler_currentfont_reset();
+void handler_palette_reset();
+void handler_clut_reset();
+void draw_numbers(int vals, unsigned char *work);
+
 
 void bye();
 void txterr(char *txt);
@@ -100,6 +116,14 @@ int select_char(char *title);
 int do_options();
 int command(int cmd, int sym);
 int show_palette(int i,int x, int y);
+int hex2dec(char hex);
+int num2val(char * chrval);
+void setpal();
+int draw_edit();
+int update_font(int b);
+
+
+
 
 
 int read_xfd_font(char *image, char *file, unsigned char *data, int max);
@@ -114,6 +138,9 @@ int write_map(char *file, unsigned char *font, view *map, int raw);
 view *read_map(char *file, unsigned char *font, view *map);
 view *read_xfd_map(char *image, char *file, unsigned char *font, view *map);
 int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
+long flength(FILE * fd);
+int import_palette(char *file, rgb_color * colortable);
+
 
 int tile_map(int w, int h, view *map, view *tile);
 int untile_map(view *map, view *tile);
@@ -127,6 +154,7 @@ extern unsigned char *dfont, *font, *cache;
 extern int echr, cacheOk;
 extern opt options;
 extern unsigned char clut[9];
+extern unsigned char clut_default[9];
 extern int cmds[32];
 extern int mode, ratio;
 extern int base;
