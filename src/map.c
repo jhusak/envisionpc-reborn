@@ -115,21 +115,21 @@ int map_panel()
 	
 	int cmdcnt=0;
 	drawbutton(0,cmdcnt*10,"Go to *Edit");	cmds[++cmdcnt]='e';
-	drawbutton(0,cmdcnt*10,"Resi*Ze");	cmds[++cmdcnt]='z';
-	drawbutton(0,cmdcnt*10,"*Mode");	cmds[++cmdcnt]='m';
-	drawbutton(0,cmdcnt*10,"*U Base");	cmds[++cmdcnt]='u';
+	drawbutton(0,cmdcnt*10,"Resi*Ze Map");	cmds[++cmdcnt]='z';
+	drawbutton(0,cmdcnt*10,"Antic *Mode");	cmds[++cmdcnt]='m';
+	drawbutton(0,cmdcnt*10,"*U HalfBase");	cmds[++cmdcnt]='u';
 	drawbutton(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
 	drawbutton(0,cmdcnt*10,"*Find");	cmds[++cmdcnt]='f';
-	drawbutton(0,cmdcnt*10,"*Draw ch"); cmds[++cmdcnt]='d';
+	drawbutton(0,cmdcnt*10,"*Draw char"); cmds[++cmdcnt]='d';
 	drawbutton(0,cmdcnt*10,"*Save map");	cmds[++cmdcnt]='s';
-	drawbutton(0,cmdcnt*10,"*WriteRawMp");	cmds[++cmdcnt]='w';
+	drawbutton(0,cmdcnt*10,"*WriteRawMap");	cmds[++cmdcnt]='w';
 	drawbutton(0,cmdcnt*10,"*Load map");	cmds[++cmdcnt]='l';
 	drawbutton(0,cmdcnt*10,"*ReadRawMap");	cmds[++cmdcnt]='R';
-	drawbutton(0,cmdcnt*10,"*Clear");	cmds[++cmdcnt]='c';
+	drawbutton(0,cmdcnt*10,"*Clear Map");	cmds[++cmdcnt]='c';
 	drawbutton(0,cmdcnt*10,"*Block");	cmds[++cmdcnt]='b';
-	drawbutton(0,cmdcnt*10,"*Go to");	cmds[++cmdcnt]='g';
+	drawbutton(0,cmdcnt*10,"*Go to pos.");	cmds[++cmdcnt]='g';
 	drawbutton(0,cmdcnt*10,"Ret*Ile");	cmds[++cmdcnt]='i';
-	drawbutton(0,cmdcnt*10,"*TypeMode");	cmds[++cmdcnt]='t';
+	drawbutton(0,cmdcnt*10,"*Type Mode");	cmds[++cmdcnt]='t';
 	drawbutton(0,cmdcnt*10,"*Hide");	cmds[++cmdcnt]='h';
 	MAP_MENU_HEIGHT=cmdcnt*10;
 	cmds[0]=MAP_MENU_HEIGHT*10+10;
@@ -397,35 +397,49 @@ int map_command(int cmd, int sym)
 				  return 1;
 			  
 		case 's':
+			fname=get_filename("Save map:",options.disk_image,RUNTIME_STORAGE.save_map_file_name);
+			if (fname) {
+				strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
+				write_map(options.disk_image,fname,font,map,0);
+				free(fname);
+			}
+			return 0;
 		case 'w':
-			fname=get_filename(cmd=='s'?"Save map:":"Write raw map:",options.disk_image);
-				  if (fname) {
-					  if (options.disk_image)
-						  i=write_xfd_map(options.disk_image,fname,font,map,cmd=='w');
-					  else
-						  i=write_map(fname,font,map,cmd=='w');
-					  free(fname);
-				  }
-				  return 0;
-				  break;
-			  
+			fname=get_filename("Write raw map:",options.disk_image,RUNTIME_STORAGE.save_raw_map_file_name);
+			if (fname) {
+				strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
+				write_map(options.disk_image,fname,font,map,1);
+				free(fname);
+			}
+			return 0;
 		case 'l':
+			fname=get_filename("Load map:",options.disk_image,NULL);
+			if (fname) {
+				strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
+				read_map(options.disk_image,fname,font,map,0);
+				free(fname);
+				draw_header(0);
+				do_mode(mode);
+			}
+			break;
+			
 		case 'R':
-				  fname=get_filename(cmd=='R'?"Read raw map:":"Load map:",options.disk_image);
-				  if (fname) {
-					  if (options.disk_image)
-						  read_xfd_map(options.disk_image,fname,font,map,cmd=='R');
-					  else
-						  read_map(fname,font,map,cmd=='R');
-					  free(fname);
-					  draw_header(0);
-					  do_mode(mode);
-				  }
-				  break;
-			  
+			fname=get_filename("Read raw map:",options.disk_image,NULL);
+			if (fname) {
+				strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
+				read_map(options.disk_image,fname,font,map,1);
+				free(fname);
+				draw_header(0);
+				do_mode(mode);
+			}
+			break;
+			
 		case 't': 
 				  if ((!tileMode)&&((tsx>1)||(tsy>1)))
+				  {
+					  info_dialog("Type mode only in char mode!");
 					  break;
+				  }
 				  tm=1;
 			      SDLNoUpdate();
 				  SDLBox(CONFIG.screenWidth-92,15,CONFIG.screenWidth-1,22,144);

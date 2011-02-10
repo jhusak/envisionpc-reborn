@@ -512,7 +512,7 @@ int write_xfd_data(char *image, char *file, unsigned char *data, int start, int 
   return 0;
 }
 /*=========================================================================*/
-view *read_map(char *file, unsigned char *font, view *map, int raw)
+view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 {
   FILE *in;
   unsigned char head[16];
@@ -596,8 +596,21 @@ view *read_map(char *file, unsigned char *font, view *map, int raw)
   fclose(in);
   return map;
 }
+
+int write_map(char *image, char *file, unsigned char *font, view *map, int raw)
+{
+	int res;
+	if (image)
+		res=write_xfd_map(options.disk_image,file,font,map,raw);
+	else
+		res=write_file_map(file,font,map,raw);
+	
+	return res;
+}
+
+
 /*=========================================================================*/
-int write_map(char *file, unsigned char *font, view *map, int raw)
+int write_file_map(char *file, unsigned char *font, view *map, int raw)
 {
   FILE *out;
   unsigned char head[16];
@@ -669,7 +682,7 @@ int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int r
     return -1;    
   }
 
-  write_map(fname,font,map,raw);
+  write_file_map(fname,font,map,raw);
   in=fopen(fname,"rb");
   if (!in) {
     error_dialog("Cannot write map");
@@ -681,6 +694,16 @@ int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int r
   remove(fname);
   return 0;
 }
+
+view *read_map(char *image, char *file, unsigned char *font, view *map, int raw)
+{
+	if (image)
+		return read_xfd_map(image,file,font,map,raw);
+	else
+		return read_file_map(file,font,map,raw);
+}
+
+
 /*=========================================================================*/
 view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw)
 {

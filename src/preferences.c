@@ -47,34 +47,63 @@ char * get_preferences_filepath()
 }
 #endif
 
-
-int readpref(FILE * fd, char * pref_id, char * buffer)
+int skip_to_eol(FILE * fd)
 {
-	char localbuf[10000];
+	int tmp;
+	while (EOF!=(tmp=fgetc(fd))) {
+		if (tmp=='\n') return 0;
+	};
+	return EOF;
+}
+
+/* readpref
+ * reads one preference entry from opened file and tries to store it in aprorpiate place in CONFIG_ENTRIES by overwriting it.
+ * if there is no such entry, preference entry is skipped;
+ * if there are wrong values, preference entry is skipped; 
+ * 
+ */
+
+int readpref(FILE * fd)
+{
+	char localbuf[MAX_PREFS_LENGTH];
 	int len, tmp, i;
-
-	if( 0>fscanf(fd,"%s\n",localbuf)) return 0;
-	if (!pref_id)
-		strcpy(pref_id,localbuf);
-	else if (strcmp (pref_id,localbuf)==0) {
-		if( 0>fscanf(fd,"%d\n",&len)) return 0;
-	}
+	CONFIG_ENTRY * prefset;
 	
-
-	char * bptr=buffer;
+	if( EOF==fscanf(fd,"%s\n",localbuf)) return EOF;
+	
+	if( EOF==fscanf(fd,"%d\n",&len)) return EOF;
+	if (len>MAX_PREFS_LENGTH) return skip_to_eol(fd);
+	
+	prefset = find_config_entry(localbuf);
+	if (!prefset) return skip_to_eol(fd);
+		
+	char * bptr=localbuf;
 	for (i=0;i<len; i++)
 	{
-		if (EOF==(tmp=fgetc(fd))) return 0;
-		if (0>(tmp=hex2dec(tmp))) return 0;
+		if (feof(fd)) return EOF;
+		if ('\n'==(tmp=fgetc(fd))) return 0;
+		if (0>(tmp=hex2dec(tmp))) { return skip_to_eol(fd); }
+		
 		*bptr=tmp<<4;
-		if (EOF==(tmp=fgetc(fd))) return 0;
-		if (0>(tmp=hex2dec(tmp))) return 0;
+		
+		if (feof(fd)) return EOF;
+		if ('\n'==(tmp=fgetc(fd))) return 0;
+		if (0>(tmp=hex2dec(tmp))) { return skip_to_eol(fd); }
+		
 		*bptr |= tmp;
+		
 		bptr++;
 		}
-	
-	if (EOF==(tmp=fgetc(fd))) return 0;
-	if (tmp==10) return 1;
+
+	if (feof(fd)) return EOF;
+	if ('\n'==fgetc(fd))
+	{
+		// zeroify in case of shorter prefs in file
+		memset(prefset->buffer, 0, prefset->len);
+
+		memcpy(prefset->buffer, localbuf, len);
+		return 1;
+	};
 	return 0;
 }
 
@@ -125,13 +154,32 @@ int setprefs()
 	return 1;
 };
 
+
+CONFIG_ENTRY * find_config_entry(char * name) {
+	CONFIG_ENTRY * prefset = CONFIG_ENTRIES;
+	int i;
+	
+	// iterate through CONFIG_ENTRIES
+	for (i=0; i<sizeof(CONFIG_ENTRIES) / sizeof (CONFIG_ENTRY); i++) {
+		
+		if (strcmp(name, prefset->pref_id)==0)
+		{
+			return prefset;
+		}
+		prefset++;
+	}
+	return NULL;
+}
+
+
+
 int getprefs()
 {
-	CONFIG_ENTRY * prefset=CONFIG_ENTRIES;
 	FILE * fd;
 	int res,i;
 	char * preffilename=get_preferences_filepath();
-	
+
+	res=1;
 	error_message[0]=0;
 	
 	fd=fopen(preffilename,"rb");
@@ -142,16 +190,7 @@ int getprefs()
 	}
 	// iterate through CONFIG_ENTRIES
 	
-	for (i=0; i<sizeof(CONFIG_ENTRIES) / sizeof (CONFIG_ENTRY); i++) {
-		if (!readpref(fd, prefset->pref_id, prefset->buffer))
-		{
-			set_error("Cannot read preferences file. Deleting.");
-			fclose(fd);
-			delete_prefs();
-			return 0;
-		}
-		prefset++;
-	}
+	while (EOF!=readpref(fd));
 
 	fclose(fd);
 	return 1;

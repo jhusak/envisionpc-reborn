@@ -53,3 +53,11 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - fixed bug in read_xfd_map
 - added save raw map to the menu
 - added read raw map function (well, that was easy) - should work either on plain file or xfd
+
+2011-02-10 (rev31)
+- added two-colors by two-bouttons char edit in modes 4 and 5
+- improved preferences reading - now adding or removing preference entries does not reset the whole thing
+- added quicksave in form that filenames are preserved between load and save operations;
+- some repaint speed-ups
+- corrected light direction of buttons (now upper-left)
+- added escape handling to almost all dialogs (except retile, ie get_number in general) 
