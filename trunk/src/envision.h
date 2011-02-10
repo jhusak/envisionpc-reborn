@@ -22,6 +22,14 @@ typedef struct view {
   unsigned char *map;
 } view;
 
+typedef struct runtime_storage
+	{
+		char save_map_file_name[128];
+		char save_raw_map_file_name[128];
+		char save_font_file_name[128];
+		char export_font_file_name[128];
+	} runtime_storage;
+
 typedef enum {COLOR_DISPLAY_HEX, COLOR_DISPLAY_DEC, COLOR_DISPLAY_MAX} color_display_type;
 
 typedef struct config
@@ -70,7 +78,7 @@ typedef struct rgb_color {
 #define EDIT_COLOR_X (102+EDIT_OFFSET_X)
 #define EDIT_COLOR_Y (176+EDIT_OFFSET_Y)
 
-#define BUTTON_WIDTH 10
+#define BUTTON_WIDTH 11
 
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 
@@ -78,7 +86,7 @@ extern config CONFIG;
 extern int MAP_MENU_HEIGHT;
 extern int bank;
 extern rgb_color colortable[256];
-
+extern runtime_storage RUNTIME_STORAGE;
 
 int title();
 
@@ -90,6 +98,8 @@ int do_exit();
 int do_move(view *map, int tileMode);
 int select_draw(char *title);
 int error_dialog(char *error);
+int info_dialog(char *error);
+int message_dialog(char * title, char *error);
 char stoa(char s);
 int tile_size(int w, int h);
 int raisedbox(int x, int y, int w, int h);
@@ -100,6 +110,7 @@ int do_mode(int m);
 int draw_screen(int b);
 int draw_header(int update);
 // handlers for "reset" dialog
+void handler_config_reset();
 void handler_chmap_reset();
 void handler_currentfont_reset();
 void handler_palette_reset();
@@ -110,7 +121,7 @@ void draw_numbers(int vals, unsigned char *work);
 void bye();
 void txterr(char *txt);
 int drawbutton(int x, int y, char *txt);
-char *get_filename(char *title, char *image);
+char *get_filename(char *title, char *image, char * initial);
 int get_number(char *title, int def, int max);
 int select_char(char *title);
 int do_options();
@@ -134,10 +145,12 @@ int read_font(char *file, unsigned char *font);
 int write_font(char *file, unsigned char *font);
 int write_data(char *file, unsigned char *font, int start, int end, int a);
 
-int write_map(char *file, unsigned char *font, view *map, int raw);
-view *read_map(char *file, unsigned char *font, view *map, int raw);
-view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
+int write_map(char *image, char *file, unsigned char *font, view *map, int raw);
+int write_file_map(char *file, unsigned char *font, view *map, int raw);
 int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
+view *read_map(char *image, char *file, unsigned char *font, view *map, int raw);
+view *read_file_map(char *file, unsigned char *font, view *map, int raw);
+view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
 long flength(FILE * fd);
 int import_palette(char *file, rgb_color * colortable);
 

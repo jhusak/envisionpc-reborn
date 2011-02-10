@@ -47,9 +47,9 @@ int drawbutton(int x, int y, char *txt)
 	l=BUTTON_WIDTH*4-strlen(btxt)*4;
 	SDLBox(x+1,y+1,x+BUTTON_WIDTH*8-1,y+8,148);
 	SDLLine(x,y,x+BUTTON_WIDTH*8,y,152);
-	SDLLine(x+BUTTON_WIDTH*8,y,x+BUTTON_WIDTH*8,y+9,152);
+	SDLLine(x+BUTTON_WIDTH*8,y,x+BUTTON_WIDTH*8,y+9,144);
 	SDLLine(x,y+9,x+BUTTON_WIDTH*8,y+9,144);
-	SDLLine(x,y+1,x,y+9,144);
+	SDLLine(x,y+1,x,y+9,152);
 	SDLstring(x+l,y+1,btxt);
 	if (c) {
 		if (c<96) c-=32;
@@ -166,6 +166,7 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 	char buffer[256];
 	char c, *r;
 
+	SDLNoUpdate();
 	SDL_ShowCursor(SDL_DISABLE);
 	SDLBox(xp,yp,slen,yp+8,146);
 	SDLHLine(xp-1,slen+1,yp-1,144);
@@ -188,8 +189,12 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 	dd=500;
 	int first=1;
 
+	SDLUpdate();
 	do {
+		SDLNoUpdate();
+
 		SDLVLine(cx,yp,yp+7,cc);
+		SDLUpdate();
 		c=SDLgetch(0);
 		if (!c) c=SDLgetch(0);
 		if (!c) c=SDLgetch(0);
@@ -200,6 +205,8 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 		if (!c) {
 			c=SDLgetch(0);
 		} else {
+			if (c==27) return NULL;
+			SDLNoUpdate();
 			if (first && c!=8 && c!=13)
 			{
 				first=0;
@@ -245,6 +252,7 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 				}
 			}
 		}
+		SDLUpdate();
 	} while (c!=13);
 
 	SDLVLine(cx,yp,yp+7,146);
@@ -262,9 +270,10 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
  * get a filename from the user
  * param title: the title for the input box
  * param image: the name of the disk image to save to (optional)
+ * param default: initial value (optional)
  * returns: the filename
  *==========================================================================*/
-char *get_filename(char *title, char *image)
+char *get_filename(char *title, char *image, char * initial)
 {
 	char *r;
 	int tmpx;
@@ -274,30 +283,52 @@ char *get_filename(char *title, char *image)
 	SDLstring(tmpx+4,68+tmpy,title);
 	SDLUpdate();
 	if (image)
-		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,NULL,2);
+		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,initial,2);
 	else
-		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,NULL,0);
+		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,initial,0);
 	closeLastDblBufferDialog();
 	return r;
 }
 
+/*===========================================================================
+ * info_dialog
+ * display an error dialog
+ * param error: the error message
+ * returns: nothing useful
+ *==========================================================================*/
+int info_dialog(char *msg)
+{
+	return message_dialog("INFO:", msg);
+
+}
 /*===========================================================================
  * error_dialog
  * display an error dialog
  * param error: the error message
  * returns: nothing useful
  *==========================================================================*/
-int error_dialog(char *error)
+int error_dialog(char *msg)
+{
+	return message_dialog("ERROR!", msg);
+}
+/*===========================================================================
+ * message_dialog
+ * display an error dialog
+ * param title: title of the window
+ * param error: the error message
+ * returns: nothing useful
+ *==========================================================================*/
+int message_dialog(char * title, char *error)
 {
 	int tmpx;
-	int tmpy=EDIT_OFFSET_Y+64;
+	int tmpy=EDIT_OFFSET_Y+48;
 	
 	int width=strlen(error) *8;
 	
 	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, width+8, 40);
-	SDLstring(tmpx+(width+8-48)/2,68+tmpy,"ERROR!");
-	SDLstring(tmpx+4,76+tmpy,error);
-	drawbutton(tmpx+(width+8-64)/2,88+tmpy,"Okay");
+	SDLstring(tmpx+(width+8-48)/2,68+tmpy,title);
+	SDLstring(tmpx+4,78+tmpy,error);
+	drawbutton(tmpx+(width-BUTTON_WIDTH*8)/2,90+tmpy,"Okay");
 	SDLUpdate();
 	SDLgetch(1);
 	closeLastDblBufferDialog();
@@ -315,7 +346,10 @@ int do_options()
 	char *names[]={"Basic","MAE","Mac/65","Action!","C"};
 	char *hot="BM6AC";
 	char *oldname=NULL;
+	char * tmp_name=NULL;
 	int tmpx;
+	int free_name=1;
+	int tmp_step, tmp_base,tmp_write_tp;
 
 	yp=EDIT_OFFSET_Y+64;
 	
@@ -333,27 +367,24 @@ int do_options()
 		c=toupper(SDLgetch(0));
 	} while ((c!='Y')&&(c!='N')&&(c!=27));
 
+	if (c==27) goto exit;
 	if (c=='Y') {
 		SDLNoUpdate();
 		SDLBox(tmpx+128,yp,tmpx+181,yp+8,148);
 		SDLstring(tmpx+129,yp,"Yes");
 		SDLUpdate();
 		yp+=10;
-		oldname=options.disk_image;
-		options.disk_image=ginput(tmpx+3,yp,tmpx+198,24,oldname,0);
+		tmp_name=ginput(tmpx+3,yp,tmpx+198,24,options.disk_image,0);
+		if (!tmp_name) goto exit;
 		SDLNoUpdate();
-		if (oldname)
-			free(oldname);
 		SDLBox(tmpx+2,yp-1,tmpx+200,yp+9,148);
-		if (options.disk_image)
-			SDLstring(tmpx+4,yp,options.disk_image);
+		if (tmp_name)
+			SDLstring(tmpx+4,yp,tmp_name);
 		else yp-=10;
 	} else {
-		if (options.disk_image)
-			free(options.disk_image);
-		options.disk_image=NULL;
+		tmp_name=NULL;
 	}
-	if (!options.disk_image) {
+	if (!tmp_name) {
 		SDLBox(tmpx+128,yp,tmpx+171,yp+8,148);
 		SDLstring(tmpx+129,yp,"No");
 		SDLUpdate();
@@ -370,8 +401,9 @@ int do_options()
 	SDLplotchr(tmpx+179,yp,35,1,dfont);
 	SDLUpdate();
 	do {
-		c=toupper(SDLgetch(0));
-		oldname=strchr(hot,c);
+		c=SDLgetch(0);
+		if (c==27) goto exit;
+		oldname=strchr(hot,toupper(c));
 	} while(!oldname);
 	c=oldname-hot;
 	yp-=8;
@@ -379,36 +411,66 @@ int do_options()
 	SDLBox(tmpx+3,yp,tmpx+190,yp+16,148);
 	SDLstring(tmpx+3,yp,"Export format:");
 	SDLstring(tmpx+119,yp,names[c]);
-	options.write_tp=c;
+	tmp_write_tp=c;
 	if ((!c)||(c==2)) {
 		yp+=10;
 		SDLstring(tmpx+11,yp,"Base:");
 		SDLUpdate();
-		do { oldname=ginput(tmpx+54,yp,tmpx+99,5,NULL,1); } while(!oldname);
+		oldname=ginput(tmpx+54,yp,tmpx+99,5,NULL,1);
+		if (!oldname) goto exit;
 		SDLNoUpdate();
 		SDLBox(tmpx+53,yp-1,tmpx+100,yp+9,148);
 		SDLstring(tmpx+55,yp,oldname);
-		options.base=num2val(oldname);
+		tmp_base=num2val(oldname);
 		free(oldname);
 		yp+=10;
 		SDLstring(tmpx+11,yp,"Step:");
 		SDLUpdate();
-		do { oldname=ginput(tmpx+54,yp,tmpx+99,5,NULL,1); } while(!oldname);
+		oldname=ginput(tmpx+54,yp,tmpx+99,5,NULL,1);
+		if (!oldname) goto exit;
+		
 		SDLNoUpdate();
 		SDLBox(tmpx+53,yp-1,tmpx+100,yp+9,148);
 		SDLstring(tmpx+55,yp,oldname);
-		options.step=num2val(oldname);
+		tmp_step=num2val(oldname);
 		free(oldname);
 	} else {
-		options.base=options.step=0;
+		tmp_base=tmp_step=0;
 	}
 	yp+=20;
-	drawbutton(tmpx+67,yp,"Okay");
+	drawbutton(tmpx+59,yp,"Okay");
 	SDLUpdate();
-	SDLgetch(1);
+	c=SDLgetch(1);
+	if (c==27) goto exit; 
+	
+	// Commit dialog values
+	free_name=0;
+	if (options.disk_image) free(options.disk_image);
+	
+	options.disk_image=tmp_name?tmp_name:NULL;
+	
+	options.step=tmp_step;
+	options.base=tmp_base;
+	options.write_tp=tmp_write_tp;
+	
+exit:
+	if (free_name && tmp_name) free(tmp_name);
 	SDL_ShowCursor(SDL_ENABLE);
 	closeLastDblBufferDialog();
 	return 1;
+}
+
+void handler_config_reset()
+{
+
+CONFIG.checkersLo=144;
+CONFIG.checkersHi=146;
+CONFIG.whiteColor=10;
+CONFIG.screenWidth=512;
+CONFIG.screenHeight=368;
+CONFIG.defaultMapWidth=40;
+CONFIG.defaultMapHeight=24;
+CONFIG.color_display_mode=0;
 }
 
 void handler_chmap_reset()
@@ -453,6 +515,8 @@ int do_defaults()
 		handler_clut_reset
 	};
 	
+	int reset[sizeof (options) / sizeof (char *)];
+	
 	yp=EDIT_OFFSET_Y+64;
 	
 	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 200, (sizeof(options)/sizeof( char *))*16+40);
@@ -481,26 +545,31 @@ int do_defaults()
 		SDLstring(tmpx+3+19*8,yp,(c=='Y')?"Yes":"No");
 		SDLUpdate();
 		
-		if (c=='Y') {
-			handlers[i]();
-		} else {
-		}
+		reset[i]=(c=='Y');
 		
 		yp+=16;
 	}
 	
+	
 	yp+=2;
 	SDLNoUpdate();
-	drawbutton(tmpx+67,yp,"Okay");
+	drawbutton(tmpx+59,yp,"Okay");
 	SDLUpdate();
-	SDLgetch(1);
+	c=SDLgetch(1);
+	
 	SDL_ShowCursor(SDL_ENABLE);
 	closeLastDblBufferDialog();
-	
-	update_font(bank);
-	setpal();
-	draw_edit();
-	setprefs();
+
+	if (c!=27) 
+	{
+		for (i=0; i<sizeof (options) / sizeof (char *); i++)
+			if (reset[i]) handlers[i]();
+		
+		update_font(bank);
+		setpal();
+		draw_edit();
+		setprefs();
+	}
 	
 	return 1;
 }
@@ -573,7 +642,7 @@ int show_palette(i,x,y)
 		clut[i]=col;
 	
 	closeLastDblBufferDialog();
-	return 1;
+	return col>=0;
 }
 
 /*===========================================================================
@@ -586,6 +655,9 @@ int do_colors()
 	int i,yp;
 	char buf[16],*color;
 	int tmpx;
+	
+	unsigned char tmpclut[9];
+	unsigned char c;
 
 	yp=64+EDIT_OFFSET_Y;
 	tmpx = openDblBufferDialog(DIALOG_CENTER,yp, 178, 96);
@@ -604,23 +676,33 @@ int do_colors()
 		SDLUpdate();
 
 		sprintf(buf,"%d",clut[i]);
-		do { color=ginput(tmpx+62,yp,tmpx+89,5,buf,1); } while(!color);
+		color=ginput(tmpx+62,yp,tmpx+89,5,buf,1);
+		if (!color) goto exit;
 		SDLNoUpdate();
 
 		SDLBox(tmpx+61,yp-1,tmpx+100,yp+9,148);
 		SDLstring(tmpx+63,yp,color);
-		clut[i]=(num2val(color)&254);
-		SDLBox(tmpx+12,yp+1,tmpx+20,yp+7,clut[i]);
+		tmpclut[i]=(num2val(color)&254);
+		SDLBox(tmpx+12,yp+1,tmpx+20,yp+7,tmpclut[i]);
 		SDLUpdate();
 
 		free(color);
 		yp+=10;
 	}
 	yp+=10;
-	drawbutton(tmpx+57,yp,"Okay");
-	SDLgetch(1);
+	SDLNoUpdate();
+	drawbutton(tmpx+49,yp,"Okay");
+	SDLUpdate();
+	SDLNoUpdate();
+	c=SDLgetch(1);
+	if (c==27) goto exit;
+	
+	memcpy(clut,tmpclut, sizeof (clut));
+	
+exit:
 	SDL_ShowCursor(SDL_ENABLE);
 	closeLastDblBufferDialog();
+	SDLUpdate();
 	return 1;
 }
 
@@ -766,16 +848,14 @@ int do_size(int tileMode)
 		sprintf(buf,"%d",tsx);
 	}
 	SDLUpdate();
-	loop=1;
-	do {
-		size=ginput(tmpx+92+4+tileMode,68+tmpy,tmpx+92+64-tileMode,6,buf,1);
-		if (size) {
-			x=num2val(size);
-			free(size);
-			if ((x)&&(x<=tmax))
-				loop=0;
-		} else loop=1;
-	} while(loop);
+	size=ginput(tmpx+92+4+tileMode,68+tmpy,tmpx+92+64-tileMode,6,buf,1);
+	if (size) {
+		x=num2val(size);
+		free(size);
+		if ((x)&&(x<=tmax))
+			loop=0;
+	} else
+		goto exit;
 	SDLNoUpdate();
 	SDLBox(tmpx+4+91,67+tmpy,tmpx+93+64-tileMode,77+tmpy,148);
 	sprintf(buf,"%d",x);
@@ -789,25 +869,22 @@ int do_size(int tileMode)
 		sprintf(buf,"%d",tsy);
 	}
 	SDLUpdate();
-	loop=1;
-	do {
 		size=ginput(tmpx+4+92+tileMode,78+tmpy,tmpx+92+64-tileMode,6,buf,1);
 		if (size) {
 			y=num2val(size);
 			free(size);
 			if ((y)&&(y<=tmax))
 				loop=0;
-		} else loop=1;
-	} while(loop);
+		} else goto exit;
 	
-	closeLastDblBufferDialog();
-
+	// operations - to move tonother place (JH)
+	
 	if (tileMode) {
 		tile_size(x,y);
-		return 0;
+		goto exit;
 	}
-	if ((map->w==x)&&(map->h==y))
-		return 0;
+	if ((map->w==x)&&(map->h==y)) goto exit;
+	
 	look=newmap=map->map;
 	if (x<map->w) {
 		for(loop=0;loop<map->h;loop++) {
@@ -836,6 +913,10 @@ int do_size(int tileMode)
 		error_dialog("Cannot allocate new map");
 	}
 	map->cx=map->cy=map->scx=map->scy=0;
+	
+exit:
+	closeLastDblBufferDialog();
+
 	return 0;
 }
 
@@ -880,16 +961,13 @@ int do_move(view *map, int tileMode)
 		SDLstring(tmpx+4,68+tmpy,"Move to X:");
 		SDLUpdate();
 		sprintf(buf,"%d",map->scx+map->cx);
-		loop=1;
-		do {
-			size=ginput(tmpx+92,68+tmpy,tmpx+92+64,6,buf,1);
-			if (size) {
-				x=num2val(size);
-				free(size);
-				if (IN_RANGE(x,0,map->w-1))
-					loop=0;
-			} else loop=1;
-		} while(loop);
+		size=ginput(tmpx+92,68+tmpy,tmpx+92+64,6,buf,1);
+		if (size) {
+			x=num2val(size);
+			free(size);
+			if (IN_RANGE(x,0,map->w-1))
+				loop=0;
+		} else goto exit;
 		SDLNoUpdate();
 		SDLBox(tmpx+91,67+tmpy,tmpx+92+65,77+tmpy,148);
 		sprintf(buf,"%d",x);
@@ -899,19 +977,15 @@ int do_move(view *map, int tileMode)
 		SDLstring(tmpx+4,78+tmpy,"Move to Y:");
 		SDLUpdate();
 		sprintf(buf,"%d",map->scy+map->cy);
-		loop=1;
-		do {
-			size=ginput(tmpx+92,78+tmpy,tmpx+92+64,6,buf,1);
-			if (size) {
-				y=num2val(size);
-				free(size);
-				if (IN_RANGE(y,0,map->h-1))
-					loop=0;
-			} else loop=1;
-		} while(loop);
+		size=ginput(tmpx+92,78+tmpy,tmpx+92+64,6,buf,1);
+		if (size) {
+			y=num2val(size);
+			free(size);
+			if (IN_RANGE(y,0,map->h-1))
+				loop=0;
+		} else goto exit;
 	}
 
-	closeLastDblBufferDialog();
 	
 	/*
 	   if (mode<6) mw=40;
@@ -939,6 +1013,9 @@ int do_move(view *map, int tileMode)
 		map->scy=y-(mh>>1);
 	}
 	map->cy=y-map->scy;
+
+exit:
+	closeLastDblBufferDialog();
 
 	return 1;
 }

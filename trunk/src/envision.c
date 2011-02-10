@@ -29,7 +29,7 @@
 
 unsigned char *dfont, *font, *copy_from, *fontbank[10];
 char bank_mod[10];
-int echr, bank, copy_size, values, act_col=1, menuPanel=1;
+int echr, bank, copy_size, values, act_col=1, back_col=0, menuPanel=1;
 
 int cmds[32];
 unsigned char undo[8];
@@ -46,6 +46,8 @@ int andit[8]={127,191,223,239,247,251,253,254};
 char * preferences_filepath;
 
 config CONFIG;
+
+runtime_storage RUNTIME_STORAGE;
 
 int corner(int all);
 /*=========================================================================*
@@ -177,11 +179,12 @@ void show_char_typefaces(int echr)
  * param act_col: actual draw color;
  *==========================================================================*/
 
-void update_color_chooser(int act_col){
+void update_color_chooser(int act_col, int back_col){
 	int j;
 	for (j=0;j<4;++j)
 		SDLBox(EDIT_GRID_X+(j<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(j<<4),EDIT_GRID_Y+78,clut[j]);
 	
+	SDLHollowBox(EDIT_GRID_X+(back_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(back_col<<4),EDIT_GRID_Y+78,2);
 	SDLHollowBox(EDIT_GRID_X+(act_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(act_col<<4),EDIT_GRID_Y+78,10);
 }
 
@@ -255,7 +258,7 @@ int grid(int chr, int rem)
 				c<<=2;
 			}
 		}
-		update_color_chooser(act_col);
+		update_color_chooser(act_col,back_col);
 		
 	}
 
@@ -515,6 +518,7 @@ int update_font(int b)
 	font=fontbank[b];
 	bank=b;
 	SDLSetContext(DialogContext);
+	SDLNoUpdate();
 	SDLClear((mode==4 || mode==5)?clut[0]:0);
 	sx=0; sy=0;
 	m=get_8x8_mode(mode);
@@ -532,6 +536,7 @@ int update_font(int b)
 	// font set number plotting
 	SDLBox(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,EDIT_FONTSEL_X+20,EDIT_FONTSEL_Y+15,144);
 	SDLplotchr(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,16+b,1,dfont);
+	SDLUpdate();
 	return 1;
 }
 
@@ -579,43 +584,35 @@ int draw_edit()
  *==========================================================================*/
 int setup(int zoom, int fullScreen)
 {
-	int i, ce, res;
+	int i, ce;
 	
 
 	ce=0;
 	strcpy(CONFIG_ENTRIES[ce].pref_id,"MAIN_SETUP");
 	CONFIG_ENTRIES[ce].len=sizeof(CONFIG);
+	CONFIG_ENTRIES[ce].init_handler=handler_config_reset;
 	CONFIG_ENTRIES[ce++].buffer=&CONFIG;
 	
 	strcpy(CONFIG_ENTRIES[ce].pref_id,"COLOR_TABLE");
 	CONFIG_ENTRIES[ce].len=sizeof(colortable);
+	CONFIG_ENTRIES[ce].init_handler=handler_palette_reset;
 	CONFIG_ENTRIES[ce++].buffer=colortable;
 
 	strcpy(CONFIG_ENTRIES[ce].pref_id,"CLUT");
 	CONFIG_ENTRIES[ce].len=sizeof(clut);
+	CONFIG_ENTRIES[ce].init_handler=handler_clut_reset;
 	CONFIG_ENTRIES[ce++].buffer=clut;
-	
-	res = getprefs();
-	
-	if (!res)
-	{
 
-		CONFIG.checkersLo=144;
-		CONFIG.checkersHi=146;
-		CONFIG.whiteColor=10;
-		CONFIG.screenWidth=512;
-		CONFIG.screenHeight=368;
-		CONFIG.defaultMapWidth=40;
-		CONFIG.defaultMapHeight=24;
-		CONFIG.color_display_mode=0;
-		
-		handler_palette_reset();
-		
-		handler_clut_reset();
-		
-		setprefs();
-	}
+	for (i=0; i<sizeof(CONFIG_ENTRIES) / sizeof (CONFIG_ENTRY); i++)
+		CONFIG_ENTRIES[i].init_handler();
+	
+	
+	// getting preferences saved, this will overwrite default values set above
+	getprefs();
+	// setting new full set of preferences.
+	setprefs();
 
+	memset(&RUNTIME_STORAGE, 0, sizeof (RUNTIME_STORAGE));
 	
 	if (!initSDL(zoom,fullScreen))
 		return 0;
@@ -748,7 +745,7 @@ int update1bit(int x, int y, int c)
  * handle a click on the edit screen
  * param x: x-position of click
  * param y: y-position of click
- * param b: b is if if left mousebutton is clicked
+ * param b: b is if left mousebutton is clicked
  * returns: nothing useful
  *==========================================================================*/
 int click(int x, int y, int b)
@@ -773,10 +770,11 @@ int click(int x, int y, int b)
 	for(i=0;i<5;i++) {
 		if (IN_BOX(x-EDIT_COLOR_X,y-EDIT_COLOR_Y,i*44,i*44+33,17,33))
 		{
-			show_palette(i,EDIT_COLOR_X+i*44, EDIT_COLOR_Y+33);
-
-			colors();
-			draw_edit();
+			if (show_palette(i,EDIT_COLOR_X+i*44, EDIT_COLOR_Y+33))
+			{
+				colors();
+				draw_edit();
+			}
 		//sprintf(buf,"%d",clut[i]);
 		return 0;
 		}
@@ -928,8 +926,8 @@ int click(int x, int y, int b)
 						}
 						else
 						{
-							col44=clut[0];
-							bit4=0;
+							col44=clut[back_col];
+							bit4=back_col;
 						}
 						SDLNoUpdate();
 						SDLBox(xe4,ye,xe4+15,ye+7,col44);
@@ -946,10 +944,13 @@ int click(int x, int y, int b)
 				const int xe=x&0xfffffff0;
 				SDLNoUpdate();
 				if (IN_BOX(x-EDIT_GRID_X,y-EDIT_GRID_Y,0,63,68,78))
-					{
+				{
+					if (b)
 						act_col=(xe-EDIT_GRID_X)>>4;
-					}
-				update_color_chooser(act_col);
+					else
+						back_col=(xe-EDIT_GRID_X)>>4;
+				}
+				update_color_chooser(act_col,back_col);
 				
 				SDLUpdate();
 
@@ -1217,8 +1218,9 @@ int command(int cmd, int sym)
 				  if (values==3) values=0;
 				  break;
 		case 's':
-				  fname=get_filename("Save font:",options.disk_image);
+				  fname=get_filename("Save font:",options.disk_image,RUNTIME_STORAGE.save_font_file_name);
 				  if (fname) {
+					  strncpy(RUNTIME_STORAGE.save_font_file_name,fname,127);
 					  if (options.disk_image)
 						  i=write_xfd_font(options.disk_image,fname,font,1024,NULL);
 					  else
@@ -1226,8 +1228,9 @@ int command(int cmd, int sym)
 					  free(fname);
 				  }
 				  break;
-		case 'l':				  fname=get_filename("Load font:",options.disk_image);
+		case 'l':				  fname=get_filename("Load font:",options.disk_image,NULL);
 				  if (fname) {
+					  strncpy(RUNTIME_STORAGE.save_font_file_name,fname,127);
 					  if (options.disk_image)
 						  i=read_xfd_font(options.disk_image,fname,font,1024);
 					  else
@@ -1237,7 +1240,7 @@ int command(int cmd, int sym)
 				  }
 				  break;
 		case 'I':
-			fname=get_filename("Import color table:",0);
+			fname=get_filename("Import color table:",0,NULL);
 			if (fname) {
 				if (import_palette(fname,colortable)) {
 					setpal();
@@ -1251,8 +1254,9 @@ int command(int cmd, int sym)
 			break;
 			
 		case 'e':
-				  fname=get_filename("Export font:",options.disk_image);
+				  fname=get_filename("Export font:",options.disk_image,RUNTIME_STORAGE.export_font_file_name);
 				  if (fname) {
+					  strncpy(RUNTIME_STORAGE.export_font_file_name,fname,127);
 					  if (options.disk_image)
 						  i=write_xfd_data(options.disk_image,fname,font,0,127);
 					  else
@@ -1357,7 +1361,7 @@ int main(int argc, char *argv[])
 				i++;
 				zoom=num2val(argv[i]);
 				if (zoom<1)
-					zoom=3;
+					zoom=2;
 				if (zoom>8)
 					zoom=8;
 			}
