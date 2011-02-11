@@ -312,10 +312,10 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 					for(x=0;x<4;x++) {
 						l=(c&192)>>6;
 						if ((chr>=128)&&(l==3)) l=4;
-						if (l) {
+						//if (l) {
 							SDLPlot(sx+x*2,sy+y,clut[l]);
 							SDLPlot(sx+(x*2+1),sy+y,clut[l]);
-						}
+						//}
 						c=c<<2;
 					}
 				}
@@ -328,12 +328,12 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 					for(x=0;x<4;x++) {
 						l=(c&192)>>6;
 						if ((chr>=128)&&(l==3)) l=4;
-						if (l) {
+						//if (l) {
 							SDLPlot(sx+x*2,sy+y*2,clut[l]);
 							SDLPlot(sx+(x*2+1),sy+y*2,clut[l]);
 							SDLPlot(sx+x*2,sy+y*2+1,clut[l]);
 							SDLPlot(sx+(x*2+1),sy+y*2+1,clut[l]);
-						}
+						//}
 						c=c<<2;
 					}
 				}
@@ -343,11 +343,11 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 		case 6: { /* Gr. 1 */
 				for(y=0;y<8;y++) {
 					c=*(dat+y);
+					int tcol;
 					for(x=0;x<8;x++) {
-						if (c&128) {
-							SDLPlot(sx+x*2,sy+y,clut[clr]);
-							SDLPlot(sx+(x*2+1),sy+y,clut[clr]);
-						}
+						tcol=(c&128)?clr:0;
+						SDLPlot(sx+x*2,sy+y,clut[tcol]);
+						SDLPlot(sx+(x*2+1),sy+y,clut[tcol]);
 						c=c<<1;
 					}
 				}
@@ -357,13 +357,13 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 		case 7: { /* Gr. 2 */
 				for(y=0;y<8;y++) {
 					c=*(dat+y);
+					int tcol;
 					for(x=0;x<8;x++) {
-						if (c&128) {
-							SDLPlot(sx+x*2,sy+y*2,clut[clr]);
-							SDLPlot(sx+(x*2+1),sy+y*2,clut[clr]);
-							SDLPlot(sx+x*2,sy+y*2+1,clut[clr]);
-							SDLPlot(sx+(x*2+1),sy+y*2+1,clut[clr]);
-						}
+						tcol=(c&128)?clr:0;
+						SDLPlot(sx+x*2,sy+y*2,clut[tcol]);
+						SDLPlot(sx+(x*2+1),sy+y*2,clut[tcol]);
+						SDLPlot(sx+x*2,sy+y*2+1,clut[tcol]);
+						SDLPlot(sx+(x*2+1),sy+y*2+1,clut[tcol]);
 						c=c<<1;
 					}
 				}
@@ -535,21 +535,14 @@ int SDLBox(int x1, int y1, int x2, int y2, int clrIdx)
 	return 1;
 }
 
-/*===========================================================================
- * SDLXORBox
- * draw a filled box, blitted with XOR color
- * param x1: upper-left x-pos
- * param y1: upper-left y-pos
- * param x2: lower-right x-pos
- * param y2: lower-right y-pos
- * returns: nothing useful
- *==========================================================================*/
-int SDLXORBox(int x1, int y1, int x2, int y2)
+enum {BOX_XOR,BOX_XORHOLLOW,BOX_XORDOTTED};
+
+int SDLGeneralBox(int x1, int y1, int x2, int y2, int box_type)
 {
 	SDL_Surface *s,*n;
 	SDL_Rect rect,xorR;
 	int x,y;
-
+	
 	if (x1>x2) {
 		int tmp=x2;
 		x2=x1;
@@ -565,7 +558,7 @@ int SDLXORBox(int x1, int y1, int x2, int y2)
 	rect.w=(x2+1)*mainScreen->zoom-rect.x;
 	rect.h=(y2+1)*mainScreen->zoom-rect.y;
 	xorR.x=xorR.y=0;
-
+	
 	s=SDL_CreateRGBSurface(SDL_SWSURFACE,rect.w,rect.h,32,rmask, gmask, bmask, amask);
 	SDL_BlitSurface(mainScreen->current,&rect,s,&xorR);
 	if (SDL_MUSTLOCK(s)) SDL_LockSurface(mainScreen->current);
@@ -574,7 +567,21 @@ int SDLXORBox(int x1, int y1, int x2, int y2)
 		Uint8 *p=(Uint8 *)s->pixels+y*s->pitch;
 		for(x=0;x<rect.w;x++) {
 			look=*(Uint32 *)p;
-			*(Uint32 *)p=look^0xffffff;
+			switch (box_type) {
+				case BOX_XORDOTTED:
+					if ((!((x-1)&1)&!((y-1)&1)))
+						*(Uint32 *)p=look^0xffffff;
+					break;
+				case BOX_XORHOLLOW:
+					if ((!x)||(!y)||(y==rect.h-1)||(x==rect.w-1))
+						*(Uint32 *)p=look^0xffffff;
+					break;
+				case BOX_XOR:
+					*(Uint32 *)p=look^0xffffff;
+				default:
+					break;
+			}
+					
 			p+=4;
 		}
 	}
@@ -586,6 +593,34 @@ int SDLXORBox(int x1, int y1, int x2, int y2)
 	if (mainScreen->update)
 		SDL_UpdateRect(mainScreen->current,rect.x,rect.y,rect.w,rect.h);
 	return 1;
+}
+/*===========================================================================
+ * SDLXORDottedBox
+ * draw a dotted box, blitted with XOR color
+ * param x1: upper-left x-pos
+ * param y1: upper-left y-pos
+ * param x2: lower-right x-pos
+ * param y2: lower-right y-pos
+ * returns: nothing useful
+ *==========================================================================*/
+int SDLXORDottedBox(int x1, int y1, int x2, int y2)
+{
+	return SDLGeneralBox(x1, y1, x2, y2, BOX_XORDOTTED);
+}
+
+
+/*===========================================================================
+ * SDLXORBox
+ * draw a filled box, blitted with XOR color
+ * param x1: upper-left x-pos
+ * param y1: upper-left y-pos
+ * param x2: lower-right x-pos
+ * param y2: lower-right y-pos
+ * returns: nothing useful
+ *==========================================================================*/
+int SDLXORBox(int x1, int y1, int x2, int y2)
+{
+	return SDLGeneralBox(x1, y1, x2, y2, BOX_XOR);
 }
 
 /*===========================================================================
@@ -599,47 +634,7 @@ int SDLXORBox(int x1, int y1, int x2, int y2)
  *==========================================================================*/
 int SDLXORHollowBox(int x1, int y1, int x2, int y2)
 {
-	SDL_Surface *s,*n;
-	SDL_Rect rect,xorR;
-	int x,y;
-
-	if (x1>x2) {
-		int tmp=x2;
-		x2=x1;
-		x1=tmp;
-	}
-	if (y1>y2) {
-		int tmp=y2;
-		y2=y1;
-		y1=tmp;
-	}
-	rect.x=x1*mainScreen->zoom;
-	rect.y=y1*mainScreen->zoom;
-	rect.w=(x2+1)*mainScreen->zoom-rect.x;
-	rect.h=(y2+1)*mainScreen->zoom-rect.y;
-	xorR.x=xorR.y=0;
-
-	s=SDL_CreateRGBSurface(SDL_SWSURFACE,rect.w,rect.h,32,rmask, gmask, bmask, amask);
-	SDL_BlitSurface(mainScreen->current,&rect,s,&xorR);
-	if (SDL_MUSTLOCK(s)) SDL_LockSurface(mainScreen->current);
-	for(y=0;y<rect.h;y++) {
-		Uint32 look;
-		Uint8 *p=(Uint8 *)s->pixels+y*s->pitch;
-		for(x=0;x<rect.w;x++) {
-			look=*(Uint32 *)p;
-			if ((!x)||(!y)||(y==rect.h-1)||(x==rect.w-1))
-				*(Uint32 *)p=look^0xffffff;
-			p+=4;
-		}
-	}
-	if (SDL_MUSTLOCK(s)) SDL_UnlockSurface(mainScreen->current);
-	n=SDL_DisplayFormat(s);
-	SDL_FreeSurface(s);
-	SDL_BlitSurface(n,NULL,mainScreen->current,&rect);
-	SDL_FreeSurface(n);
-	if (mainScreen->update)
-		SDL_UpdateRect(mainScreen->current,rect.x,rect.y,rect.w,rect.h);
-	return 1;
+	return SDLGeneralBox(x1, y1, x2, y2, BOX_XORHOLLOW);
 }
 
 /*===========================================================================
@@ -865,7 +860,6 @@ int SDLCharBlt(int dst, int dx, int dy, int idx)
 
 	dstR.x=dx*mainScreen->zoom;
 	dstR.y=dy*mainScreen->zoom;
-
 	err=SDL_BlitSurface(charTable[idx],NULL,mainScreen->surfaces[dst],&dstR);
 	if ((!dst)&&(mainScreen->update))
 		SDL_UpdateRect(mainScreen->surfaces[dst],dstR.x,dstR.y,dstR.w,dstR.h);

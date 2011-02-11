@@ -58,27 +58,30 @@ typedef struct rgb_color {
 #define EDIT_OFFSET_X 64
 #define EDIT_OFFSET_Y 64
 
-#define EDIT_GRID_X (256+EDIT_OFFSET_X)
+#define EDIT_GRID_X (272+EDIT_OFFSET_X)
 #define EDIT_GRID_Y (32+EDIT_OFFSET_Y)
 
-#define EDIT_FONTSEL_X (328+EDIT_OFFSET_X)
+#define EDIT_FONTSEL_X (344+EDIT_OFFSET_X)
 #define EDIT_FONTSEL_Y (176+EDIT_OFFSET_Y)
-#define EDIT_MODESEL_X (328+EDIT_OFFSET_X)
+#define EDIT_MODESEL_X (344+EDIT_OFFSET_X)
 #define EDIT_MODESEL_Y (194+EDIT_OFFSET_Y)
 
-#define EDIT_CHARMAP_X (104+EDIT_OFFSET_X)
+#define EDIT_CHARMAP_X (120+EDIT_OFFSET_X)
 #define EDIT_CHARMAP_Y (136+EDIT_OFFSET_Y)
 
-#define EDIT_CORNER_X (136+EDIT_OFFSET_X)
+#define EDIT_CORNER_X (144+EDIT_OFFSET_X)
 #define EDIT_CORNER_Y (32+EDIT_OFFSET_Y)
 
 #define EDIT_MENU_X (EDIT_OFFSET_X)
 #define EDIT_MENU_Y (24+EDIT_OFFSET_Y)
 
-#define EDIT_COLOR_X (102+EDIT_OFFSET_X)
+#define EDIT_COLOR_X (118+EDIT_OFFSET_X)
 #define EDIT_COLOR_Y (176+EDIT_OFFSET_Y)
 
-#define BUTTON_WIDTH 11
+#define BUTTON_WIDTH 12
+
+#define TILE_MODE ((!tileEditMode)&&((tsx>1)||(tsy>1)))
+#define NOT_TILE_MODE (!TILE_MODE)
 
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 
@@ -93,9 +96,9 @@ int title();
 int get_8x8_mode(int m);
 int do_map();
 int do_colors();
-int do_size(int tileMode);
+int do_size(int tile_mode);
 int do_exit();
-int do_move(view *map, int tileMode);
+int do_move(view *map, int tile_mode);
 int select_draw(char *title);
 int error_dialog(char *error);
 int info_dialog(char *error);
@@ -116,6 +119,8 @@ void handler_currentfont_reset();
 void handler_palette_reset();
 void handler_clut_reset();
 void draw_numbers(int vals, unsigned char *work);
+void plot_draw_char(int x, int y, unsigned char c);
+
 
 
 void bye();
@@ -130,6 +135,7 @@ int show_palette(int i,int x, int y);
 int hex2dec(char hex);
 int num2val(char * chrval);
 void setpal();
+void setdefaultpal();
 int draw_edit();
 int update_font(int b);
 
@@ -171,5 +177,5 @@ extern unsigned char clut_default[9];
 extern int cmds[32];
 extern int mode, ratio;
 extern int base;
-extern int tsx, tsy, tileMode;
+extern int tsx, tsy, tileEditMode;
 extern unsigned long s1,s2;
