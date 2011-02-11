@@ -566,7 +566,7 @@ int do_defaults()
 			if (reset[i]) handlers[i]();
 		
 		update_font(bank);
-		setpal();
+		//setdefaultpal();
 		draw_edit();
 		setprefs();
 	}
@@ -593,12 +593,13 @@ int palette_click(int i, int mx, int my)
 
 int show_palette(i,x,y)
 {
-	
 	openDblBufferDialog(x-32,y-130,129,113);
 	SDL_Event event;
 	int done=0;
 	int col,lum;
 	
+	setpal();
+
 	for (col=0; col<16; col++)
 		for (lum=0; lum<8; lum++)
 		{
@@ -642,6 +643,7 @@ int show_palette(i,x,y)
 		clut[i]=col;
 	
 	closeLastDblBufferDialog();
+	setdefaultpal();
 	return col>=0;
 }
 
@@ -743,17 +745,13 @@ int select_draw(char *title)
 	SDLVLine(290,48,yp+8,152);
 	sx=0; sy=0;
 	
+	setpal();
 	for(i=0;i<256;i++) {
-		if (mode<6) {
-			SDLmap_plotchr(32+sx,48+sy,i,m,font);
-		} else {
-			dat=(char *)(font+(i&63)*8+base);
-			clr=(i>>6)+1;
-			SDLCharEngine(32+sx,48+sy,i&127,1,clut[clr],(unsigned char *)dat);
-		}
+		plot_draw_char(32+sx, 48+sy, i);
 		sx+=8;
 		if (sx>248) { sx=0; sy+=8; }
 	}
+	setdefaultpal();
 	SDLUpdate();
 
 	yp=0;
@@ -824,23 +822,23 @@ int get_number(char *title, int def, int max)
 /*===========================================================================
  * do_size
  * resize a map
- * param tileMode: flag indicating 0: map mode; 1 tile mode;
+ * param tile_mode: flag indicating 0: map mode; 1 tile mode;
  * returns: nothing useful
  *==========================================================================*/
-int do_size(int tileMode)
+int do_size(int tile_mode)
 {
 	int i, x, y, loop, tmax;
 	char buf[16], *size;
 	unsigned char *newmap,*look;
-	if (tileMode) {
-		tileMode=8; tmax=16;
+	if (tile_mode) {
+		tile_mode=8; tmax=16;
 	} else tmax=65536;
 
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y;
 	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 160, 32);
 	
-	if (!tileMode) {
+	if (!tile_mode) {
 		SDLstring(tmpx+4,68+tmpy,"New Width:");
 		sprintf(buf,"%d",map->w);
 	} else {
@@ -848,7 +846,7 @@ int do_size(int tileMode)
 		sprintf(buf,"%d",tsx);
 	}
 	SDLUpdate();
-	size=ginput(tmpx+92+4+tileMode,68+tmpy,tmpx+92+64-tileMode,6,buf,1);
+	size=ginput(tmpx+92+4+tile_mode,68+tmpy,tmpx+92+64-tile_mode,6,buf,1);
 	if (size) {
 		x=num2val(size);
 		free(size);
@@ -857,11 +855,11 @@ int do_size(int tileMode)
 	} else
 		goto exit;
 	SDLNoUpdate();
-	SDLBox(tmpx+4+91,67+tmpy,tmpx+93+64-tileMode,77+tmpy,148);
+	SDLBox(tmpx+4+91,67+tmpy,tmpx+93+64-tile_mode,77+tmpy,148);
 	sprintf(buf,"%d",x);
-	SDLstring(tmpx+4+93+tileMode,68+tmpy,buf);
+	SDLstring(tmpx+4+93+tile_mode,68+tmpy,buf);
 	
-	if (!tileMode) {
+	if (!tile_mode) {
 		SDLstring(tmpx+4,78+tmpy,"New Height:");
 		sprintf(buf,"%d",map->h);
 	} else {
@@ -869,7 +867,7 @@ int do_size(int tileMode)
 		sprintf(buf,"%d",tsy);
 	}
 	SDLUpdate();
-		size=ginput(tmpx+4+92+tileMode,78+tmpy,tmpx+92+64-tileMode,6,buf,1);
+		size=ginput(tmpx+4+92+tile_mode,78+tmpy,tmpx+92+64-tile_mode,6,buf,1);
 		if (size) {
 			y=num2val(size);
 			free(size);
@@ -879,7 +877,7 @@ int do_size(int tileMode)
 	
 	// operations - to move tonother place (JH)
 	
-	if (tileMode) {
+	if (tile_mode) {
 		tile_size(x,y);
 		goto exit;
 	}
@@ -924,10 +922,10 @@ exit:
  * do_move
  * jump to a screen position
  * param map: the map to update
- * param tileMode: flag indicating 0: map mode; 1 tile mode;
+ * param tile_mode: flag indicating 0: map mode; 1 tile mode;
  * returns: nothing useful
  *==========================================================================*/
-int do_move(view *map, int tileMode)
+int do_move(view *map, int tile_mode)
 {
 	int mw, mh, x, y, loop;
 	char buf[16], *size;
@@ -937,7 +935,7 @@ int do_move(view *map, int tileMode)
 
 	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 168, 32);
 	
-	if (tileMode) {
+	if (tile_mode) {
 
 		SDLstring(tmpx+4,68+tmpy,"Go to tile:");
 		SDLUpdate();
@@ -1036,6 +1034,7 @@ int do_exit()
 	SDLplotchr(x+4+128-8,76+tmpy,stoa('Y'),1,dfont);
 	SDLUpdate();
 	setprefs();
+	return 1;
 	
 	ch=SDLgetch(1);
 	closeLastDblBufferDialog();

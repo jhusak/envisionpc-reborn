@@ -28,7 +28,7 @@
 #include "preferences.h"
 
 unsigned char *dfont, *font, *copy_from, *fontbank[10];
-char bank_mod[10];
+//char bank_mod[10];
 int echr, bank, copy_size, values, act_col=1, back_col=0, menuPanel=1;
 
 int cmds[32];
@@ -98,11 +98,22 @@ void txterr(char *txt)
 void setpal()
 {
 	int x;
-
+	
 	for(x=0;x<256;x++) {
 		
 		//SDLsetPalette(x,(colortable[x]>>16)&0xff,(colortable[x]>>8)&0xff,(colortable[x])&0xff);
 		SDLsetPalette(x,colortable[x].r,colortable[x].g,colortable[x].b);
+	}
+}
+
+void setdefaultpal()
+{
+	int x;
+
+	for(x=0;x<256;x++) {
+		
+		//SDLsetPalette(x,(colortable[x]>>16)&0xff,(colortable[x]>>8)&0xff,(colortable[x])&0xff);
+		SDLsetPalette(x,colortable_default[x*3],colortable_default[x*3+1],colortable_default[x*3+2]);
 	}
 }
 
@@ -160,17 +171,17 @@ void frame(int x, int y, int width, int height, int col)
 
 void show_char_typefaces(int echr)
 {
+	
 	frame(10,2,16,8,clut[0]);
-	SDLplotchr(10,2,echr,6,font);
-	
 	frame(10,15,16,16,clut[0]);
-	SDLplotchr(10,15,echr,7,font);
-	
 	frame(14,36,8,8,clut[0]);
-	SDLplotchr(14,36,echr,4,font);
-	
 	frame(14,49,8,16,clut[0]);
+	setpal();
+	SDLplotchr(10,2,echr,6,font);
+	SDLplotchr(10,15,echr,7,font);
+	SDLplotchr(14,36,echr,4,font);
 	SDLplotchr(14,49,echr,5,font);
+	setdefaultpal();
 }
 
 /*===========================================================================
@@ -181,8 +192,10 @@ void show_char_typefaces(int echr)
 
 void update_color_chooser(int act_col, int back_col){
 	int j;
+	setpal();
 	for (j=0;j<4;++j)
 		SDLBox(EDIT_GRID_X+(j<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(j<<4),EDIT_GRID_Y+78,clut[j]);
+	setdefaultpal();
 	
 	SDLHollowBox(EDIT_GRID_X+(back_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(back_col<<4),EDIT_GRID_Y+78,2);
 	SDLHollowBox(EDIT_GRID_X+(act_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(act_col<<4),EDIT_GRID_Y+78,10);
@@ -250,6 +263,7 @@ int grid(int chr, int rem)
 		}
 	}
 	else if (m==4){
+		setpal();
 		for(y=0;y<8;y++) {
 			c=*(dat+y);
 			for(x=0;x<4;x++) {
@@ -258,17 +272,20 @@ int grid(int chr, int rem)
 				c<<=2;
 			}
 		}
+		setdefaultpal();
 		update_color_chooser(act_col,back_col);
 		
 	}
 
 	topos(echr,&x,&y);
-	SDLBox(x,y,x+7,y+7,(mode==4||mode==5)?clut[0]:0);
+	if (mode==4 || mode==5) setpal();
+	SDLBox(x,y,x+7,y+7,clut[0]);
 	SDLplotchr(x,y,echr,m,font);
 	echr=chr;
 	topos(echr,&x,&y);
 	SDLBox(x,y,x+7,y+7,148);
 	SDLplotchr(x,y,echr,m,font);
+	setdefaultpal();
 
 	SDLSetContext(UpdContext);
 	SDLClear(0);
@@ -287,8 +304,8 @@ int grid(int chr, int rem)
 	SDLplotchr(EDIT_GRID_X+86,EDIT_GRID_Y+82,echr,2,dfont);
 	
 	draw_numbers(values,dat);
-
 	SDLUpdate();
+
 	corner(0);
 	return 1;
 }
@@ -321,12 +338,12 @@ int panel(int tp)
 	drawbutton(0,idxcnt*10+8,"*Copy"); cmds[++idxcnt]='c';
 	drawbutton(0,idxcnt*10+8,"*X-copy"); cmds[++idxcnt]='x';
 	drawbutton(0,idxcnt*10+8,"*Transcopy"); cmds[++idxcnt]='t';
-	drawbutton(0,idxcnt*10+8,"*PickColors"); cmds[++idxcnt]='p';
+	drawbutton(0,idxcnt*10+8,"*Pick Colors"); cmds[++idxcnt]='p';
 	//drawbutton(0,idxcnt*10+8,"RestorFont"); cmds[++idxcnt]='A';
 	drawbutton(0,idxcnt*10+8,"*Save Font"); cmds[++idxcnt]='s';
 	drawbutton(0,idxcnt*10+8,"*Load Font"); cmds[++idxcnt]='l';
 	drawbutton(0,idxcnt*10+8,"*Export"); cmds[++idxcnt]='e';
-	drawbutton(0,idxcnt*10+8,"*ImportCTAB"); cmds[++idxcnt]='I';
+	drawbutton(0,idxcnt*10+8,"*Import Pall"); cmds[++idxcnt]='I';
 	drawbutton(0,idxcnt*10+8,"*Options"); cmds[++idxcnt]='o';
 	drawbutton(0,idxcnt*10+8,"De*faults"); cmds[++idxcnt]='f';
 	// dfgjknqwyz
@@ -363,7 +380,7 @@ int corner(int all)
 	match=echr&msk;
 	SDLNoUpdate();
 	frame(EDIT_CORNER_X,EDIT_CORNER_Y,64,64,0);
-	
+	if (mode>=4) setpal();
 	if (all) {
 		SDLSetContext(BackContext);
 		SDLBox(0,0,63,63,clut[0]);
@@ -461,7 +478,7 @@ int corner(int all)
 		y+=h;
 		idx++;
 	}
-	
+	setdefaultpal();
 	SDLSetContext(MainContext);
 	//if (f)
 		SDLContextBlt(MainContext,EDIT_CORNER_X,EDIT_CORNER_Y,BackContext,0,0,63,63);
@@ -483,7 +500,10 @@ int colors()
 	for(i=0;i<5;i++) {
 		SDLHollowBox(EDIT_COLOR_X+i*44,EDIT_COLOR_Y+17,EDIT_COLOR_X+i*44+33,EDIT_COLOR_Y+33
 					 ,144);
+		setpal();
 		SDLBox(EDIT_COLOR_X+i*44+1,EDIT_COLOR_Y+18,EDIT_COLOR_X+i*44+32,EDIT_COLOR_Y+32,clut[i]);
+		setdefaultpal();
+		
 		sprintf(buf,"PF%d",(int)i);
 		SDLstring(EDIT_COLOR_X+i*44+5
 				  ,EDIT_COLOR_Y,buf);
@@ -503,6 +523,7 @@ int colors()
 	}
 	
 	SDLUpdate();
+	setdefaultpal();
 	return 1;
 }
 /*===========================================================================
@@ -519,7 +540,8 @@ int update_font(int b)
 	bank=b;
 	SDLSetContext(DialogContext);
 	SDLNoUpdate();
-	SDLClear((mode==4 || mode==5)?clut[0]:0);
+	if (mode==4 || mode==5) setpal();
+	SDLClear(0);
 	sx=0; sy=0;
 	m=get_8x8_mode(mode);
 	for(i=0;i<128;i++) {
@@ -537,6 +559,7 @@ int update_font(int b)
 	SDLBox(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,EDIT_FONTSEL_X+20,EDIT_FONTSEL_Y+15,144);
 	SDLplotchr(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,16+b,1,dfont);
 	SDLUpdate();
+	setdefaultpal();
 	return 1;
 }
 
@@ -623,7 +646,7 @@ int setup(int zoom, int fullScreen)
 
 	for(i=0;i<10;i++) {
 		fontbank[i]=(unsigned char *)malloc(1024);
-		bank_mod[i]=0;
+		//bank_mod[i]=0;
 		memcpy(fontbank[i],dfont,1024);
 	}
 
@@ -672,7 +695,7 @@ int setup(int zoom, int fullScreen)
 
 	title();
 
-	setpal();
+	setdefaultpal();
 	draw_edit();
 	if (get_error())	error_dialog(get_error());
 
@@ -691,10 +714,12 @@ int update(int x, int y)
 {
 	topos(echr,&x,&y);
 	SDLSetContext(UpdContext);
+	setpal();
 	SDLBox(0,0,7,7,clut[0]);
 	SDLplotchr(0,0,echr,mode,font);
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,x,y,UpdContext,0,0,7,7);
+	setdefaultpal();
 	
 	SDLSetContext(UpdContext);
 	SDLClear(0);

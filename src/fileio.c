@@ -636,7 +636,7 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
   fwrite(map->map,map->w*map->h,1,out);
   if (!raw) {
     fwrite(font,1024,1,out);
-    if ((!tileMode)&&((tsx>1)||(tsy>1))) {
+    if TILE_MODE {
       int i;
       unsigned char *look;
 
@@ -677,7 +677,7 @@ int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int r
   FILE *in;
   long len;
 
-  if ((!tileMode)&&((tsx>1)||(tsy>1))) {
+  if TILE_MODE {
     error_dialog("No tilemap.XFD save");
     return -1;    
   }

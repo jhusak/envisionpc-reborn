@@ -135,7 +135,7 @@ void store_tiles(hashTable *table, view *tile) {
     if (!tileDef)
       break;
     ty=i/16;
-    tx=i-ty*16;
+    tx=i%16;
     walk=tile->map+tx*tsx+ty*tsy*tsx*16;
     for(h=0;h<tsy;h++) {
       for(w=0;w<tsx;w++) {

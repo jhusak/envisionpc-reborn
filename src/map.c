@@ -15,11 +15,11 @@
 #include "envision.h"
 
 view *currentView, *map, *tile; /* display, map, tile */
-int tm; /* typing mode flag */
+int typeMode; /* typing mode flag */
 int mode, hidden, ratio; /* ANTIC mode, menu shown flag, replace ratio */
 int base; /* character base */
 int tsx, tsy; /* tile width, height */
-int cacheOk, tileMode; /* cache valid flag, tile mode flag */
+int cacheOk, tileEditMode; /* cache valid flag, tile edit mode flag */
 unsigned char *cache; /* cache */
 SDL_Surface *charTable[512];
 
@@ -45,7 +45,8 @@ int draw_cursor() {
 	else SDLClip(1);
 
 	SDLXORBox(currentView->cx*currentView->cw,MAP_TOP_OFFSET+currentView->cy*currentView->ch,currentView->cx*currentView->cw+currentView->cw-1,MAP_TOP_OFFSET+currentView->cy*currentView->ch+currentView->ch-1);
-	if ((tileMode)&&((tsx>1)||(tsy>1))) {
+	// draw hollow box
+	if ((tileEditMode) &&((tsx>1)||(tsy>1))) {
 		int tx, ty;
 		tx=(((currentView->cx+(currentView->scx%tsx))/tsx)*tsx)-currentView->scx%tsx;
 		ty=(((currentView->cy+(currentView->scy%tsy))/tsy)*tsy)-currentView->scy%tsy;
@@ -64,11 +65,11 @@ int draw_cursor() {
 int set_mapview(int id) {
 	view *old=currentView;
 	if (!id) {
-		tileMode=0;
+		tileEditMode=0;
 		do_mode(mode); /* update tiles, if necessary */
 		currentView=map;
 	} else {
-		tileMode=1;
+		tileEditMode=1;
 		currentView=tile;
 	}
 	if (currentView!=old)
@@ -114,23 +115,24 @@ int map_panel()
 	SDLClear(0);
 	
 	int cmdcnt=0;
-	drawbutton(0,cmdcnt*10,"Go to *Edit");	cmds[++cmdcnt]='e';
-	drawbutton(0,cmdcnt*10,"Resi*Ze Map");	cmds[++cmdcnt]='z';
-	drawbutton(0,cmdcnt*10,"Antic *Mode");	cmds[++cmdcnt]='m';
-	drawbutton(0,cmdcnt*10,"*U HalfBase");	cmds[++cmdcnt]='u';
+	drawbutton(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
+	drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
+	drawbutton(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
+	drawbutton(0,cmdcnt*10,"ShiftBase*up");	cmds[++cmdcnt]='u';
 	drawbutton(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
-	drawbutton(0,cmdcnt*10,"*Find");	cmds[++cmdcnt]='f';
-	drawbutton(0,cmdcnt*10,"*Draw char"); cmds[++cmdcnt]='d';
-	drawbutton(0,cmdcnt*10,"*Save map");	cmds[++cmdcnt]='s';
+	drawbutton(0,cmdcnt*10,"*find");	cmds[++cmdcnt]='f';
+	drawbutton(0,cmdcnt*10,"*draw char"); cmds[++cmdcnt]='d';
+	drawbutton(0,cmdcnt*10,"*save map");	cmds[++cmdcnt]='s';
 	drawbutton(0,cmdcnt*10,"*WriteRawMap");	cmds[++cmdcnt]='w';
-	drawbutton(0,cmdcnt*10,"*Load map");	cmds[++cmdcnt]='l';
-	drawbutton(0,cmdcnt*10,"*ReadRawMap");	cmds[++cmdcnt]='R';
-	drawbutton(0,cmdcnt*10,"*Clear Map");	cmds[++cmdcnt]='c';
-	drawbutton(0,cmdcnt*10,"*Block");	cmds[++cmdcnt]='b';
-	drawbutton(0,cmdcnt*10,"*Go to pos.");	cmds[++cmdcnt]='g';
-	drawbutton(0,cmdcnt*10,"Ret*Ile");	cmds[++cmdcnt]='i';
-	drawbutton(0,cmdcnt*10,"*Type Mode");	cmds[++cmdcnt]='t';
-	drawbutton(0,cmdcnt*10,"*Hide");	cmds[++cmdcnt]='h';
+	drawbutton(0,cmdcnt*10,"*load map");	cmds[++cmdcnt]='l';
+	drawbutton(0,cmdcnt*10,"*Read RawMap");	cmds[++cmdcnt]='R';
+	drawbutton(0,cmdcnt*10,"*clear map");	cmds[++cmdcnt]='c';
+	drawbutton(0,cmdcnt*10,"*block");	cmds[++cmdcnt]='b';
+	drawbutton(0,cmdcnt*10,"*go to pos.");	cmds[++cmdcnt]='g';
+	drawbutton(0,cmdcnt*10,"Ret*ile");	cmds[++cmdcnt]='i';
+	if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
+	drawbutton(0,cmdcnt*10,"*hide");	cmds[++cmdcnt]='h';
+	// wolne:0-9ajknopqvxy
 	MAP_MENU_HEIGHT=cmdcnt*10;
 	cmds[0]=MAP_MENU_HEIGHT*10+10;
 	SDLSetContext(MainContext);
@@ -148,7 +150,7 @@ int curs_pos()
 	int back;
 
 	SDLSetContext(DialogContext);
-	if (!tileMode) {
+	if (!tileEditMode) {
 		if ((currentView->w>999)||(currentView->h>999)) {
 			sprintf(buf,"X:%05d Y:%05d",currentView->scx+currentView->cx,currentView->scy+currentView->cy);
 			back=32;
@@ -214,7 +216,7 @@ int move(int dx, int dy)
 			return draw_cursor();
 		else currentView->scy++;
 	}
-	if (tm) {
+	if (typeMode) {
 		SDLBox(CONFIG.screenWidth-12,15,CONFIG.screenWidth-4,22,144);
 		m=get_8x8_mode(mode);
 		SDLmap_plotchr(CONFIG.screenWidth-12,15,currentView->map[(currentView->cx+currentView->scx)+(currentView->cy+currentView->scy)*currentView->w],m,font);
@@ -224,7 +226,7 @@ int move(int dx, int dy)
 	//if ((ox==currentView->cx)&&(oy==currentView->cy))
 	// but it lead to shadows during moving cursor beyound borders (JH)
 	
-	if ((ox==currentView->cx)||(oy==currentView->cy)) 
+	if ((ox==currentView->cx)||(oy==currentView->cy))
 		draw_screen(1);
 	else draw_cursor();
 	return 1;
@@ -243,7 +245,7 @@ int map_command(int cmd, int sym)
 	char *fname;
 	unsigned char *look;
 
-	if (tm) {
+	if (typeMode) {
 		if (!sym) {
 			currentView->map[(currentView->cx+currentView->scx)+(currentView->cy+currentView->scy)*currentView->w]=cmd;
 			draw_cursor();
@@ -257,10 +259,10 @@ int map_command(int cmd, int sym)
 	if (sym) {
 		switch(sym) {
 			case SDLK_ESCAPE: {
-						  if (!tm)
+						  if (!typeMode)
 							  bye();
 						  else {
-							  tm=0;
+							  typeMode=0;
 							  draw_header(1);
 							  return 0;
 						  }
@@ -296,7 +298,7 @@ int map_command(int cmd, int sym)
 				  break;
 			  
 		case 'f': 
-				  if ((!tileMode)&&((tsx>1)||(tsy>1)))
+				  if TILE_MODE
 					  f=currentView->dc=get_number("Tile to replace:", 1,255);
 				  else
 					  f=select_draw("Select character to replace:");
@@ -333,7 +335,7 @@ int map_command(int cmd, int sym)
 				  return 0;
 			  
 		case 'd': 
-				  if ((!tileMode)&&((tsx>1)||(tsy>1)))
+				  if TILE_MODE
 					  currentView->dc=get_number("New draw tile:", currentView->dc,255);
 				  else
 					  currentView->dc=select_draw("Select or type new draw char:");
@@ -355,39 +357,42 @@ int map_command(int cmd, int sym)
 				  break;
 			  
 		case 'z': 
-				  do_size(tileMode);
+				  do_size(tileEditMode);
 				  draw_header(0);
 				  cacheOk=0;
 				  break;
 			  
 		case 'i': {
-				  int itsx, itsy;
-				  if (tileMode)
-					  break;
-
-				  cacheOk=0;
-				  itsx=itsy=0;
-				  if ((tsy==1)&&(tsx==1)) {
-					  do {
-						  itsx=get_number("Enter tile width:",2,8);
-					  } while((itsx<1)||(itsx>8)||(itsx>map->w));
-					  do {
-						  itsy=get_number("Enter tile height:",2,8);	
-					  } while((itsy<1)||(itsy>8)||(itsy>map->h));
-					  if ((itsy==1)&&(itsx==1))
-						  break;
-				  }      
-				  set_mapview(1);
-				  if ((tsy>1)||(tsx>1)) {
-					  untile_map(map,tile);
-				  } else {
-					  tile_map(itsx,itsy,map,tile);
-				  }
-				  set_mapview(0);
-				  draw_header(0);
-				  break;
+			int itsx, itsy;
+			if (tileEditMode) {
+				break;
+			}
+			
+			cacheOk=0;
+			itsx=itsy=0;
+			if ((tsy==1)&&(tsx==1)) {
+				do {
+					itsx=get_number("Enter tile width:",2,8);
+				} while((itsx<1)||(itsx>8)||(itsx>map->w));
+				do {
+					itsy=get_number("Enter tile height:",2,8);	
+				} while((itsy<1)||(itsy>8)||(itsy>map->h));
+				if ((itsy==1)&&(itsx==1))
+					break;
+			}
+			set_mapview(1);
+			if ((tsy>1)||(tsx>1)) {
+				untile_map(map,tile);
+			} else {
+				tile_map(itsx,itsy,map,tile);
+			}
+			set_mapview(0);
+			map_panel();
+			draw_header(0);
+			break;
 		}
-		case 'u': 
+		case 'u':
+			
 				  if (base) base=0;
 				  else base=64*8;
 				  do_mode(mode);
@@ -435,12 +440,12 @@ int map_command(int cmd, int sym)
 			break;
 			
 		case 't': 
-				  if ((!tileMode)&&((tsx>1)||(tsy>1)))
+				  if TILE_MODE
 				  {
 					  info_dialog("Type mode only in char mode!");
 					  break;
 				  }
-				  tm=1;
+				  typeMode=1;
 			      SDLNoUpdate();
 				  SDLBox(CONFIG.screenWidth-92,15,CONFIG.screenWidth-1,22,144);
 				  SDLstring(CONFIG.screenWidth-92,15,"Type Mode");
@@ -450,13 +455,13 @@ int map_command(int cmd, int sym)
 				  break;
 			  
 		case 'g': 
-				  do_move(currentView,tileMode);
+				  do_move(currentView,tileEditMode);
 				  cacheOk=0;
 				  curs_pos();
 				  break;
 			  
 		case 'b': 
-				  set_mapview(!tileMode);
+				  set_mapview(!tileEditMode);
 				  if (!cacheOk)
 					  draw_header(0);
 				  break;
@@ -482,6 +487,7 @@ int map_click(int x, int y, int b, int *down)
 {
 	int i,ox,oy;
 
+	// menu at the rigth
 	if ((!hidden)&&(IN_BOX(x,y,CONFIG.screenWidth-BUTTON_WIDTH*8-5,CONFIG.screenWidth-5,MAP_TOP_OFFSET,cmds[0]))) {
 		i=(y-MAP_TOP_OFFSET+10)/10;
 		SDLrelease(); /* wait for mouse to unclick */
@@ -495,19 +501,26 @@ int map_click(int x, int y, int b, int *down)
 		if ((ox+currentView->scx>=currentView->w)||
 				(i+currentView->scy>=currentView->h))
 			return 0;
-		if ((b)&&(!tm)) {
-			currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=currentView->dc;
-			x=x*currentView->cw;
-			y=MAP_TOP_OFFSET+i*currentView->ch;
-			if ((!tileMode)&&((tsx!=1)||(tsy!=1))) {
-				SDLCharBlt(MainContext,x,y,currentView->dc+256);
-			} else {
-				SDLCharBlt(MainContext,x,y,currentView->dc);
+		// witn this "if" works much better, but still not in edit tile mode
+		if (ox!=currentView->cx || oy!=currentView->cy) {
+			if ((b)&&(!typeMode)) {
+				// with this "if" works very well.
+				if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=currentView->dc)
+				{
+					currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=currentView->dc;
+					x=x*currentView->cw;
+					y=MAP_TOP_OFFSET+i*currentView->ch;
+					if TILE_MODE {
+						SDLCharBlt(MainContext,x,y,currentView->dc+256);
+					} else {
+						SDLCharBlt(MainContext,x,y,currentView->dc);
+					}
+					if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
+						draw_screen(b);
+				}
 			}
-			if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
-				draw_screen(b);
+			move(ox-currentView->cx,oy-currentView->cy);
 		}
-		move(ox-currentView->cx,oy-currentView->cy);
 	}
 	return 0;
 }
@@ -542,6 +555,7 @@ int draw_screen(int b)
 	check=cache;
 	SDLClip(!hidden);
 
+	
 	while ((y<h)&&(!by)) {
 		x=bx=0;
 		while (x<w) {
@@ -556,8 +570,9 @@ int draw_screen(int b)
 			else {
 				by=y; break;
 			} 
-			if ((!tileMode)&&((tsx!=1)||(tsy!=1)))
+			if TILE_MODE
 				i+=256;
+			
 			if ((!cacheOk)||(*check!=i)) {
 				SDLCharBlt(MainContext,x,MAP_TOP_OFFSET+y,i);
 			}
@@ -568,6 +583,7 @@ int draw_screen(int b)
 		y+=currentView->ch;
 	}
 	cacheOk=1;
+	
 	if (by) {
 		SDLBox(0,by+MAP_TOP_OFFSET,CONFIG.screenWidth,CONFIG.screenHeight,144);
 		SDLBox(0,by+MAP_TOP_OFFSET,CONFIG.screenWidth,by+MAP_TOP_OFFSET,0);
@@ -578,6 +594,7 @@ int draw_screen(int b)
 		SDLBox(0,h+MAP_TOP_OFFSET,CONFIG.screenWidth,CONFIG.screenHeight,144);
 	} 
 	SDLClip(0);
+
 	if (!hidden) {
 		SDLBox(CONFIG.screenWidth-BUTTON_WIDTH*8-8,MAP_TOP_OFFSET,CONFIG.screenWidth-1,CONFIG.screenHeight,0);
 		SDLContextBlt(MainContext,CONFIG.screenWidth-BUTTON_WIDTH*8-5,MAP_TOP_OFFSET,UpdContext,0,0,BUTTON_WIDTH*8+8,MAP_MENU_HEIGHT-1);
@@ -612,6 +629,7 @@ int do_mode(int m)
 	}
 	map->cw=tile->cw*tsx; map->ch=tile->ch*tsy;
 	/* build characters... */
+	setpal();
 	for(i=0;i<256;i++) {
 		SDLRebuildChar(i,tile->cw,tile->ch);
 		SDLClear(clut[0]);
@@ -637,9 +655,27 @@ int do_mode(int m)
 			SDLRebuildChar(256+i,0,0);
 		}
 	}
+	setdefaultpal();
+
 	SDLSetContext(MainContext);
 
 	return 1;
+}
+
+void plot_draw_char(int x, int y, unsigned char c) {
+	char * dat;
+	int clr;
+	int m;
+
+	m=get_8x8_mode(mode);
+	SDLBox(x,y,x+7,y+7,clut[0]);
+	
+	if (mode>=6) {
+		dat=(char *)(font+(c&63)*8+base);
+		clr=(c>>6)+1;
+		SDLCharEngine(x,y,c&63,1,clut[clr],(unsigned char *)dat);
+	} else
+		SDLmap_plotchr(x,y,c,m,font);
 }
 
 /*===========================================================================
@@ -656,7 +692,7 @@ int draw_header(int update)
 	SDLNoUpdate();
 	SDLBox(0,6,CONFIG.screenWidth-1,22,144);
 	SDLHLine(0,CONFIG.screenWidth-1,14,0);
-	if (!tileMode) {
+	if (!tileEditMode) {
 		SDLstring(8,6,"Map Editor - ");
 		if ((currentView->w>999)||(currentView->h>999))
 			sprintf(buf,"Mode %02d [%05dx%05d]",mode,currentView->w,currentView->h);
@@ -667,13 +703,15 @@ int draw_header(int update)
 		sprintf(buf,"Size [%02dx%02d]",tsx,tsy);
 	}
 	SDLstring(8,15,buf);
-	if ((!tileMode)&&((tsx>1)||(tsy>1))) {
+	if TILE_MODE {
 		sprintf(buf,"Tile: %03d",currentView->dc);
 		SDLstring(CONFIG.screenWidth-92,15,buf);
 	} else {
 		SDLstring(CONFIG.screenWidth-92,15,"Draw Char:");
 
-		SDLmap_plotchr(CONFIG.screenWidth-12,15,currentView->dc,m,font);
+		setpal();
+		plot_draw_char(CONFIG.screenWidth-12, 15, currentView->dc);
+		setdefaultpal();
 	}
 	curs_pos();
 	return 1;
@@ -698,7 +736,7 @@ int do_map()
 	map_panel();
 	draw_screen(1);
 	cacheOk=0;
-	tm=0;
+	typeMode=0;
 
 	do {
 		SDLUpdate();
@@ -719,7 +757,7 @@ int do_map()
 								  (sym==SDLK_UP)||(sym==SDLK_DOWN)) {
 							  done=map_command(ch,sym);
 						  } else if (ch) {
-							  if (tm) {
+							  if (typeMode) {
 								  ch=stoa(ch);
 								  if ((event.key.keysym.mod&KMOD_ALT))
 									  ch+=128;
@@ -729,15 +767,15 @@ int do_map()
 						  break;
 					  }
 			case SDL_MOUSEBUTTONDOWN: {
-							  int mx,my;
-							  mx=SDLTranslateClick(event.button.x);
-							  my=SDLTranslateClick(event.button.y);
-							  down=event.button.button;
-							  if (down==3)
-								  SDLUpdate();
-							  done=map_click(mx,my,event.button.button==1,&down);
-							  break;
-						  }
+				int mx,my;
+				mx=SDLTranslateClick(event.button.x);
+				my=SDLTranslateClick(event.button.y);
+				down=event.button.button;
+				if (down==3)
+					SDLUpdate();
+				done=map_click(mx,my,event.button.button==1,&down);
+				break;
+			}
 			case SDL_MOUSEMOTION: {
 						      if (down) {
 							      int mx,my,ox,oy;
