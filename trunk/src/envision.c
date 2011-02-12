@@ -44,6 +44,8 @@ int orit[8]={128,64,32,16,8,4,2,1};
 int andit[8]={127,191,223,239,247,251,253,254};
 
 char * preferences_filepath;
+char commands_allowed[64];
+
 
 config CONFIG;
 
@@ -115,6 +117,21 @@ void setdefaultpal()
 		//SDLsetPalette(x,(colortable[x]>>16)&0xff,(colortable[x]>>8)&0xff,(colortable[x])&0xff);
 		SDLsetPalette(x,colortable_default[x*3],colortable_default[x*3+1],colortable_default[x*3+2]);
 	}
+}
+
+void set_allowed_commands(int * cmds, int cmdcnt)
+{
+	int i;
+	for (i=1; i<=cmdcnt; i++)
+		commands_allowed[i-1]=cmds[i];
+	commands_allowed[cmdcnt]='\0';
+	
+}
+
+int is_command_allowed(int cmd)
+{
+	if (strchr(commands_allowed,cmd)) return 1;
+	return 0;
 }
 
 /*===========================================================================
@@ -669,6 +686,9 @@ int setup(int zoom, int fullScreen)
 	map->dc=1;
 	map->cx=map->cy=map->scx=map->scy=0;
 	map->map=(unsigned char *)malloc(map->w*map->h);
+	map->mask=(unsigned char *)malloc(map->w*map->h);
+	
+	memset(map->mask,0,map->w*map->h);
 	memset(map->map,0,map->w*map->h);
 	for(i=0;i<256;i++)
 		map->map[i]=i;

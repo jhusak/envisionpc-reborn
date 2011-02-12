@@ -729,9 +729,7 @@ int get_8x8_mode(int m)
  *==========================================================================*/
 int select_draw(char *title)
 {
-	int i,sx,sy,yp,clr;
-	int m=get_8x8_mode(mode);
-    char * dat;
+	int i,sx,sy,yp;
 	SDL_Event evt;
 
 	SDLNoUpdate();
@@ -819,6 +817,39 @@ int get_number(char *title, int def, int max)
 	return i;
 }
 
+
+unsigned char * resize_map(view * map_view, unsigned char * map_data, int x, int y) {
+	unsigned char * look, * newmap, *result;
+	int loop, i;
+	
+	look=newmap=map_data;
+	if (x<map_view->w) {
+		for(loop=0;loop<map_view->h;loop++) {
+			for(i=0;i<x;i++)
+				*look++=*newmap++;
+			newmap+=map_view->w-x;
+		}
+	}
+	newmap=(unsigned char *)realloc(map_data,x*y);
+	if (newmap) {
+		result=newmap;
+		if (x>map_view->w) {
+			look=result+x*y-map_view->w*map_view->h;
+			memmove(look,result,map_view->w*map_view->h);
+			for(loop=0;loop<map_view->h;loop++)
+				for(i=0;i<x;i++)
+					if (i<map_view->w) *newmap++=*look++;
+					else *newmap++=0;
+		}
+		if (x*y>map_view->w*map_view->h)
+			memset(result+map_view->w*map_view->h,0,x*y-map_view->w*map_view->h);
+	} else {
+		error_dialog("Cannot allocate new map");
+		return NULL;
+	}
+	return result;
+}
+
 /*===========================================================================
  * do_size
  * resize a map
@@ -827,9 +858,9 @@ int get_number(char *title, int def, int max)
  *==========================================================================*/
 int do_size(int tile_mode)
 {
-	int i, x, y, loop, tmax;
+	int x, y, loop, tmax;
 	char buf[16], *size;
-	unsigned char *newmap,*look;
+	
 	if (tile_mode) {
 		tile_mode=8; tmax=16;
 	} else tmax=65536;
@@ -883,33 +914,23 @@ int do_size(int tile_mode)
 	}
 	if ((map->w==x)&&(map->h==y)) goto exit;
 	
-	look=newmap=map->map;
-	if (x<map->w) {
-		for(loop=0;loop<map->h;loop++) {
-			for(i=0;i<x;i++)
-				*look++=*newmap++;
-			newmap+=map->w-x;
-		}
-	}
-	newmap=(unsigned char *)realloc(map->map,x*y);
-	if (newmap) {
-		if (x>map->w) {
-			map->map=newmap;
-			look=newmap+x*y-map->w*map->h;
-			memmove(look,newmap,map->w*map->h);
-			for(loop=0;loop<map->h;loop++)
-				for(i=0;i<x;i++)
-					if (i<map->w) *map->map++=*look++;
-					else *map->map++=0;
-		}
-		if (x*y>map->w*map->h)
-			memset(newmap+map->w*map->h,0,x*y-map->w*map->h);
-		map->map=newmap;
+	unsigned char * result_map=resize_map(map, map->map, x, y);
+	unsigned char * result_mask=resize_map(map, map->mask, x, y);
+	
+	if (result_map && result_mask)
+	{
+		map->map=result_map;
+		map->mask=result_mask;
 		map->w=x;
 		map->h=y;
 	} else {
-		error_dialog("Cannot allocate new map");
+		if (!result_map)  error_dialog("Failed to realloc map");
+		if (!result_mask)  error_dialog("Failed to realloc mask");
+		// possible bug here - map was reallocated and mask not.
+		// inconsistency between mask and map
 	}
+		
+	
 	map->cx=map->cy=map->scx=map->scy=0;
 	
 exit:

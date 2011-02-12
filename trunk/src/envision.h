@@ -8,18 +8,19 @@
 #include <stdio.h>
 
 typedef struct opt {
-  char *disk_image;
-  int write_tp;
-  int base, step;
+	char *disk_image;
+	int write_tp;
+	int base, step;
 } opt;
 
 typedef struct view {
-  int w, h;     /* map width, height */
-  int scx, scy; /* Upper left corner of screen */
-  int cx, cy;   /* Cursor offset from upper left */
-  int cw, ch;   /* Cursor width, height */
-  int dc;       /* draw color */
-  unsigned char *map;
+	int w, h;     /* map width, height */
+	int scx, scy; /* Upper left corner of screen */
+	int cx, cy;   /* Cursor offset from upper left */
+	int cw, ch;   /* Cursor width, height */
+	int dc;       /* draw color */
+	unsigned char *map;
+	unsigned char *mask;
 } view;
 
 typedef struct runtime_storage
@@ -83,6 +84,9 @@ typedef struct rgb_color {
 #define TILE_MODE ((!tileEditMode)&&((tsx>1)||(tsy>1)))
 #define NOT_TILE_MODE (!TILE_MODE)
 
+#define MASK_EDIT_MODE (maskEditMode)
+#define NOT_MASK_EDIT_MODE (!maskEditMode)
+
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 
 extern config CONFIG;
@@ -90,6 +94,7 @@ extern int MAP_MENU_HEIGHT;
 extern int bank;
 extern rgb_color colortable[256];
 extern runtime_storage RUNTIME_STORAGE;
+extern char commands_allowed[64];
 
 int title();
 
@@ -107,6 +112,8 @@ char stoa(char s);
 int tile_size(int w, int h);
 int raisedbox(int x, int y, int w, int h);
 int do_defaults();
+unsigned char * resize_map(view * map_view, unsigned char * map_data, int x, int y);
+
 
 
 int do_mode(int m);
@@ -138,6 +145,9 @@ void setpal();
 void setdefaultpal();
 int draw_edit();
 int update_font(int b);
+void set_allowed_commands(int * cmds, int cmdcnt);
+int is_command_allowed(int cmd);
+
 
 
 
@@ -178,4 +188,5 @@ extern int cmds[32];
 extern int mode, ratio;
 extern int base;
 extern int tsx, tsy, tileEditMode;
+extern int maskEditMode;
 extern unsigned long s1,s2;

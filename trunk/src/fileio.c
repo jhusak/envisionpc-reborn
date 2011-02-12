@@ -537,11 +537,15 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 		clut[4]=head[9];
 		
 	}
-	if (map->map) {
-    free(map->map);
-  }
-  map->map=(unsigned char *)malloc(map->w*map->h);
-  fread(map->map,map->w*map->h,1,in);
+	if (map->map) { free(map->map); }
+	if (map->mask) { free(map->mask); }
+	
+	map->mask=(unsigned char *)malloc(map->w*map->h);
+	memset(map->mask,0,map->w*map->h);
+	
+	map->map=(unsigned char *)malloc(map->w*map->h);
+	
+	fread(map->map,map->w*map->h,1,in);
 	
 	if (!raw) {
 		fread(font,1024,1,in);
@@ -722,16 +726,19 @@ view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int 
 		clut[3]=head[8];
 		clut[4]=head[9];
 	}
-  if (map->map) {
-    free(map->map);
-  }
-  map->map=(unsigned char *)malloc(map->w*map->h+1034);
-  i=read_xfd_font(image,file,map->map,map->w*map->h+1034);
-  if (i<0) return NULL;
+	if (map->map) { free(map->map); }
+	if (map->mask) { free(map->mask); }
+	
+	map->mask=(unsigned char *)malloc(map->w*map->h);
+	memset(map->mask,0,map->w*map->h);
+	
+	map->map=(unsigned char *)malloc(map->w*map->h+1034);
+	i=read_xfd_font(image,file,map->map,map->w*map->h+1034);
+	if (i<0) return NULL;
 	if (!raw) {
 		memmove(map->map,map->map+10,map->w*map->h);
 		memcpy(font,map->map+10+map->w*map->h,1024);
 	}
-  return map;
+	return map;
 }
 /*=========================================================================*/

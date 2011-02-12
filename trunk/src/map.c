@@ -20,6 +20,7 @@ int mode, hidden, ratio; /* ANTIC mode, menu shown flag, replace ratio */
 int base; /* character base */
 int tsx, tsy; /* tile width, height */
 int cacheOk, tileEditMode; /* cache valid flag, tile edit mode flag */
+int maskEditMode; /* mask mode edit flag */
 unsigned char *cache; /* cache */
 SDL_Surface *charTable[512];
 
@@ -115,25 +116,37 @@ int map_panel()
 	SDLClear(0);
 	
 	int cmdcnt=0;
-	drawbutton(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
-	drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
-	drawbutton(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
-	drawbutton(0,cmdcnt*10,"ShiftBase*up");	cmds[++cmdcnt]='u';
-	drawbutton(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
-	drawbutton(0,cmdcnt*10,"*find");	cmds[++cmdcnt]='f';
-	drawbutton(0,cmdcnt*10,"*draw char"); cmds[++cmdcnt]='d';
-	drawbutton(0,cmdcnt*10,"*save map");	cmds[++cmdcnt]='s';
-	drawbutton(0,cmdcnt*10,"*WriteRawMap");	cmds[++cmdcnt]='w';
-	drawbutton(0,cmdcnt*10,"*load map");	cmds[++cmdcnt]='l';
-	drawbutton(0,cmdcnt*10,"*Read RawMap");	cmds[++cmdcnt]='R';
-	drawbutton(0,cmdcnt*10,"*clear map");	cmds[++cmdcnt]='c';
-	drawbutton(0,cmdcnt*10,"*block");	cmds[++cmdcnt]='b';
-	drawbutton(0,cmdcnt*10,"*go to pos.");	cmds[++cmdcnt]='g';
-	drawbutton(0,cmdcnt*10,"Ret*ile");	cmds[++cmdcnt]='i';
-	if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
-	drawbutton(0,cmdcnt*10,"*hide");	cmds[++cmdcnt]='h';
+	if NOT_MASK_EDIT_MODE {
+		drawbutton(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
+		drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
+		drawbutton(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
+		drawbutton(0,cmdcnt*10,"ShiftBase*up");	cmds[++cmdcnt]='u';
+		drawbutton(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
+		drawbutton(0,cmdcnt*10,"*find");	cmds[++cmdcnt]='f';
+		drawbutton(0,cmdcnt*10,"*draw char"); cmds[++cmdcnt]='d';
+		drawbutton(0,cmdcnt*10,"*load map");	cmds[++cmdcnt]='l';
+		drawbutton(0,cmdcnt*10,"*Read RawMap");	cmds[++cmdcnt]='R';
+		drawbutton(0,cmdcnt*10,"*save map");	cmds[++cmdcnt]='s';
+		drawbutton(0,cmdcnt*10,"*WriteRawMap");	cmds[++cmdcnt]='w';
+		drawbutton(0,cmdcnt*10,"*clear map");	cmds[++cmdcnt]='c';
+		drawbutton(0,cmdcnt*10,"*block");	cmds[++cmdcnt]='b';
+		drawbutton(0,cmdcnt*10,"Ret*ile");	cmds[++cmdcnt]='i';
+		if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
+	} else {
+		drawbutton(0,cmdcnt*10,"*Read RawMask");	cmds[++cmdcnt]='R';
+		drawbutton(0,cmdcnt*10,"*WriteRawMsk");	cmds[++cmdcnt]='w';
+		drawbutton(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
+		drawbutton(0,cmdcnt*10,"*clear mask");	cmds[++cmdcnt]='c';
+	}
+	
+	drawbutton(0,cmdcnt*10,"*go to XY");	cmds[++cmdcnt]='g';
+	if NOT_MASK_EDIT_MODE { drawbutton(0,cmdcnt*10,"M*ask edit");	cmds[++cmdcnt]='a';}
+		drawbutton(0,cmdcnt*10,"*hide");	cmds[++cmdcnt]='h';
 	// wolne:0-9ajknopqvxy
 	MAP_MENU_HEIGHT=cmdcnt*10;
+	
+	set_allowed_commands(cmds,cmdcnt);
+	
 	cmds[0]=MAP_MENU_HEIGHT*10+10;
 	SDLSetContext(MainContext);
 	return 1;
@@ -259,13 +272,21 @@ int map_command(int cmd, int sym)
 	if (sym) {
 		switch(sym) {
 			case SDLK_ESCAPE: {
-						  if (!typeMode)
-							  bye();
-						  else {
+						  if (typeMode) {
+							  if (typeMode>1) hidden=0;
 							  typeMode=0;
 							  draw_header(1);
+							  map_panel();
+							  draw_screen(1);
 							  return 0;
-						  }
+						  } else if MASK_EDIT_MODE {
+							  maskEditMode=0;
+							  draw_header(1);
+							  map_panel();
+							  draw_screen(1);
+							  return 0;
+						  } else
+							  bye();
 						  break;
 					  }
 			case SDLK_LEFT: {
@@ -290,78 +311,80 @@ int map_command(int cmd, int sym)
 					}
 		}
 	}
+	
+	if (!is_command_allowed(cmd)) return 0;
 
 	switch (cmd) {
 		case 'h': 
-				  hidden=!hidden;
-				  cacheOk=0;
-				  break;
-			  
+			hidden=!hidden;
+			cacheOk=0;
+			break;
+			
 		case 'f': 
-				  if TILE_MODE
-					  f=currentView->dc=get_number("Tile to replace:", 1,255);
-				  else
-					  f=select_draw("Select character to replace:");
-				  j=currentView->w*currentView->h;
-				  look=currentView->map;
-				  for(i=0;i<j;i++) {
-					  if (*look==f) {
-						  r=(int)(100.0*UNI);
-						  if (r<ratio) *look=currentView->dc;
-					  }
-					  look++;
-				  }
-				  cacheOk=0;
-				  draw_header(0);
-				  break;
-			  
+			if TILE_MODE
+				f=currentView->dc=get_number("Tile to replace:", 1,255);
+			else
+				f=select_draw("Select character to replace:");
+			j=currentView->w*currentView->h;
+			look=currentView->map;
+			for(i=0;i<j;i++) {
+				if (*look==f) {
+					r=(int)(100.0*UNI);
+					if (r<ratio) *look=currentView->dc;
+				}
+				look++;
+			}
+			cacheOk=0;
+			draw_header(0);
+			break;
+			
 		case 'c': 
-				  if (ratio==100) {
-					  memset(currentView->map,currentView->dc,currentView->w*currentView->h);
-				  } else {
-					  j=currentView->w*currentView->h;
-					  look=currentView->map;
-					  for(i=0;i<j;i++) {
-						  r=(int)(100.0*UNI);
-						  if (r<ratio) *look=currentView->dc;
-						  look++;
-					  }
-				  }
-				  cacheOk=0;
-				  break;
-			  
+			if (ratio==100) {
+				memset(currentView->map,currentView->dc,currentView->w*currentView->h);
+			} else {
+				j=currentView->w*currentView->h;
+				look=currentView->map;
+				for(i=0;i<j;i++) {
+					r=(int)(100.0*UNI);
+					if (r<ratio) *look=currentView->dc;
+					look++;
+				}
+			}
+			cacheOk=0;
+			break;
+			
 		case 'r': 
-				  ratio=get_number("Enter ratio:",ratio,100);
-				  return 0;
-			  
+			ratio=get_number("Enter ratio:",ratio,100);
+			return 0;
+			
 		case 'd': 
-				  if TILE_MODE
-					  currentView->dc=get_number("New draw tile:", currentView->dc,255);
-				  else
-					  currentView->dc=select_draw("Select or type new draw char:");
-				  draw_header(0);
-				  cacheOk=0;
-				  break;
-			  
+			if TILE_MODE
+				currentView->dc=get_number("New draw tile:", currentView->dc,255);
+			else
+				currentView->dc=select_draw("Select or type new draw char:");
+			draw_header(0);
+			cacheOk=0;
+			break;
+			
 		case 'm': 
-				  do {
-					  i=get_number("Enter ANTIC mode:",mode,-1);
-				  } while ((i>=0)&&((i<2)||(i>7)));
-				  if (mode==i) return 0;
-				  if (i>0) {
-					  currentView->cx=currentView->cy=currentView->scx=currentView->scy=0;
-					  mode=i;
-					  draw_header(0);
-					  do_mode(mode);
-				  }
-				  break;
-			  
+			do {
+				i=get_number("Enter ANTIC mode:",mode,-1);
+			} while ((i>=0)&&((i<2)||(i>7)));
+			if (mode==i) return 0;
+			if (i>0) {
+				currentView->cx=currentView->cy=currentView->scx=currentView->scy=0;
+				mode=i;
+				draw_header(0);
+				do_mode(mode);
+			}
+			break;
+			
 		case 'z': 
-				  do_size(tileEditMode);
-				  draw_header(0);
-				  cacheOk=0;
-				  break;
-			  
+			do_size(tileEditMode);
+			draw_header(0);
+			cacheOk=0;
+			break;
+			
 		case 'i': {
 			int itsx, itsy;
 			if (tileEditMode) {
@@ -393,14 +416,14 @@ int map_command(int cmd, int sym)
 		}
 		case 'u':
 			
-				  if (base) base=0;
-				  else base=64*8;
-				  do_mode(mode);
-				  break;
-			  
+			if (base) base=0;
+			else base=64*8;
+			do_mode(mode);
+			break;
+			
 		case 'e': 
-				  return 1;
-			  
+			return 1;
+			
 		case 's':
 			fname=get_filename("Save map:",options.disk_image,RUNTIME_STORAGE.save_map_file_name);
 			if (fname) {
@@ -440,34 +463,42 @@ int map_command(int cmd, int sym)
 			break;
 			
 		case 't': 
-				  if TILE_MODE
-				  {
-					  info_dialog("Type mode only in char mode!");
-					  break;
-				  }
-				  typeMode=1;
-			      SDLNoUpdate();
-				  SDLBox(CONFIG.screenWidth-92,15,CONFIG.screenWidth-1,22,144);
-				  SDLstring(CONFIG.screenWidth-92,15,"Type Mode");
-			      SDLUpdate();
-				  cacheOk=0;
-				  hidden=1;
-				  break;
-			  
+			if TILE_MODE
+			{
+				info_dialog("Type mode only in char mode!");
+				break;
+			}
+			typeMode=1;
+			if (!hidden) typeMode++;
+			SDLNoUpdate();
+			SDLBox(CONFIG.screenWidth-92,15,CONFIG.screenWidth-1,22,144);
+			SDLstring(CONFIG.screenWidth-92,15,"Type Mode");
+			SDLUpdate();
+			cacheOk=0;
+			hidden=1;
+			break;
+			
 		case 'g': 
-				  do_move(currentView,tileEditMode);
-				  cacheOk=0;
-				  curs_pos();
-				  break;
-			  
+			do_move(currentView,tileEditMode);
+			cacheOk=0;
+			curs_pos();
+			break;
+			
 		case 'b': 
-				  set_mapview(!tileEditMode);
-				  if (!cacheOk)
-					  draw_header(0);
-				  break;
+			set_mapview(!tileEditMode);
+			if (!cacheOk)
+				draw_header(0);
+			break;
+		case 'a':
+			maskEditMode=1;
+			// set_mapview(0);
+			map_panel();
+			draw_header(1);
+			draw_screen(1);
+			return 0;
 			  
 		default: 
-				 return 0;
+			return 0;
 			 
 	}
 	draw_screen(1);
@@ -531,7 +562,7 @@ int map_click(int x, int y, int b, int *down)
  * param b: 1 if left mousebutton is pressed
  * returns: nothing useful
  *==========================================================================*/
-int draw_screen(int b)
+int draw_screen(int b) /* b not used in this func */
 {
 	int i,w,h;
 	int x,y,ofs,lx,ly,by,bx;
@@ -694,6 +725,10 @@ int draw_header(int update)
 	SDLHLine(0,CONFIG.screenWidth-1,14,0);
 	if (!tileEditMode) {
 		SDLstring(8,6,"Map Editor - ");
+		if MASK_EDIT_MODE {
+			SDLBox(11*8,6,CONFIG.screenWidth-1,22,144);
+			SDLstring(11*8,6,": Mask Edit Mode");
+		}
 		if ((currentView->w>999)||(currentView->h>999))
 			sprintf(buf,"Mode %02d [%05dx%05d]",mode,currentView->w,currentView->h);
 		else

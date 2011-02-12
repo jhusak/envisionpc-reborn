@@ -205,6 +205,13 @@ int tile_map(int itsx, int itsy, view *map, view *tiles) {
   newmap=(unsigned char *)realloc(map->map,w*h);
   map->map=newmap;
   memcpy(newmap,tiled,w*h);
+	
+	newmap=(unsigned char *)realloc(map->mask,w*h);
+	map->mask=newmap;
+	memset(map->mask,0,w*h);
+	
+	
+
 
   killTable(table);
   free(tiled);
@@ -219,38 +226,41 @@ int tile_map(int itsx, int itsy, view *map, view *tiles) {
  * returns: flag indicating success
  *==========================================================================*/
 int untile_map(view *map, view *tiles) {
-  int num;
-  int mx,my,tx,ty,w,h,i,j;
-  unsigned char *tiled,*look,*tile,*newmap,*walk;
+	int num;
+	int mx,my,tx,ty,w,h,i,j;
+	unsigned char *tiled,*look,*tile,*newmap,*walk;
+	
+	w=map->w;
+	h=map->h;
+	look=tiled=(unsigned char *)malloc(w*h);
+	memcpy(tiled,map->map,w*h);
+	
+	map->w*=tsx; map->h*=tsy;
+	map->cx=map->cy=map->scx=map->scy=0;
+	newmap=(unsigned char *)realloc(map->map,map->w*map->h);
+	map->map=newmap;
+	newmap=(unsigned char *)realloc(map->mask,map->w*map->h);
+	map->mask=newmap;
+	memset(map->mask,0,map->w*map->h);
 
-  w=map->w;
-  h=map->h;
-  look=tiled=(unsigned char *)malloc(w*h);
-  memcpy(tiled,map->map,w*h);
-
-  map->w*=tsx; map->h*=tsy;
-  map->cx=map->cy=map->scx=map->scy=0;
-  newmap=(unsigned char *)realloc(map->map,map->w*map->h);
-  map->map=newmap;
-
-  for(ty=0;ty<h;ty++) {
-    for(tx=0;tx<w;tx++) {
-      num=*look++;
-      my=num/16;
-      mx=num-my*16;
-      tile=tiles->map+mx*tsx+my*tsy*tsx*16;
-      walk=map->map+tx*tsx+ty*tsy*map->w;
-      for(i=0;i<tsy;i++) {
-        for(j=0;j<tsx;j++) {
-	  *walk++=*tile++;
-        }
-        walk+=map->w-tsx;
-	tile+=tsx*15;
-      }
-    }
-  }  
-  free(tiled);
-  tile_size(1,1);
-  return 1;
+	for(ty=0;ty<h;ty++) {
+		for(tx=0;tx<w;tx++) {
+			num=*look++;
+			my=num/16;
+			mx=num-my*16;
+			tile=tiles->map+mx*tsx+my*tsy*tsx*16;
+			walk=map->map+tx*tsx+ty*tsy*map->w;
+			for(i=0;i<tsy;i++) {
+				for(j=0;j<tsx;j++) {
+					*walk++=*tile++;
+				}
+				walk+=map->w-tsx;
+				tile+=tsx*15;
+			}
+		}
+	}  
+	free(tiled);
+	tile_size(1,1);
+	return 1;
 }
 /*==========================================================================*/
