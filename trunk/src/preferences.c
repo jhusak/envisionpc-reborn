@@ -176,7 +176,7 @@ CONFIG_ENTRY * find_config_entry(char * name) {
 int getprefs()
 {
 	FILE * fd;
-	int res,i;
+	int res;
 	char * preffilename=get_preferences_filepath();
 
 	res=1;
@@ -188,8 +188,7 @@ int getprefs()
 		if (!res) set_error("Cannot open preferences file.");
 		return 0;
 	}
-	// iterate through CONFIG_ENTRIES
-	
+x	
 	while (EOF!=readpref(fd));
 
 	fclose(fd);

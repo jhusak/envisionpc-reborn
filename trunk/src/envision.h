@@ -20,7 +20,7 @@ typedef struct view {
 	int cw, ch;   /* Cursor width, height */
 	int dc;       /* draw color */
 	unsigned char *map;
-	unsigned char *mask;
+//	unsigned char *mask;
 } view;
 
 typedef struct runtime_storage
@@ -112,7 +112,7 @@ char stoa(char s);
 int tile_size(int w, int h);
 int raisedbox(int x, int y, int w, int h);
 int do_defaults();
-unsigned char * resize_map(view * map_view, unsigned char * map_data, int x, int y);
+unsigned char * resize_map(view * map_view, int x, int y);
 
 
 
@@ -178,7 +178,7 @@ int unpack(unsigned char *look, int xs, int ys);
 
 char * get_preferences_filepath();
 
-extern view *currentView, *map, *tile;
+extern view *currentView, *map, *tile, *mask;
 extern unsigned char *dfont, *font, *cache;
 extern int echr, cacheOk;
 extern opt options;

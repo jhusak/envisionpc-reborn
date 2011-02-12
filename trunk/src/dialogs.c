@@ -818,11 +818,11 @@ int get_number(char *title, int def, int max)
 }
 
 
-unsigned char * resize_map(view * map_view, unsigned char * map_data, int x, int y) {
+unsigned char * resize_map(view * map_view, int x, int y) {
 	unsigned char * look, * newmap, *result;
 	int loop, i;
 	
-	look=newmap=map_data;
+	look=newmap=map_view->map;
 	if (x<map_view->w) {
 		for(loop=0;loop<map_view->h;loop++) {
 			for(i=0;i<x;i++)
@@ -830,7 +830,7 @@ unsigned char * resize_map(view * map_view, unsigned char * map_data, int x, int
 			newmap+=map_view->w-x;
 		}
 	}
-	newmap=(unsigned char *)realloc(map_data,x*y);
+	newmap=(unsigned char *)realloc(map_view->map,x*y);
 	if (newmap) {
 		result=newmap;
 		if (x>map_view->w) {
@@ -914,15 +914,16 @@ int do_size(int tile_mode)
 	}
 	if ((map->w==x)&&(map->h==y)) goto exit;
 	
-	unsigned char * result_map=resize_map(map, map->map, x, y);
-	unsigned char * result_mask=resize_map(map, map->mask, x, y);
+	unsigned char * result_map=resize_map(map, x, y);
+	unsigned char * result_mask=resize_map(mask, x, y);
 	
 	if (result_map && result_mask)
 	{
 		map->map=result_map;
-		map->mask=result_mask;
-		map->w=x;
-		map->h=y;
+		mask->map=result_mask;
+		map->w=mask->w=x;
+		map->h=mask->h=y;
+		
 	} else {
 		if (!result_map)  error_dialog("Failed to realloc map");
 		if (!result_mask)  error_dialog("Failed to realloc mask");

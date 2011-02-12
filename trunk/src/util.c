@@ -202,17 +202,17 @@ int tile_map(int itsx, int itsy, view *map, view *tiles) {
   map->w=w;
   map->h=h;
   map->cx=map->cy=map->scx=map->scy=0;
-  newmap=(unsigned char *)realloc(map->map,w*h);
+	mask->w=w;
+	mask->h=h;
+	mask->cx=mask->cy=mask->scx=mask->scy=0;
+	newmap=(unsigned char *)realloc(map->map,w*h);
   map->map=newmap;
   memcpy(newmap,tiled,w*h);
 	
-	newmap=(unsigned char *)realloc(map->mask,w*h);
-	map->mask=newmap;
-	memset(map->mask,0,w*h);
+	newmap=(unsigned char *)realloc(mask->map,w*h);
+	mask->map=newmap;
+	memset(mask->map,0,w*h);
 	
-	
-
-
   killTable(table);
   free(tiled);
   return 1;
@@ -237,11 +237,13 @@ int untile_map(view *map, view *tiles) {
 	
 	map->w*=tsx; map->h*=tsy;
 	map->cx=map->cy=map->scx=map->scy=0;
+	mask->w=map->w; mask->h=map->h;
+	mask->cx=mask->cy=mask->scx=mask->scy=0;
 	newmap=(unsigned char *)realloc(map->map,map->w*map->h);
 	map->map=newmap;
-	newmap=(unsigned char *)realloc(map->mask,map->w*map->h);
-	map->mask=newmap;
-	memset(map->mask,0,map->w*map->h);
+	newmap=(unsigned char *)realloc(mask->map,mask->w*mask->h);
+	mask->map=newmap;
+	memset(mask->map,0,mask->w*mask->h);
 
 	for(ty=0;ty<h;ty++) {
 		for(tx=0;tx<w;tx++) {

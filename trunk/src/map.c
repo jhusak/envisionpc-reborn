@@ -14,7 +14,7 @@
 #include "SDLemu.h"
 #include "envision.h"
 
-view *currentView, *map, *tile; /* display, map, tile */
+view *currentView, *map, *tile, *mask; /* display, map, tile */
 int typeMode; /* typing mode flag */
 int mode, hidden, ratio; /* ANTIC mode, menu shown flag, replace ratio */
 int base; /* character base */
@@ -44,14 +44,18 @@ unsigned long s1, s2;
 int draw_cursor() {
 	if (hidden) SDLClip(2);
 	else SDLClip(1);
-
-	SDLXORBox(currentView->cx*currentView->cw,MAP_TOP_OFFSET+currentView->cy*currentView->ch,currentView->cx*currentView->cw+currentView->cw-1,MAP_TOP_OFFSET+currentView->cy*currentView->ch+currentView->ch-1);
+	if NOT_MASK_EDIT_MODE
+		SDLXORBox(currentView->cx*currentView->cw,MAP_TOP_OFFSET+currentView->cy*currentView->ch,currentView->cx*currentView->cw+currentView->cw-1,MAP_TOP_OFFSET+currentView->cy*currentView->ch+currentView->ch-1);
+	else
+		SDLXORDottedBox(currentView->cx*currentView->cw,MAP_TOP_OFFSET+currentView->cy*currentView->ch,currentView->cx*currentView->cw+currentView->cw-1,MAP_TOP_OFFSET+currentView->cy*currentView->ch+currentView->ch-1);
 	// draw hollow box
 	if ((tileEditMode) &&((tsx>1)||(tsy>1))) {
 		int tx, ty;
 		tx=(((currentView->cx+(currentView->scx%tsx))/tsx)*tsx)-currentView->scx%tsx;
 		ty=(((currentView->cy+(currentView->scy%tsy))/tsy)*tsy)-currentView->scy%tsy;
 		SDLXORHollowBox(tx*currentView->cw,MAP_TOP_OFFSET+ty*currentView->ch,tx*currentView->cw+currentView->cw*tsx-1,MAP_TOP_OFFSET+ty*currentView->ch+currentView->ch*tsy-1);
+
+
 	}
 	SDLClip(0);
 	return 1;
@@ -134,13 +138,13 @@ int map_panel()
 		if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
 	} else {
 		drawbutton(0,cmdcnt*10,"*Read RawMask");	cmds[++cmdcnt]='R';
-		drawbutton(0,cmdcnt*10,"*WriteRawMsk");	cmds[++cmdcnt]='w';
+		drawbutton(0,cmdcnt*10,"*Write RawMsk");	cmds[++cmdcnt]='w';
 		drawbutton(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
 		drawbutton(0,cmdcnt*10,"*clear mask");	cmds[++cmdcnt]='c';
 	}
 	
 	drawbutton(0,cmdcnt*10,"*go to XY");	cmds[++cmdcnt]='g';
-	if NOT_MASK_EDIT_MODE { drawbutton(0,cmdcnt*10,"M*ask edit");	cmds[++cmdcnt]='a';}
+	if (NOT_MASK_EDIT_MODE && !tileEditMode)  { drawbutton(0,cmdcnt*10,"M*ask edit");	cmds[++cmdcnt]='a';}
 		drawbutton(0,cmdcnt*10,"*hide");	cmds[++cmdcnt]='h';
 	// wolne:0-9ajknopqvxy
 	MAP_MENU_HEIGHT=cmdcnt*10;
@@ -486,6 +490,7 @@ int map_command(int cmd, int sym)
 			
 		case 'b': 
 			set_mapview(!tileEditMode);
+			map_panel();
 			if (!cacheOk)
 				draw_header(0);
 			break;
@@ -494,8 +499,9 @@ int map_command(int cmd, int sym)
 			// set_mapview(0);
 			map_panel();
 			draw_header(1);
-			draw_screen(1);
-			return 0;
+			break;
+			//draw_screen(1);
+			//return 0;
 			  
 		default: 
 			return 0;
@@ -510,11 +516,12 @@ int map_command(int cmd, int sym)
  * process a mouse click
  * param x: x position of the mouse
  * param y: y position of the mouse
- * param b: 1 if left mousebutton is pressed
+ * param bleft: 1 if left mousebutton is pressed
+ * param bright: 1 if left mousebutton is pressed
  * param down: returns mouse button status
  * returns: 0 if user is exiting map screen
  *==========================================================================*/
-int map_click(int x, int y, int b, int *down)
+int map_click(int x, int y, int bleft, int bright, int *down)
 {
 	int i,ox,oy;
 
@@ -534,20 +541,47 @@ int map_click(int x, int y, int b, int *down)
 			return 0;
 		// witn this "if" works much better, but still not in edit tile mode
 		if (ox!=currentView->cx || oy!=currentView->cy) {
-			if ((b)&&(!typeMode)) {
-				// with this "if" works very well.
-				if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=currentView->dc)
-				{
-					currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=currentView->dc;
-					x=x*currentView->cw;
-					y=MAP_TOP_OFFSET+i*currentView->ch;
-					if TILE_MODE {
-						SDLCharBlt(MainContext,x,y,currentView->dc+256);
-					} else {
-						SDLCharBlt(MainContext,x,y,currentView->dc);
+			if (bleft || bright) {
+				if (!typeMode) {
+					if NOT_MASK_EDIT_MODE {
+						// with this "if" works very well.
+						if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=currentView->dc)
+						{
+							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=currentView->dc;
+							x=x*currentView->cw;
+							y=MAP_TOP_OFFSET+i*currentView->ch;
+							if TILE_MODE {
+								SDLCharBlt(MainContext,x,y,currentView->dc+256);
+							} else {
+								SDLCharBlt(MainContext,x,y,currentView->dc);
+							}
+							if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
+								draw_screen(bleft);
+						}
 					}
-					if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
-						draw_screen(b);
+					if MASK_EDIT_MODE {
+						// with this "if" works very well.
+						int setmaskfield;
+						if (bright) setmaskfield=0;
+						if (bleft) setmaskfield=1;
+						
+						if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=setmaskfield)
+						{
+							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=setmaskfield;
+							if (setmaskfield) draw_cursor();
+							x=x*currentView->cw;
+							y=MAP_TOP_OFFSET+i*currentView->ch;
+//							if TILE_MODE {
+//								SDLCharBlt(MainContext,x,y,currentView->dc+256);
+//							} else {
+//								SDLCharBlt(MainContext,x,y,currentView->dc);
+//							}
+							//if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
+								draw_screen(1);
+							// draw_mask();
+						}
+					}
+					
 				}
 			}
 			move(ox-currentView->cx,oy-currentView->cy);
@@ -808,7 +842,7 @@ int do_map()
 				down=event.button.button;
 				if (down==3)
 					SDLUpdate();
-				done=map_click(mx,my,event.button.button==1,&down);
+				done=map_click(mx,my,event.button.button==1,event.button.button==3,&down);
 				break;
 			}
 			case SDL_MOUSEMOTION: {
@@ -819,7 +853,7 @@ int do_map()
 							      oy=(my-MAP_TOP_OFFSET)/currentView->ch;
 							      ox=mx/currentView->cw;
 							      if (((hidden)||(mx<CONFIG.screenWidth-BUTTON_WIDTH*8-6))&&((ox!=currentView->cx)||(oy!=currentView->cy))) {
-								      done=map_click(mx,my,down==1,&down);
+								      done=map_click(mx,my,down==1,down==3,&down);
 							      }
 						      }
 						      break;
