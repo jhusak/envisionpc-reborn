@@ -530,6 +530,10 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 		map->cw=map->ch=0;
 		map->w=head[1]+head[2]*256;
 		map->h=head[3]+head[4]*256;
+		mask->cx=mask->cy=mask->scx=mask->scy=0;
+		mask->cw=mask->ch=0;
+		mask->w=map->w;
+		mask->h=map->h;
 		clut[0]=head[5];
 		clut[1]=head[6];
 		clut[2]=head[7];
@@ -538,10 +542,10 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 		
 	}
 	if (map->map) { free(map->map); }
-	if (map->mask) { free(map->mask); }
+	if (mask->map) { free(mask->map); }
 	
-	map->mask=(unsigned char *)malloc(map->w*map->h);
-	memset(map->mask,0,map->w*map->h);
+	mask->map=(unsigned char *)malloc(mask->w*mask->h);
+	memset(mask->map,0,mask->w*mask->h);
 	
 	map->map=(unsigned char *)malloc(map->w*map->h);
 	
@@ -720,6 +724,9 @@ view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int 
 		map->cx=map->cy=map->scx=map->scy=0;
 		map->w=head[1]+head[2]*256;
 		map->h=head[3]+head[4]*256;
+		mask->cx=mask->cy=mask->scx=mask->scy=0;
+		mask->w=map->w;
+		mask->h=map->h;
 		clut[0]=head[5];
 		clut[1]=head[6];
 		clut[2]=head[7];
@@ -727,10 +734,10 @@ view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int 
 		clut[4]=head[9];
 	}
 	if (map->map) { free(map->map); }
-	if (map->mask) { free(map->mask); }
-	
-	map->mask=(unsigned char *)malloc(map->w*map->h);
-	memset(map->mask,0,map->w*map->h);
+	if (mask->map) { free(mask->map); }
+
+	mask->map=(unsigned char *)malloc(mask->w*mask->h);
+	memset(mask->map,0,mask->w*mask->h);
 	
 	map->map=(unsigned char *)malloc(map->w*map->h+1034);
 	i=read_xfd_font(image,file,map->map,map->w*map->h+1034);

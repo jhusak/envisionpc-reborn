@@ -686,9 +686,14 @@ int setup(int zoom, int fullScreen)
 	map->dc=1;
 	map->cx=map->cy=map->scx=map->scy=0;
 	map->map=(unsigned char *)malloc(map->w*map->h);
-	map->mask=(unsigned char *)malloc(map->w*map->h);
 	
-	memset(map->mask,0,map->w*map->h);
+	mask->w=CONFIG.defaultMapWidth; mask->h=CONFIG.defaultMapHeight;
+	mask->ch=mask->cw=8;
+	mask->dc=1;
+	mask->cx=mask->cy=mask->scx=mask->scy=0;
+	mask->map=(unsigned char *)malloc(mask->w*mask->h);
+	
+	memset(mask->map,0,mask->w*mask->h);
 	memset(map->map,0,map->w*map->h);
 	for(i=0;i<256;i++)
 		map->map[i]=i;
