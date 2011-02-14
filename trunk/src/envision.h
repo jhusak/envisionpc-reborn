@@ -90,7 +90,7 @@ typedef struct rgb_color {
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 enum {VIEW_MAP, VIEW_TILE, VIEW_MASK};
 enum {MAP_NO_ALLOC,MAP_ALLOC};
-enum {FILE_NATIVE,FILE_RAWMAP,FILE_RAWMASK};
+enum {FILE_NATIVE,FILE_RAWMAP,FILE_RAWMASK,FILE_RAWBITMASK};
 
 
 extern config CONFIG;
@@ -109,9 +109,11 @@ int do_size(int tile_mode);
 int do_exit();
 int do_move(view *map, int tile_mode);
 int select_draw(char *title);
+int ask(char *msg,char * answers);
+int askNoYes(char *msg);
 int error_dialog(char *error);
 int info_dialog(char *error);
-int message_dialog(char * title, char *error);
+int message_dialog(char * title, char *error, char * answers);
 char stoa(char s);
 int raisedbox(int x, int y, int w, int h);
 int do_defaults();
@@ -161,6 +163,10 @@ view * map_init(int alloc_map, view * map, int width, int height);
 
 
 // fileio.c
+int overwrite( char * fname);
+int xfd_format_if_needed();
+int xfd_file_format (char * fname);
+int xfd_format(FILE * image);
 int read_xfd_font(char *image, char *file, unsigned char *data, int max);
 int write_xfd_font(char *image, char *file, unsigned char *data, int max, FILE *in);
 int write_xfd_data(char *image, char *file, unsigned char *data, int start, int end);

@@ -149,7 +149,7 @@ int map_panel()
 		drawbutton(0,cmdcnt*10,"*write RawMsk");	cmds[++cmdcnt]='w';
 		drawbutton(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
 		drawbutton(0,cmdcnt*10,"*clear mask");	cmds[++cmdcnt]='c';
-		drawbutton(0,cmdcnt*10,"SetFrom*mask");	cmds[++cmdcnt]='m';
+		drawbutton(0,cmdcnt*10,"Set from *map");	cmds[++cmdcnt]='m';
 	}
 	
 	drawbutton(0,cmdcnt*10,"*go to XY");	cmds[++cmdcnt]='g';
@@ -483,25 +483,44 @@ int map_command(int cmd, int sym)
 			} else {
 				fname=get_filename("Save map:",options.disk_image,RUNTIME_STORAGE.save_map_file_name);
 				if (fname) {
-					strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
-					write_map(options.disk_image,fname,font,map,FILE_NATIVE);
+					if (!xfd_format_if_needed()) 
+						if (overwrite(fname)){
+							strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
+							write_map(options.disk_image,fname,font,map,FILE_NATIVE);
+							info_dialog("Map saved.");
+						}
 					free(fname);
 				}
 			}
 			return 0;
 		case 'w':
 			if MASK_EDIT_MODE {
-				fname=get_filename("Write raw mask:",options.disk_image,RUNTIME_STORAGE.save_raw_mask_file_name);
-				if (fname) {
-					strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
-					write_map(options.disk_image,fname,font,map,FILE_RAWMASK);
-					free(fname);
+				int ans;
+				int rawformat=0;
+				ans=ask("Raw mask output format?","Bi*t|*Byte");
+				if (ans==1) rawformat=FILE_RAWBITMASK;
+				if (ans==2) rawformat=FILE_RAWMASK;
+				if (rawformat) {
+					fname=get_filename("Write raw mask:",options.disk_image,RUNTIME_STORAGE.save_raw_mask_file_name);
+					if (fname) {
+						if (!xfd_format_if_needed())
+							if (overwrite(fname)){
+								strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
+								write_map(options.disk_image,fname,font,map,rawformat);
+								info_dialog("Raw mask written.");
+							}
+						free(fname);
+					}
 				}
 			} else {
 				fname=get_filename("Write raw map:",options.disk_image,RUNTIME_STORAGE.save_raw_map_file_name);
 				if (fname) {
-					strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
-					write_map(options.disk_image,fname,font,map,FILE_RAWMAP);
+					if (!xfd_format_if_needed()) 
+						if (overwrite(fname)){
+							strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
+							write_map(options.disk_image,fname,font,map,FILE_RAWMAP);
+							info_dialog("Raw map written.");
+						}
 					free(fname);
 				}
 			}
@@ -519,15 +538,21 @@ int map_command(int cmd, int sym)
 			
 		case 'R':
 			if MASK_EDIT_MODE {
-				fname=get_filename("Read raw mask:",options.disk_image,NULL);
-				if (fname) {
-					strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
-					read_map(options.disk_image,fname,font,map,FILE_RAWMASK);
-					free(fname);
-					draw_header(0);
-					do_mode(mode);
+				int ans;
+				int rawformat=0;
+				ans=ask("Raw mask output format?","Bi*t|*Byte");
+				if (ans==1) rawformat=FILE_RAWBITMASK;
+				if (ans==2) rawformat=FILE_RAWMASK;
+				if (rawformat) {
+					fname=get_filename("Read raw mask:",options.disk_image,NULL);
+					if (fname) {
+						strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
+						read_map(options.disk_image,fname,font,map,rawformat);
+						free(fname);
+						draw_header(0);
+						do_mode(mode);
+					}
 				}
-				
 			} else {
 				
 				fname=get_filename("Read raw map:",options.disk_image,NULL);
@@ -672,9 +697,9 @@ int map_click(int x, int y, int bleft, int bright, int *down)
  *==========================================================================*/
 int draw_screen(int b) /* b not used in this func */
 {
-	int i,w,h,m;
+	int i,w,h,m=0;
 	int x,y,ofs,lx,ly,by,bx;
-	unsigned char *max, *look, *check, *masklook;
+	unsigned char *max, *look, *check, *masklook=NULL;
 
 	SDLNoUpdate();
 	look=currentView->map+currentView->scy*currentView->w+currentView->scx;

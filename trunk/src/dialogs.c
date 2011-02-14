@@ -26,7 +26,9 @@
  * param txt: button text
  * returns: nothing useful
  *==========================================================================*/
-int drawbutton(int x, int y, char *txt)
+
+
+int drawbuttonwidth(int x, int y, char *txt, int width)
 {
 	int l,o,c;
 	char *f,btxt[16];
@@ -44,11 +46,11 @@ int drawbutton(int x, int y, char *txt)
 		c=*(f+1);
 		o=(f-txt)*8;
 	}
-	l=BUTTON_WIDTH*4-strlen(btxt)*4;
-	SDLBox(x+1,y+1,x+BUTTON_WIDTH*8-1,y+8,148);
-	SDLLine(x,y,x+BUTTON_WIDTH*8,y,152);
-	SDLLine(x+BUTTON_WIDTH*8,y,x+BUTTON_WIDTH*8,y+9,144);
-	SDLLine(x,y+9,x+BUTTON_WIDTH*8,y+9,144);
+	l=width*4-strlen(btxt)*4;
+	SDLBox(x+1,y+1,x+width*8-1,y+8,148);
+	SDLLine(x,y,x+width*8,y,152);
+	SDLLine(x+width*8,y,x+width*8,y+9,144);
+	SDLLine(x,y+9,x+width*8,y+9,144);
 	SDLLine(x,y+1,x,y+9,152);
 	SDLstring(x+l,y+1,btxt);
 	if (c) {
@@ -58,6 +60,10 @@ int drawbutton(int x, int y, char *txt)
 	return 1;
 }
 
+int drawbutton(int x, int y, char *txt)
+{
+	return drawbuttonwidth(x,y,txt,BUTTON_WIDTH);
+}
 
 struct dblBufferTmpStorage
 {
@@ -290,6 +296,20 @@ char *get_filename(char *title, char *image, char * initial)
 	return r;
 }
 
+
+int askNoYes(char *msg)
+{
+	return ask(msg,"*No|*Yes");
+	
+}
+
+int ask(char *msg, char * answers)
+{
+	return message_dialog("Question:", msg,answers);
+	
+}
+
+
 /*===========================================================================
  * info_dialog
  * display an error dialog
@@ -298,7 +318,7 @@ char *get_filename(char *title, char *image, char * initial)
  *==========================================================================*/
 int info_dialog(char *msg)
 {
-	return message_dialog("INFO:", msg);
+	return message_dialog("INFO:", msg,NULL);
 
 }
 /*===========================================================================
@@ -309,30 +329,78 @@ int info_dialog(char *msg)
  *==========================================================================*/
 int error_dialog(char *msg)
 {
-	return message_dialog("ERROR!", msg);
+	return message_dialog("ERROR!", msg, NULL);
 }
 /*===========================================================================
  * message_dialog
  * display an error dialog
  * param title: title of the window
  * param error: the error message
+ * param answers: numbered from left to right
  * returns: nothing useful
  *==========================================================================*/
-int message_dialog(char * title, char *error)
+int message_dialog(char * title, char *error, char * answers)
 {
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y+48;
 	
 	int width=strlen(error) *8;
+	if (width <80) width=80;
+	int resval=0;
+		
+	char answer_shortcuts[10];
+	char buf[32];
+	
 	
 	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, width+8, 40);
 	SDLstring(tmpx+(width+8-48)/2,68+tmpy,title);
 	SDLstring(tmpx+4,78+tmpy,error);
-	drawbutton(tmpx+(width-BUTTON_WIDTH*8)/2,90+tmpy,"Okay");
-	SDLUpdate();
-	SDLgetch(1);
+	if (!answers)
+	{
+		drawbuttonwidth(tmpx+(width-6*8)/2,90+tmpy,"Okay",6);
+		SDLUpdate();
+		SDLgetch(1);
+	}
+	else
+	{
+		char * c, *co, *a, * ans, ch;
+		int i=0;
+		memset(buf,0,32);
+		strcpy(buf,answers);
+		a=answer_shortcuts;
+		*a++=27;
+	
+		ans=buf;
+		while (*ans) {
+			c=ans;
+			while (*c!='|' && *c!='\0') c++;
+			*c='\0';
+			co=strchr(ans,'*');
+			*a++=tolower(*(++co));
+			drawbuttonwidth(tmpx+width/4+i*(5*8+10),90+tmpy,ans,5);
+			ans=++c;
+			i++;
+
+		}
+		*a++=27;
+		*a='\0';
+		SDLUpdate();
+		while (1) {
+			ch=SDLgetch(0);
+			
+			if (a=strchr(answer_shortcuts,ch))
+			{
+				if (*a) {
+					resval=a-answer_shortcuts;
+					break;
+				}
+			}
+		}
+		
+	}
 	closeLastDblBufferDialog();
-	return 1;
+	
+	return resval;
 }
 
 /*===========================================================================

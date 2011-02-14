@@ -73,3 +73,6 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - fixed bug not saving tiles when save map in tile edit mode
 - fixed issue with ghost chars where in typeMode and right edge of the screen reached (and map right edge not)
 - added map editing and file operations with mask (xfd untested)
+- added confirmation dialogs when overwritting files.
+- added raw mask write in bit format.
+- tested some code in xfd operations, but still some bugs exist.

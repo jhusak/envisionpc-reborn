@@ -1276,11 +1276,15 @@ int command(int cmd, int sym)
 		case 's':
 				  fname=get_filename("Save font:",options.disk_image,RUNTIME_STORAGE.save_font_file_name);
 				  if (fname) {
-					  strncpy(RUNTIME_STORAGE.save_font_file_name,fname,127);
-					  if (options.disk_image)
-						  i=write_xfd_font(options.disk_image,fname,font,1024,NULL);
-					  else
-						  i=write_font(fname,font);
+					  if (!xfd_format_if_needed()) 
+						  if (overwrite(fname)){
+							  strncpy(RUNTIME_STORAGE.save_font_file_name,fname,127);
+							  if (options.disk_image)
+								  i=write_xfd_font(options.disk_image,fname,font,1024,NULL);
+							  else
+								  i=write_font(fname,font);
+							  info_dialog("Font saved.");
+						  }
 					  free(fname);
 				  }
 				  break;

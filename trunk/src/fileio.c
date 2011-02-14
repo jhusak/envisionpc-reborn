@@ -22,6 +22,44 @@
 unsigned char secbuf[256];
 unsigned char VTOCsec[128];
 
+static unsigned char BOOT_sectors[] ={
+0xc4,0x03,0x00,0x07,0xfb,0x12,0x38,0x60,0x28,0x04,0x00,0x04,0x00,0x1e,0x80,0x01,
+0x02,0x00,0x04,0x05,0x06,0x07,0x00,0x3b,0x9b,0x4e,0x55,0x9b,0x45,0x4e,0x55,0x9b,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x9b,0xa9,0x80,0xa0,0x07,0x20,0x63,0x07,0xa9,0x7d,0x85,0x45,0xa0,0x04,0xa9,0x00,
+0x20,0x71,0x07,0x30,0x15,0x20,0x5c,0x07,0xa0,0x00,0xb1,0x43,0x29,0x03,0xaa,0xc8,
+0x11,0x43,0xf0,0x07,0xb1,0x43,0xa8,0x8a,0x10,0xe6,0x38,0x60,0x18,0xa4,0x44,0xa5,
+0x43,0x65,0x45,0x85,0x43,0x8d,0x04,0x03,0x98,0x69,0x00,0x85,0x44,0x8d,0x05,0x03,
+0x60,0x8d,0x0b,0x03,0xa2,0x52,0x90,0x02,0xa2,0x50,0x8c,0x0a,0x03,0xa0,0x03,0x98,
+0x8e,0x02,0x03,0x8d,0x06,0x03,0x8c,0x68,0x1b,0xa9,0x31,0x8d,0x00,0x03,0xa9,0x80,
+0xa0,0x00,0x24,0x45,0x10,0x02,0x0a,0xc8,0x8d,0x08,0x03,0x8c,0x09,0x03,0xa9,0x40,
+0xae,0x02,0x03,0xec,0x79,0x07,0xd0,0x01,0x0a,0x8d,0x03,0x03,0xad,0x01,0x03,0xf0,
+0x62,0x20,0x59,0xe4,0x10,0x14,0xad,0x0f,0xd2,0x29,0x08,0xf0,0x05,0xce,0x68,0x1b,
+0xd0,0xdc,0xad,0x5d,0x0e,0xf0,0x05,0x4c,0x5d,0x0e,0xa6,0x18,0x98,0x60,0x99,0x08,
+0xa6,0x0a,0x71,0x0a,0xc2,0x09,0x1b,0x0b,0xfe,0x0a,0x44,0xce,0x07,0x4d,0xce,0x07,
+0xa9,0x00,0x8d,0x44,0x02,0xa8,0x99,0x03,0x1b,0xc8,0xd0,0xfa,0xad,0x09,0x07,0xf0,
+0x04,0xc9,0x0b,0x90,0x05,0xa9,0x04,0x8d,0x09,0x07,0xa8,0x99,0x75,0x1b,0x20,0x6a,
+0x12,0x8d,0xe8,0x02,0x8c,0xe7,0x02,0xa0,0x05,0xb9,0xda,0x07,0x99,0x29,0x03,0x88,
+0x10,0xf7,0x60,0xa9,0x00,0x85,0x30,0xae,0x01,0xd3,0x18,0xac,0x0a,0x03,0xad,0x0b,
+0x03,0x2c,0x0e,0x07,0x70,0x1b,0x30,0x02,0x69,0x04,0x85,0x32,0x98,0x0a,0x26,0x32,
+0x38,0x6a,0x4a,0x85,0x31,0x66,0x30,0xa4,0x32,0x8a,0x09,0xfc,0x39,0x8e,0x08,0xd0,
+0x18,0x98,0xac,0x0b,0x03,0xf0,0x02,0xe9,0x67,0xc9,0x20,0x90,0x02,0x69,0x0f,0x4a,
+0x66,0x30,0x69,0xc0,0x85,0x31,0x8a,0x29,0xfe,0x78,0xa0,0x00,0x8c,0x0e,0xd4,0x8d,
+0x01,0xd3,0xad,0x04,0x03,0x85,0x32,0xad,0x05,0x03,0x85,0x33,0xad,0x03,0x03,0x10,
+0x08,0xb1,0x32,0x91,0x30,0xc8,0x10,0xf9,0x88,0xb1,0x30,0x91,0x32,0xc8,0x10,0xf9
+};
+
+// 360 sector
+static unsigned char VTOC_sectors[] ={
+0x02,0xc3,0x02,0xc3,0x02,0x00,0x00,0x00,0x00,0x00,0x0f,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+};
 
 long flength(FILE * in)
 {
@@ -41,44 +79,198 @@ int is_xfd(FILE *image)
 }
 
 
+int xfd_file_exists(char * fname) {
+	FILE * xfd;
+	xfd=fopen(fname,"rb");
+	if (!xfd) {
+		return -1;
+	}
+	if (!is_xfd(xfd)) {
+		fclose(xfd);
+		return -2;
+	}
+	fclose(xfd);
+	return 0;
+}
+
+int file_exists(char * fname)
+{
+	int res=xfd_file_exists(fname);
+	// if not exist
+	if (res==-1) return 0;
+	return 1;
+}
 
 /*=========================================================================*/
 void convertfname(char *in, char *out)
 {
-  int x,y;
-
-  for(x=0; x<11; x++)
-    out[x]=32;
-  out[11]=0;
-
-  x=0;
-  y=*in++;
-
-  while ((y!=0)&&(y!='.')) {
-    out[x]=y;
-    if(x!=8) x++;
-    y=*in++;
-  }
-  out[8]=32;
-  if (y!=0) {
-    x=8;
-    y=*in++;
-    while((x<11)&&(y)&&(y!='.')) {
-      out[x]=y;
-      x++;
-      y=*in++;
-    }
-  }
+	int x,y;
+	
+	for(x=0; x<11; x++)
+		out[x]=32;
+	out[11]=0;
+	
+	x=0;
+	y=*in++;
+	
+	while ((y!=0)&&(y!='.')) {
+		out[x]=y;
+		if(x!=8) x++;
+		y=*in++;
+	}
+	out[8]=32;
+	if (y!=0) {
+		x=8;
+		y=*in++;
+		while((x<11)&&(y)&&(y!='.')) {
+			out[x]=y;
+			x++;
+			y=*in++;
+		}
+	}
 }
 /*=========================================================================*/
 int readsec(FILE *image, int nr)
 {
-  if ((nr>dsksize)||(nr<1))
-    return 0;
-  fseek(image,(long)(nr-1)*secsize,SEEK_SET);
-  fread(secbuf,secsize,1,image);
-  return 1;
+	if ((nr>dsksize)||(nr<1))
+		return 0;
+	fseek(image,(long)(nr-1)*secsize,SEEK_SET);
+	fread(secbuf,secsize,1,image);
+	return 1;
 }
+
+/*=========================================================================*/
+int scandir(FILE *image, char *filename)
+{
+	int secnum,cnt,status,length,startsec;
+	int endofdir;
+	char fname[12];
+	
+	endofdir=0;
+	secnum=361;
+	startsec=-1;
+	
+	while(!endofdir) {
+		readsec(image,secnum);
+		
+		for(cnt=0; cnt<8; cnt++) {
+			status=secbuf[cnt*16];
+			length=secbuf[cnt*16+1]+256*secbuf[cnt*16+2];
+			
+			if (!status) {
+				endofdir=1;
+				break;
+			}
+			
+			if (!(status&0x80)) {
+				memcpy(fname,&secbuf[cnt*16+5],11);
+				fname[11]=0;
+				if (strncmp(filename,fname,11)==0)
+					startsec=secbuf[cnt*16+3]+secbuf[cnt*16+4]*256;
+			}
+		}
+		
+		secnum++;
+		if (secnum>368)
+			endofdir=1;
+	}
+	return startsec;
+}
+
+int xfd_image_file_exists(char *image, char *file)
+{
+	FILE *xfd;
+	int startsec;
+	char fname[12];
+	
+	xfd=fopen(image,"rb");
+	if (!xfd) {
+		error_dialog("Cannot open image");
+		return -1;
+	}
+	if (!is_xfd(xfd)) {
+		error_dialog("Not an .XFD image");
+		return -2;
+	}
+	
+	convertfname(file,fname);
+	
+	startsec=scandir(xfd,fname);
+	if (startsec<0)  {
+		return -3;
+	}
+	return 0;
+}	
+
+int overwrite( char * fname)
+{
+	int res=1;
+	if (options.disk_image) {
+		if (!xfd_image_file_exists(options.disk_image,fname)) {
+			info_dialog("File on image exists. Can not delete.");
+			return 0;
+		}
+	}
+	else {
+		if (file_exists(fname)) {
+			res=askNoYes("File exists. Overwrite?");
+			return res==2;
+		}
+	}
+	return res;
+}
+
+int xfd_format_if_needed() {
+	int skip=0;
+	if (options.disk_image) {
+		switch (xfd_file_exists(options.disk_image)) {
+			case -1: 
+				if (2==askNoYes("Image file does not exist. Create?"))
+					xfd_file_format(options.disk_image);
+				else skip=1;
+				break;
+			case -2: 
+				info_dialog("File exists but has incorrect length. Aborting.");
+				skip=1;
+				break;
+			default:
+				// ok, file exists and has the right length
+				break;								
+		}
+	}
+	return skip;
+}
+
+int xfd_file_format (char * fname)
+{
+	FILE * xfd;
+	xfd=fopen(fname,"wb");
+	if (!xfd) {
+		return -1;
+	}
+	xfd_format(xfd);
+	fclose(xfd);
+	return 0;
+}
+
+
+int xfd_format(FILE * image)
+{
+	unsigned char buffer[secsize];
+	int i;
+	memset(buffer, 0, secsize);
+	fseek(image,0L,SEEK_SET);
+	fwrite(BOOT_sectors, 128, 3, image);
+	
+	for (i=4; i<=720; i++)
+		fwrite(buffer, 128, 1, image);
+	
+	fseek(image,359*secsize,SEEK_SET);
+	fwrite(VTOC_sectors, 128, 1, image);
+	return 0;
+}
+
+
 /*=========================================================================*/
 int writesec(FILE *image, int nr)
 {
@@ -146,43 +338,6 @@ void marksec(FILE *image, int nr, int *secsfree)
   VTOCsec[4]=highb(*secsfree);
 
   writeVTOC(image);
-}
-/*=========================================================================*/
-int scandir(FILE *image, char *filename)
-{
-  int secnum,cnt,status,length,startsec;
-  int endofdir;
-  char fname[12];
-
-  endofdir=0;
-  secnum=361;
-  startsec=-1;
-
-  while(!endofdir) {
-    readsec(image,secnum);
-
-    for(cnt=0; cnt<8; cnt++) {
-      status=secbuf[cnt*16];
-      length=secbuf[cnt*16+1]+256*secbuf[cnt*16+2];
-
-      if (!status) {
-	endofdir=1;
-	break;
-      }
-
-      if (!(status&0x80)) {
-	memcpy(fname,&secbuf[cnt*16+5],11);
-	fname[11]=0;
-	if (strncmp(filename,fname,11)==0)
-	  startsec=secbuf[cnt*16+3]+secbuf[cnt*16+4]*256;
-      }
-    }
-
-    secnum++;
-    if (secnum>368)
-      endofdir=1;
-  }
-  return startsec;
 }
 /*=========================================================================*/
 void writedirentry(FILE *image, char *file, int startsec, int len, int entry)
@@ -537,6 +692,8 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 	if (!raw || raw==FILE_RAWMASK)
 		memset(mask->map,0,mask->w*mask->h);
 	
+	
+	
 	if (!raw || raw==FILE_RAWMAP)
 	
 		if (!raw || raw==FILE_RAWMAP) {
@@ -546,6 +703,18 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 	
 	if (raw==FILE_RAWMASK) {
 		fread(mask->map,mask->w*mask->h,1,in);
+	}
+	
+	if (raw==FILE_RAWBITMASK) {
+		unsigned char * look=mask->map;
+		unsigned char ch=0;
+		int i;
+		for (i=0; i<mask->w*mask->h; i++)
+		{
+			if ((i&7)==0) ch=fgetc(in);
+			*look++=!!(ch&1<<(7-(i&0x7)));
+		}
+		
 	}
 	
 	if (!raw) {
@@ -653,6 +822,19 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 	if (raw==FILE_RAWMASK)
 		fwrite(mask->map,mask->w*mask->h,1,out);
 	
+	if (raw==FILE_RAWBITMASK) {
+		unsigned char * look=mask->map;
+		unsigned char ch=0;
+		int i;
+		for (i=0; i<mask->w*mask->h; i++)
+		{
+			if ((i&7)==0) ch=0;
+			if (*look++) ch|=1<<(7-(i&0x7));
+			if ((i&7)==7) fputc(ch, out);
+		}
+		if ((mask->h*mask->w)&0x7) fputc(ch, out);
+	}
+	
 	if (!raw) {
 		fwrite(font,1024,1,out);
 		if ((tsx>1)||(tsy>1)) {
@@ -752,14 +934,20 @@ view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int 
 		clut[3]=head[8];
 		clut[4]=head[9];
 	}
-	if (map->map) { free(map->map); }
-	if (mask->map) { free(mask->map); }
-	mask->map=(unsigned char *)malloc(mask->w*mask->h);
-	memset(mask->map,0,mask->w*mask->h);
-	// dirty hack, read whole file at a time (JH)
-	// there might be an mask after fonts with "2" id
-	map->map=(unsigned char *)malloc(map->w*map->h*2+1034+1);
-
+	if (!raw || FILE_RAWMAP){
+		if (map->map) { free(map->map); }
+		// dirty hack, read whole file at a time (JH)
+		// there might be an mask after fonts with "2" id
+		map->map=(unsigned char *)malloc(map->w*map->h*2+1034+1);
+	}
+	
+	
+	if (FILE_RAWMASK || FILE_RAWBITMASK) {
+		if (mask->map) { free(mask->map); }
+		mask->map=(unsigned char *)malloc(mask->w*mask->h);
+		memset(mask->map,0,mask->w*mask->h);
+	}
+	
 	if (!raw || raw==FILE_RAWMAP) {
 		memset(map->map,0,map->w*map->h);
 		i=read_xfd_font(image,file,map->map,map->w*map->h*2+1034+1);
@@ -768,10 +956,22 @@ view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int 
 		if (raw==FILE_RAWMAP)
 			memset(map->map+map->w*map->h, 0, map->w*map->h+1034+1);
 	}
-	if (raw==FILE_RAWMASK) {
+	if (raw==FILE_RAWMASK || raw==FILE_RAWBITMASK) {
 		i=read_xfd_font(image,file,mask->map,mask->w*mask->h);
 		if (i<0) return NULL;
 	}
+	
+	if (raw==FILE_RAWBITMASK) {
+		unsigned char * look=mask->map+mask->w*mask->h;
+		unsigned char * poke=mask->map+mask->w*mask->h;
+		int i;
+		for (i=mask->w*mask->h-1; i>=0; i--)
+		{
+			look=mask->map+i/8;
+			*(--poke)=!!(*look&1<<(7-(i&0x7)));
+		}
+	}
+		
 	
 	if (!raw) {
 		memmove(map->map,map->map+10,map->w*map->h);
