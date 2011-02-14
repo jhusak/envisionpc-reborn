@@ -44,10 +44,10 @@ unsigned long s1, s2;
 int draw_cursor() {
 	if (hidden) SDLClip(2);
 	else SDLClip(1);
-	if NOT_MASK_EDIT_MODE
+	//if NOT_MASK_EDIT_MODE
 		SDLXORBox(currentView->cx*currentView->cw,MAP_TOP_OFFSET+currentView->cy*currentView->ch,currentView->cx*currentView->cw+currentView->cw-1,MAP_TOP_OFFSET+currentView->cy*currentView->ch+currentView->ch-1);
-	else
-		SDLXORDottedBox(currentView->cx*currentView->cw,MAP_TOP_OFFSET+currentView->cy*currentView->ch,currentView->cx*currentView->cw+currentView->cw-1,MAP_TOP_OFFSET+currentView->cy*currentView->ch+currentView->ch-1);
+	//else
+	//	SDLXORDottedBox(currentView->cx*currentView->cw,MAP_TOP_OFFSET+currentView->cy*currentView->ch,currentView->cx*currentView->cw+currentView->cw-1,MAP_TOP_OFFSET+currentView->cy*currentView->ch+currentView->ch-1);
 	// draw hollow box
 	if ((tileEditMode) &&((tsx>1)||(tsy>1))) {
 		int tx, ty;
@@ -61,21 +61,29 @@ int draw_cursor() {
 	return 1;
 }
 
+
 /*===========================================================================
  * set_mapview
  * ensure display is showing a specific view;
- * param id: the view to display (0=map; 1=tile)
+ * param id: the view to display (0=map; 1=tile, 2=mask)
  * returns: nothing useful
  *==========================================================================*/
 int set_mapview(int id) {
 	view *old=currentView;
-	if (!id) {
-		tileEditMode=0;
-		do_mode(mode); /* update tiles, if necessary */
-		currentView=map;
-	} else {
-		tileEditMode=1;
-		currentView=tile;
+	switch (id) {
+		case VIEW_MAP:
+			tileEditMode=0;
+			do_mode(mode); /* update tiles, if necessary */
+			currentView=map;
+			break;
+		case VIEW_TILE: 
+			tileEditMode=1;
+			currentView=tile;
+			break;
+		case VIEW_MASK:
+			tileEditMode=0;
+			currentView=mask;
+			break;
 	}
 	if (currentView!=old)
 		cacheOk=0;
@@ -131,16 +139,17 @@ int map_panel()
 		drawbutton(0,cmdcnt*10,"*load map");	cmds[++cmdcnt]='l';
 		drawbutton(0,cmdcnt*10,"*Read RawMap");	cmds[++cmdcnt]='R';
 		drawbutton(0,cmdcnt*10,"*save map");	cmds[++cmdcnt]='s';
-		drawbutton(0,cmdcnt*10,"*WriteRawMap");	cmds[++cmdcnt]='w';
+		drawbutton(0,cmdcnt*10,"*writeRawMap");	cmds[++cmdcnt]='w';
 		drawbutton(0,cmdcnt*10,"*clear map");	cmds[++cmdcnt]='c';
 		drawbutton(0,cmdcnt*10,"*block");	cmds[++cmdcnt]='b';
 		drawbutton(0,cmdcnt*10,"Ret*ile");	cmds[++cmdcnt]='i';
 		if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
 	} else {
 		drawbutton(0,cmdcnt*10,"*Read RawMask");	cmds[++cmdcnt]='R';
-		drawbutton(0,cmdcnt*10,"*Write RawMsk");	cmds[++cmdcnt]='w';
+		drawbutton(0,cmdcnt*10,"*write RawMsk");	cmds[++cmdcnt]='w';
 		drawbutton(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
 		drawbutton(0,cmdcnt*10,"*clear mask");	cmds[++cmdcnt]='c';
+		drawbutton(0,cmdcnt*10,"SetFrom*mask");	cmds[++cmdcnt]='m';
 	}
 	
 	drawbutton(0,cmdcnt*10,"*go to XY");	cmds[++cmdcnt]='g';
@@ -163,7 +172,7 @@ int map_panel()
  *==========================================================================*/
 int curs_pos()
 {
-	char buf[16];
+	char buf[32];
 	int back;
 
 	SDLSetContext(DialogContext);
@@ -184,8 +193,17 @@ int curs_pos()
 	}
 	SDLBox(0,0,118,7,144);
 	SDLstring(0,0,buf);
+	
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,CONFIG.screenWidth-92-back,6,DialogContext,0,0,118,7);
+	/* DEBUG PURPOSES JH
+	SDLBox(28*8,6,48*8,22,144);
+	sprintf(buf,"cxcy  [%05dx%05d]",currentView->cx,currentView->cy);
+	SDLstring(28*8,6,buf);
+	sprintf(buf,"scxscy[%05dx%05d]",currentView->scx,currentView->scy);
+	SDLstring(28*8,14,buf);
+	 */
+	
 	return 1;
 }
 
@@ -209,20 +227,30 @@ int move(int dx, int dy)
 			(currentView->cy+currentView->scy+dy<0))
 		return 0;
 
+	// this tears-off the cursor previously set
 	draw_cursor();
 
+	// change cursor coords
 	ox=currentView->cx; oy=currentView->cy;
 	currentView->cx+=dx; currentView->cy+=dy;
 
+	// clip them and when they are outside move the window if not out of bounds
 	if (currentView->cx<0) {
 		currentView->cx=0;
 		if (currentView->scx) currentView->scx--;
 		else return draw_cursor();
 	} else if (currentView->cx*currentView->cw>CONFIG.screenWidth-currentView->cw) {
 		currentView->cx--;
-		if (currentView->cx+currentView->scx+1<currentView->w) currentView->scx++;
+		if (currentView->cx+currentView->scx+1<currentView->w)
+		{  
+			currentView->scx++;
+			// rather wrong way of bugfix for shadows in type-mode when right side of the screen reached
+			//and right side of the map not yet.
+			cacheOk=0;
+		}
 		else return draw_cursor();
 	}
+	
 	if (currentView->cy<0) {
 		currentView->cy=0;
 		if (currentView->scy) currentView->scy--;
@@ -233,11 +261,13 @@ int move(int dx, int dy)
 			return draw_cursor();
 		else currentView->scy++;
 	}
+	
 	if (typeMode) {
 		SDLBox(CONFIG.screenWidth-12,15,CONFIG.screenWidth-4,22,144);
 		m=get_8x8_mode(mode);
 		SDLmap_plotchr(CONFIG.screenWidth-12,15,currentView->map[(currentView->cx+currentView->scx)+(currentView->cy+currentView->scy)*currentView->w],m,font);
 	}
+	
 	curs_pos();
 	// was:
 	//if ((ox==currentView->cx)&&(oy==currentView->cy))
@@ -284,6 +314,7 @@ int map_command(int cmd, int sym)
 							  draw_screen(1);
 							  return 0;
 						  } else if MASK_EDIT_MODE {
+							  draw_cursor();
 							  maskEditMode=0;
 							  draw_header(1);
 							  map_panel();
@@ -316,7 +347,7 @@ int map_command(int cmd, int sym)
 		}
 	}
 	
-	if (!is_command_allowed(cmd)) return 0;
+	if (!is_command_allowed(cmd)) { return 0; }
 
 	switch (cmd) {
 		case 'h': 
@@ -343,18 +374,23 @@ int map_command(int cmd, int sym)
 			break;
 			
 		case 'c': 
-			if (ratio==100) {
-				memset(currentView->map,currentView->dc,currentView->w*currentView->h);
+			if MASK_EDIT_MODE {
+				memset(mask->map,0,mask->h*mask->w);
+				break;
 			} else {
-				j=currentView->w*currentView->h;
-				look=currentView->map;
-				for(i=0;i<j;i++) {
-					r=(int)(100.0*UNI);
-					if (r<ratio) *look=currentView->dc;
-					look++;
+				if (ratio==100) {
+					memset(currentView->map,currentView->dc,currentView->w*currentView->h);
+				} else {
+					j=currentView->w*currentView->h;
+					look=currentView->map;
+					for(i=0;i<j;i++) {
+						r=(int)(100.0*UNI);
+						if (r<ratio) *look=currentView->dc;
+						look++;
+					}
 				}
+				cacheOk=0;
 			}
-			cacheOk=0;
 			break;
 			
 		case 'r': 
@@ -371,15 +407,27 @@ int map_command(int cmd, int sym)
 			break;
 			
 		case 'm': 
-			do {
-				i=get_number("Enter ANTIC mode:",mode,-1);
-			} while ((i>=0)&&((i<2)||(i>7)));
-			if (mode==i) return 0;
-			if (i>0) {
-				currentView->cx=currentView->cy=currentView->scx=currentView->scy=0;
-				mode=i;
-				draw_header(0);
-				do_mode(mode);
+			if MASK_EDIT_MODE {
+				int i;
+				unsigned char * look= currentView->map;
+				unsigned char *store= mask->map;
+				
+				// this does not work well in automatic tiles
+				// but when tile 0 is empty, this is good
+				for (i=0; i<currentView->w*currentView->h; i++)
+					*store++=*look++?1:0;
+				
+			}else {
+				do {
+					i=get_number("Enter ANTIC mode:",mode,-1);
+				} while ((i>=0)&&((i<2)||(i>7)));
+				if (mode==i) return 0;
+				if (i>0) {
+					currentView->cx=currentView->cy=currentView->scx=currentView->scy=0;
+					mode=i;
+					draw_header(0);
+					do_mode(mode);
+				}
 			}
 			break;
 			
@@ -407,13 +455,13 @@ int map_command(int cmd, int sym)
 				if ((itsy==1)&&(itsx==1))
 					break;
 			}
-			set_mapview(1);
+			set_mapview(VIEW_TILE);
 			if ((tsy>1)||(tsx>1)) {
 				untile_map(map,tile);
 			} else {
 				tile_map(itsx,itsy,map,tile);
 			}
-			set_mapview(0);
+			set_mapview(VIEW_MAP);
 			map_panel();
 			draw_header(0);
 			break;
@@ -429,26 +477,40 @@ int map_command(int cmd, int sym)
 			return 1;
 			
 		case 's':
-			fname=get_filename("Save map:",options.disk_image,RUNTIME_STORAGE.save_map_file_name);
-			if (fname) {
-				strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
-				write_map(options.disk_image,fname,font,map,0);
-				free(fname);
+			if MASK_EDIT_MODE {
+				memset(mask->map,1,mask->h*mask->w);
+				break;
+			} else {
+				fname=get_filename("Save map:",options.disk_image,RUNTIME_STORAGE.save_map_file_name);
+				if (fname) {
+					strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
+					write_map(options.disk_image,fname,font,map,FILE_NATIVE);
+					free(fname);
+				}
 			}
 			return 0;
 		case 'w':
-			fname=get_filename("Write raw map:",options.disk_image,RUNTIME_STORAGE.save_raw_map_file_name);
-			if (fname) {
-				strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
-				write_map(options.disk_image,fname,font,map,1);
-				free(fname);
+			if MASK_EDIT_MODE {
+				fname=get_filename("Write raw mask:",options.disk_image,RUNTIME_STORAGE.save_raw_mask_file_name);
+				if (fname) {
+					strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
+					write_map(options.disk_image,fname,font,map,FILE_RAWMASK);
+					free(fname);
+				}
+			} else {
+				fname=get_filename("Write raw map:",options.disk_image,RUNTIME_STORAGE.save_raw_map_file_name);
+				if (fname) {
+					strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
+					write_map(options.disk_image,fname,font,map,FILE_RAWMAP);
+					free(fname);
+				}
 			}
 			return 0;
 		case 'l':
 			fname=get_filename("Load map:",options.disk_image,NULL);
 			if (fname) {
 				strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
-				read_map(options.disk_image,fname,font,map,0);
+				read_map(options.disk_image,fname,font,map,FILE_NATIVE);
 				free(fname);
 				draw_header(0);
 				do_mode(mode);
@@ -456,13 +518,26 @@ int map_command(int cmd, int sym)
 			break;
 			
 		case 'R':
-			fname=get_filename("Read raw map:",options.disk_image,NULL);
-			if (fname) {
-				strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
-				read_map(options.disk_image,fname,font,map,1);
-				free(fname);
-				draw_header(0);
-				do_mode(mode);
+			if MASK_EDIT_MODE {
+				fname=get_filename("Read raw mask:",options.disk_image,NULL);
+				if (fname) {
+					strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
+					read_map(options.disk_image,fname,font,map,FILE_RAWMASK);
+					free(fname);
+					draw_header(0);
+					do_mode(mode);
+				}
+				
+			} else {
+				
+				fname=get_filename("Read raw map:",options.disk_image,NULL);
+				if (fname) {
+					strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
+					read_map(options.disk_image,fname,font,map,FILE_RAWMAP);
+					free(fname);
+					draw_header(0);
+					do_mode(mode);
+				}
 			}
 			break;
 			
@@ -489,16 +564,16 @@ int map_command(int cmd, int sym)
 			break;
 			
 		case 'b': 
-			set_mapview(!tileEditMode);
+			set_mapview(tileEditMode?VIEW_MAP:VIEW_TILE);
 			map_panel();
 			if (!cacheOk)
 				draw_header(0);
 			break;
 		case 'a':
+			draw_cursor();
 			maskEditMode=1;
-			// set_mapview(0);
 			map_panel();
-			draw_header(1);
+			draw_header(0);
 			break;
 			//draw_screen(1);
 			//return 0;
@@ -561,14 +636,14 @@ int map_click(int x, int y, int bleft, int bright, int *down)
 					}
 					if MASK_EDIT_MODE {
 						// with this "if" works very well.
-						int setmaskfield;
+						int setmaskfield=1;
 						if (bright) setmaskfield=0;
 						if (bleft) setmaskfield=1;
 						
-						if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=setmaskfield)
+						if (mask->map[(x+mask->scx)+(i+mask->scy)*mask->w]!=setmaskfield)
 						{
-							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=setmaskfield;
-							if (setmaskfield) draw_cursor();
+							mask->map[(x+mask->scx)+(i+mask->scy)*mask->w]=setmaskfield;
+							//if (setmaskfield) draw_cursor();
 							x=x*currentView->cw;
 							y=MAP_TOP_OFFSET+i*currentView->ch;
 //							if TILE_MODE {
@@ -578,7 +653,6 @@ int map_click(int x, int y, int bleft, int bright, int *down)
 //							}
 							//if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
 								draw_screen(1);
-							// draw_mask();
 						}
 					}
 					
@@ -598,12 +672,18 @@ int map_click(int x, int y, int bleft, int bright, int *down)
  *==========================================================================*/
 int draw_screen(int b) /* b not used in this func */
 {
-	int i,w,h;
+	int i,w,h,m;
 	int x,y,ofs,lx,ly,by,bx;
-	unsigned char *max, *look, *check;
+	unsigned char *max, *look, *check, *masklook;
 
 	SDLNoUpdate();
 	look=currentView->map+currentView->scy*currentView->w+currentView->scx;
+	if MASK_EDIT_MODE {
+		mask->scx=currentView->scx;
+		mask->scy=currentView->scy;
+		masklook=mask->map+mask->scy*mask->w+mask->scx;
+	}
+
 	max=currentView->map+currentView->w*currentView->h;
 	lx=currentView->cx*currentView->cw;
 	ly=currentView->cy*currentView->ch;
@@ -630,21 +710,29 @@ int draw_screen(int b) /* b not used in this func */
 				look++;
 				break;
 			}
-			if (look<max)
+			if (look<max) {
 				i=*look++;
-			else {
+				if MASK_EDIT_MODE m=*masklook++;
+			} else {
 				by=y; break;
 			} 
 			if TILE_MODE
 				i+=256;
 			
-			if ((!cacheOk)||(*check!=i)) {
+//			if ((!cacheOk)||(*check!=i)) {
 				SDLCharBlt(MainContext,x,MAP_TOP_OFFSET+y,i);
+//			}
+			
+			if MASK_EDIT_MODE {
+				if (m)
+					SDLXORDottedBox(x,MAP_TOP_OFFSET+y, x+mask->cw-1,MAP_TOP_OFFSET+y+mask->ch-1);
 			}
+			
 			x+=currentView->cw;
 			*check++=i;
 		}
-		look=look+ofs;
+		look+=ofs;
+		if MASK_EDIT_MODE masklook+=ofs;
 		y+=currentView->ch;
 	}
 	cacheOk=1;
@@ -693,6 +781,7 @@ int do_mode(int m)
 		tile->ch=tile->cw=16;
 	}
 	map->cw=tile->cw*tsx; map->ch=tile->ch*tsy;
+	mask->cw=map->cw; mask->ch=map->ch;
 	/* build characters... */
 	setpal();
 	for(i=0;i<256;i++) {
@@ -705,7 +794,7 @@ int do_mode(int m)
 		if ((tsx!=1)||(tsy!=1)) {
 			int tx,ty;
 			ty=i/16;
-			tx=i-ty*16;
+			tx=i%16;
 			look=tile->map+tx*tsx+ty*tsy*tsx*16;
 			SDLRebuildChar(256+i,tsx*tile->cw,tsy*tile->ch);
 			SDLClear(clut[0]);
@@ -749,7 +838,7 @@ void plot_draw_char(int x, int y, unsigned char c) {
  * param update: if true, refresh the screen
  * returns: nothing useful
  *==========================================================================*/
-int draw_header(int update)
+int draw_header(int update) /* update not used */
 {
 	char buf[80];
 	int m;
@@ -771,6 +860,7 @@ int draw_header(int update)
 		SDLstring(8,6,"Tile Editor - ");
 		sprintf(buf,"Size [%02dx%02d]",tsx,tsy);
 	}
+	
 	SDLstring(8,15,buf);
 	if TILE_MODE {
 		sprintf(buf,"Tile: %03d",currentView->dc);
@@ -782,6 +872,7 @@ int draw_header(int update)
 		plot_draw_char(CONFIG.screenWidth-12, 15, currentView->dc);
 		setdefaultpal();
 	}
+	
 	curs_pos();
 	return 1;
 }
@@ -797,12 +888,12 @@ int do_map()
 	int down,done;
 
 	down=done=0;
-	set_mapview(0);
+	set_mapview(VIEW_MAP);
 
 	SDLClear(0);
-	draw_header(0);
 	do_mode(mode);
 	map_panel();
+	draw_header(0);
 	draw_screen(1);
 	cacheOk=0;
 	typeMode=0;
@@ -866,7 +957,7 @@ int do_map()
 						break;
 		}
 	} while(!done);
-	set_mapview(0);
+	set_mapview(VIEW_MAP);
 	return 0;
 }
 /*=========================================================================*/

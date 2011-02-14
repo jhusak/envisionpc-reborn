@@ -188,7 +188,7 @@ int getprefs()
 		if (!res) set_error("Cannot open preferences file.");
 		return 0;
 	}
-x	
+
 	while (EOF!=readpref(fd));
 
 	fclose(fd);

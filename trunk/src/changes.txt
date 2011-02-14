@@ -68,3 +68,8 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - some code cleanups
 - added code that blocks execution of commands not in menu
 - now typeMode restores hidden status of right menu.
+
+2011-02-13 (rev 35)
+- fixed bug not saving tiles when save map in tile edit mode
+- fixed issue with ghost chars where in typeMode and right edge of the screen reached (and map right edge not)
+- added map editing and file operations with mask (xfd untested)

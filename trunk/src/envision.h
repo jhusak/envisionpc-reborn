@@ -20,13 +20,13 @@ typedef struct view {
 	int cw, ch;   /* Cursor width, height */
 	int dc;       /* draw color */
 	unsigned char *map;
-//	unsigned char *mask;
 } view;
 
 typedef struct runtime_storage
 	{
 		char save_map_file_name[128];
 		char save_raw_map_file_name[128];
+		char save_raw_mask_file_name[128];
 		char save_font_file_name[128];
 		char export_font_file_name[128];
 	} runtime_storage;
@@ -88,6 +88,10 @@ typedef struct rgb_color {
 #define NOT_MASK_EDIT_MODE (!maskEditMode)
 
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
+enum {VIEW_MAP, VIEW_TILE, VIEW_MASK};
+enum {MAP_NO_ALLOC,MAP_ALLOC};
+enum {FILE_NATIVE,FILE_RAWMAP,FILE_RAWMASK};
+
 
 extern config CONFIG;
 extern int MAP_MENU_HEIGHT;
@@ -98,8 +102,8 @@ extern char commands_allowed[64];
 
 int title();
 
+//dialog.c
 int get_8x8_mode(int m);
-int do_map();
 int do_colors();
 int do_size(int tile_mode);
 int do_exit();
@@ -109,50 +113,54 @@ int error_dialog(char *error);
 int info_dialog(char *error);
 int message_dialog(char * title, char *error);
 char stoa(char s);
-int tile_size(int w, int h);
 int raisedbox(int x, int y, int w, int h);
 int do_defaults();
 unsigned char * resize_map(view * map_view, int x, int y);
+int drawbutton(int x, int y, char *txt);
+char *get_filename(char *title, char *image, char * initial);
+int get_number(char *title, int def, int max);
+int select_char(char *title);
+int do_options();
+int show_palette(int i,int x, int y);
 
-
-
-int do_mode(int m);
-int draw_screen(int b);
-int draw_header(int update);
 // handlers for "reset" dialog
 void handler_config_reset();
 void handler_chmap_reset();
 void handler_currentfont_reset();
 void handler_palette_reset();
 void handler_clut_reset();
-void draw_numbers(int vals, unsigned char *work);
+
+//map.c
+int do_map();
+int do_mode(int m);
+int draw_screen(int b);
+int draw_header(int update);
 void plot_draw_char(int x, int y, unsigned char c);
+int tile_size(int w, int h);
 
 
 
-void bye();
+// envision.c
 void txterr(char *txt);
-int drawbutton(int x, int y, char *txt);
-char *get_filename(char *title, char *image, char * initial);
-int get_number(char *title, int def, int max);
-int select_char(char *title);
-int do_options();
-int command(int cmd, int sym);
-int show_palette(int i,int x, int y);
-int hex2dec(char hex);
-int num2val(char * chrval);
 void setpal();
 void setdefaultpal();
-int draw_edit();
-int update_font(int b);
 void set_allowed_commands(int * cmds, int cmdcnt);
 int is_command_allowed(int cmd);
+void bye();
+int command(int cmd, int sym);
+int hex2dec(char hex);
+int num2val(char * chrval);
+int draw_edit();
+int update_font(int b);
+void draw_numbers(int vals, unsigned char *work);
+view * map_init(int alloc_map, view * map, int width, int height);
 
 
 
 
 
 
+// fileio.c
 int read_xfd_font(char *image, char *file, unsigned char *data, int max);
 int write_xfd_font(char *image, char *file, unsigned char *data, int max, FILE *in);
 int write_xfd_data(char *image, char *file, unsigned char *data, int start, int end);
@@ -170,13 +178,12 @@ view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int 
 long flength(FILE * fd);
 int import_palette(char *file, rgb_color * colortable);
 
-
+// util.c
 int tile_map(int w, int h, view *map, view *tile);
 int untile_map(view *map, view *tile);
 
 int unpack(unsigned char *look, int xs, int ys);
 
-char * get_preferences_filepath();
 
 extern view *currentView, *map, *tile, *mask;
 extern unsigned char *dfont, *font, *cache;

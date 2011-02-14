@@ -514,9 +514,10 @@ int write_xfd_data(char *image, char *file, unsigned char *data, int start, int 
 /*=========================================================================*/
 view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 {
-  FILE *in;
-  unsigned char head[16];
-  int tp,i;
+	FILE *in;
+	unsigned char head[16];
+	int tp,i;
+	int tile_inited=0;
 
 	in=fopen(file,"rb");
 	if (!in) {
@@ -526,83 +527,88 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 	if (!raw) {
 		fread(head,10,1,in);
 		mode=head[0];
-		map->cx=map->cy=map->scx=map->scy=0;
-		map->cw=map->ch=0;
-		map->w=head[1]+head[2]*256;
-		map->h=head[3]+head[4]*256;
-		mask->cx=mask->cy=mask->scx=mask->scy=0;
-		mask->cw=mask->ch=0;
-		mask->w=map->w;
-		mask->h=map->h;
-		clut[0]=head[5];
-		clut[1]=head[6];
-		clut[2]=head[7];
-		clut[3]=head[8];
-		clut[4]=head[9];
-		
+
+		map=map_init(MAP_ALLOC, map, head[1]+head[2]*256, head[3]+head[4]*256);
+		mask=map_init(MAP_ALLOC, mask, head[1]+head[2]*256, head[3]+head[4]*256);
+		memcpy(clut,&head[5],5);
+	
 	}
-	if (map->map) { free(map->map); }
-	if (mask->map) { free(mask->map); }
 	
-	mask->map=(unsigned char *)malloc(mask->w*mask->h);
-	memset(mask->map,0,mask->w*mask->h);
+	if (!raw || raw==FILE_RAWMASK)
+		memset(mask->map,0,mask->w*mask->h);
 	
-	map->map=(unsigned char *)malloc(map->w*map->h);
+	if (!raw || raw==FILE_RAWMAP)
 	
-	fread(map->map,map->w*map->h,1,in);
+		if (!raw || raw==FILE_RAWMAP) {
+			memset(map->map,0,map->w*map->h);
+			fread(map->map,map->w*map->h,1,in);
+		}
+	
+	if (raw==FILE_RAWMASK) {
+		fread(mask->map,mask->w*mask->h,1,in);
+	}
 	
 	if (!raw) {
 		fread(font,1024,1,in);
 		
 		tsx=tsy=1;
-		tile->w=16; tile->h=16;
-		tile->dc=1;
-		tile->ch=tile->cw=0;
-		tile->cx=tile->cy=tile->scx=tile->scy=0;
-		if (tile->map)
-			free(tile->map);
-		tile->map=NULL;
-		
-		tp=fgetc(in);
-		if (tp!=EOF) {
-			switch(tp) {
-				case 1: {
-					int i,num;
-					unsigned char *look;
-					
-					fread(head,6,1,in);
-					tsx=head[1]*256+head[0];
-					tsy=head[3]*256+head[2];
-					num=head[5]*256+head[4]+1;
-					tile->w=16*tsx; tile->h=16*tsy;
-					tile->ch=map->ch;
-					tile->cw=map->cw;
-					tile->map=(unsigned char *)malloc(256*tsx*tsy);
-					memset(tile->map,256*tsx*tsy,0);
-					for(i=0;i<num;i++) {
-						int tx,ty,w,h;
-						ty=i/16;
-						tx=i-ty*16;
-						look=tile->map+tx*tsx+ty*tsy*tsx*16;
-						for(h=0;h<tsy;h++) {
-							for(w=0;w<tsx;w++) {
-								*look=fgetc(in);
-								look++;
-							}
-							look+=tile->w-tsx;
-						}	  
+		//default tiles
+		tile=map_init(MAP_NO_ALLOC,tile, 16, 16);
+		while (!feof(in)) {
+			tp=fgetc(in);
+			if (tp!=EOF) {
+				switch(tp) {
+					case 1: {
+						int i,num;
+						unsigned char *look;
+						
+						fread(head,6,1,in);
+						tsx=head[1]*256+head[0];
+						tsy=head[3]*256+head[2];
+						num=head[5]*256+head[4]+1;
+						
+						tile=map_init(MAP_ALLOC,tile,16*tsx, 16*tsy);
+						tile_inited=1;
+						
+						for(i=0;i<num;i++) {
+							int tx,ty,w,h;
+							ty=i/16;
+							tx=i%16;
+							look=tile->map+tx*tsx+ty*tsy*tsx*16;
+							for(h=0;h<tsy;h++) {
+								for(w=0;w<tsx;w++) {
+									*look=fgetc(in);
+									look++;
+								}
+								look+=tile->w-tsx;
+							}	  
+						}
+					}
+						break;
+					case 2: {
+						/* mask map corresponds to map->map
+						 * It has the same dimensions
+						 * so it is not nessesary to put them in the file
+						 * I see no particular reason to have map of different size than main map.
+						 */
+						
+						fread(mask->map,mask->w*mask->h,1,in);
+						break;
+					default:
+						break;
+						
 					}
 				}
 			}
 		}
-		if (!tile->map) {
-			tile->map=(unsigned char *)malloc(tile->w*tile->h);
+		if (!tile_inited) {
+			tile=map_init(MAP_ALLOC,tile, 16, 16);
 			for(i=0;i<256;i++)
 				tile->map[i]=i;
 		}
 	}
-  fclose(in);
-  return map;
+	fclose(in);
+	return map;
 }
 
 int write_map(char *image, char *file, unsigned char *font, view *map, int raw)
@@ -620,62 +626,75 @@ int write_map(char *image, char *file, unsigned char *font, view *map, int raw)
 /*=========================================================================*/
 int write_file_map(char *file, unsigned char *font, view *map, int raw)
 {
-  FILE *out;
-  unsigned char head[16];
-
-  out=fopen(file,"wb");
-  if (!out) {
-    error_dialog("Cannot save map");
-    return -1;
-  }
-  if (!raw) {
-    head[0]=mode;
-    head[1]=map->w&255;
-    head[2]=(map->w>>8)&255;
-    head[3]=map->h&255;
-    head[4]=(map->h>>8)&255;
-    head[5]=clut[0];
-    head[6]=clut[1];
-    head[7]=clut[2];
-    head[8]=clut[3];
-    head[9]=clut[4];
-    fwrite(head,10,1,out);
-  }
-  fwrite(map->map,map->w*map->h,1,out);
-  if (!raw) {
-    fwrite(font,1024,1,out);
-    if TILE_MODE {
-      int i;
-      unsigned char *look;
-
-      fputc(1,out); /* signal tilemap type 1 block */
-      head[0]=tsx&255;
-      head[1]=(tsx>>8)&255;
-      head[2]=tsy&255;
-      head[3]=(tsy>>8)&255;
-      head[4]=255;  /* num tiles -1 */
-      head[5]=0;
-      fwrite(head,6,1,out);
-
-      for(i=0;i<256;i++) {
-        int tx,ty,w,h;
-        ty=i/16;
-        tx=i-ty*16;
-        look=tile->map+tx*tsx+ty*tsy*tsx*16;
-        for(h=0;h<tsy;h++) {
-          for(w=0;w<tsx;w++) {
-            fputc(*look,out);
-            look++;
-          }
-          look+=tile->w-tsx;
-        }
-      }
-    } else {
-      fputc(0,out); /* signal end of blocks */
-    }
-  }
-  fclose(out);
-  return 0;
+	FILE *out;
+	unsigned char head[16];
+	
+	out=fopen(file,"wb");
+	if (!out) {
+		error_dialog("Cannot save map");
+		return -1;
+	}
+	if (!raw) {
+		head[0]=mode;
+		head[1]=map->w&255;
+		head[2]=(map->w>>8)&255;
+		head[3]=map->h&255;
+		head[4]=(map->h>>8)&255;
+		head[5]=clut[0];
+		head[6]=clut[1];
+		head[7]=clut[2];
+		head[8]=clut[3];
+		head[9]=clut[4];
+		fwrite(head,10,1,out);
+	}
+	if (!raw || raw==FILE_RAWMAP)
+		fwrite(map->map,map->w*map->h,1,out);
+	
+	if (raw==FILE_RAWMASK)
+		fwrite(mask->map,mask->w*mask->h,1,out);
+	
+	if (!raw) {
+		fwrite(font,1024,1,out);
+		if ((tsx>1)||(tsy>1)) {
+			int i;
+			unsigned char *look;
+			
+			fputc(1,out); /* signal tilemap type 1 block */
+			head[0]=tsx&255;
+			head[1]=(tsx>>8)&255;
+			head[2]=tsy&255;
+			head[3]=(tsy>>8)&255;
+			head[4]=255;  /* num tiles -1 */
+			head[5]=0;
+			fwrite(head,6,1,out);
+			
+			for(i=0;i<256;i++) {
+				int tx,ty,w,h;
+				ty=i/16;
+				tx=i%16;
+				look=tile->map+tx*tsx+ty*tsy*tsx*16;
+				for(h=0;h<tsy;h++) {
+					for(w=0;w<tsx;w++) {
+						fputc(*look,out);
+						look++;
+					}
+					look+=tile->w-tsx;
+				}
+			}
+		}
+		/* mask map corresponds to map->map
+		 * It has the same dimensions
+		 * so it is not nessesary to put them in the file
+		 * I see no particular reason to have map of different size than main map.
+		 */
+		fputc(2,out); /* signal tilemap type 1 block */		
+		fwrite(mask->map,mask->w*mask->h,1,out);
+		
+		fputc(0,out); /* signal end of blocks */
+		
+	}
+	fclose(out);
+	return 0;
 }
 /*=========================================================================*/
 int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw)
@@ -735,16 +754,31 @@ view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int 
 	}
 	if (map->map) { free(map->map); }
 	if (mask->map) { free(mask->map); }
-
 	mask->map=(unsigned char *)malloc(mask->w*mask->h);
 	memset(mask->map,0,mask->w*mask->h);
+	// dirty hack, read whole file at a time (JH)
+	// there might be an mask after fonts with "2" id
+	map->map=(unsigned char *)malloc(map->w*map->h*2+1034+1);
+
+	if (!raw || raw==FILE_RAWMAP) {
+		memset(map->map,0,map->w*map->h);
+		i=read_xfd_font(image,file,map->map,map->w*map->h*2+1034+1);
+		if (i<0) return NULL;
+		
+		if (raw==FILE_RAWMAP)
+			memset(map->map+map->w*map->h, 0, map->w*map->h+1034+1);
+	}
+	if (raw==FILE_RAWMASK) {
+		i=read_xfd_font(image,file,mask->map,mask->w*mask->h);
+		if (i<0) return NULL;
+	}
 	
-	map->map=(unsigned char *)malloc(map->w*map->h+1034);
-	i=read_xfd_font(image,file,map->map,map->w*map->h+1034);
-	if (i<0) return NULL;
 	if (!raw) {
 		memmove(map->map,map->map+10,map->w*map->h);
 		memcpy(font,map->map+10+map->w*map->h,1024);
+		if (map->map[10+map->w*map->h+1024]==2)
+			memcpy(mask->map,map->map+1035+map->w*map->h,map->w*map->h);
+		
 	}
 	return map;
 }

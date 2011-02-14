@@ -615,6 +615,24 @@ int draw_edit()
 	return 1;
 }
 
+view * map_init(int alloc_map, view * map, int width, int height) {
+	if (!map) {
+		map=(view *)malloc(sizeof(view));
+		map->map=NULL;
+	}
+	map->w=width; map->h=height;
+	map->ch=map->cw=8;
+	map->dc=1;
+	map->cx=map->cy=map->scx=map->scy=0;
+	if (map->map) free(map->map);
+	map->map=NULL;
+	if (alloc_map) {
+		map->map=(unsigned char *)malloc(map->w*map->h);
+		memset(map->map,0,map->w*map->h);
+	}
+	return map;
+}
+
 /*===========================================================================
  * setup
  * initialize Envision
@@ -680,31 +698,19 @@ int setup(int zoom, int fullScreen)
 	memset(peek,0,64);
 	memset(plot,0,64);
 
-	currentView=map=(view *)malloc(sizeof(view));
-	map->w=CONFIG.defaultMapWidth; map->h=CONFIG.defaultMapHeight;
-	map->ch=map->cw=8;
-	map->dc=1;
-	map->cx=map->cy=map->scx=map->scy=0;
-	map->map=(unsigned char *)malloc(map->w*map->h);
+	map=map_init(MAP_ALLOC,NULL,CONFIG.defaultMapWidth,CONFIG.defaultMapHeight);
 	
-	mask->w=CONFIG.defaultMapWidth; mask->h=CONFIG.defaultMapHeight;
-	mask->ch=mask->cw=8;
-	mask->dc=1;
-	mask->cx=mask->cy=mask->scx=mask->scy=0;
-	mask->map=(unsigned char *)malloc(mask->w*mask->h);
+	currentView=map;
+
+	mask=map_init(MAP_ALLOC,NULL,CONFIG.defaultMapWidth,CONFIG.defaultMapHeight);
 	
-	memset(mask->map,0,mask->w*mask->h);
-	memset(map->map,0,map->w*map->h);
 	for(i=0;i<256;i++)
 		map->map[i]=i;
 
 	tsx=1; tsy=1;
-	tile=(view *)malloc(sizeof(view));
-	tile->w=16; tile->h=16;
-	tile->dc=1;
-	tile->ch=tile->cw=8;
-	tile->cx=tile->cy=tile->scx=tile->scy=0;
-	tile->map=(unsigned char *)malloc(tile->w*tile->h);
+	
+	tile = map_init(MAP_ALLOC,NULL,16, 16);
+	
 	for(i=0;i<256;i++)
 		tile->map[i]=i;
 
