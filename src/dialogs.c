@@ -906,7 +906,7 @@ int do_size(int tile_mode)
 				loop=0;
 		} else goto exit;
 	
-	// operations - to move tonother place (JH)
+	// operations - to move to another place (JH)
 	
 	if (tile_mode) {
 		tile_size(x,y);
@@ -1056,7 +1056,6 @@ int do_exit()
 	SDLplotchr(x+4+128-8,76+tmpy,stoa('Y'),1,dfont);
 	SDLUpdate();
 	setprefs();
-	return 1;
 	
 	ch=SDLgetch(1);
 	closeLastDblBufferDialog();

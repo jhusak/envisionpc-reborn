@@ -268,7 +268,7 @@ Available commands in the map editor:
       [0]: an optional zero indicating no more data is available
 
    Note, if you are saving a tile map, the file format is extended to
-   look ike the following:
+   look like the following:
 
       ANTIC mode:  1 byte
       map width: 2 bytes (low byte, then high byte)

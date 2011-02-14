@@ -32,7 +32,7 @@ int credits(int x, int y)
 	int center=(CONFIG.screenWidth-280)/2;
 	SDLBox(8,CONFIG.screenHeight-12,CONFIG.screenWidth-8,CONFIG.screenHeight-5,1);
 	SDLBox(8,CONFIG.screenHeight-24,CONFIG.screenWidth-8,CONFIG.screenHeight-17,1);
-	SDLstring(center,CONFIG.screenHeight-24,"v0.8.31 by Jakub Husak and STC.");
+	SDLstring(center,CONFIG.screenHeight-24,"v0.8.36 by Jakub Husak and STC.");
 	SDLstring(center,CONFIG.screenHeight-12,"v0.8 Programmed by Mark Schmelzenbach");
 	return 1;
 }
