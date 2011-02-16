@@ -23,7 +23,7 @@ int SDLmap_plotchr(int sx, int sy, int chr, int typ, unsigned char *fnt);
 int SDLstring(int x, int y, char *txt);
 int SDLBox(int x1, int y1, int x2, int y2, int clr);
 int SDLHollowBox(int x1, int y1, int x2, int y2, int clr);
-int SDLGeneralBox(int x1, int y1, int x2, int y2, int box_type);
+int SDLGeneralBox(int x1, int y1, int x2, int y2, int clrIdx, int box_type);
 int SDLXORBox(int x1, int y1, int x2, int y2);
 int SDLXORDottedBox(int x1, int y1, int x2, int y2);
 int SDLXORHollowBox(int x1, int y1, int x2, int y2);

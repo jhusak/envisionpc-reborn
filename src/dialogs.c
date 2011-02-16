@@ -459,6 +459,7 @@ int do_options()
 		tmp_base=num2val(oldname);
 		free(oldname);
 		yp+=10;
+		
 		SDLstring(tmpx+11,yp,"Step:");
 		SDLUpdate();
 		oldname=ginput(tmpx+54,yp,tmpx+99,5,NULL,1);

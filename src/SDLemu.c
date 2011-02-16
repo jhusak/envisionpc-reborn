@@ -306,41 +306,33 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 				cw=8; ch=10;
 				break;
 			}
-		case 4: {
+
+		case 4: 
+		case 5:
+			{
 				for(y=0;y<8;y++) {
 					c=*(dat+y);
 					for(x=0;x<4;x++) {
 						l=(c&192)>>6;
 						if ((chr>=128)&&(l==3)) l=4;
-						//if (l) {
+						if (typ==4) {
 							SDLPlot(sx+x*2,sy+y,clut[l]);
 							SDLPlot(sx+(x*2+1),sy+y,clut[l]);
-						//}
-						c=c<<2;
-					}
-				}
-				cw=ch=8;
-				break;
-			}
-		case 5: {
-				for(y=0;y<8;y++) {
-					c=*(dat+y);
-					for(x=0;x<4;x++) {
-						l=(c&192)>>6;
-						if ((chr>=128)&&(l==3)) l=4;
-						//if (l) {
+						} else {
 							SDLPlot(sx+x*2,sy+y*2,clut[l]);
 							SDLPlot(sx+(x*2+1),sy+y*2,clut[l]);
 							SDLPlot(sx+x*2,sy+y*2+1,clut[l]);
 							SDLPlot(sx+(x*2+1),sy+y*2+1,clut[l]);
+						}
 						//}
 						c=c<<2;
 					}
 				}
-				cw=8; ch=16;
+				cw=8;
+				ch=typ==5?16:8;
 				break;
 			}
-		case 6: { /* Gr. 1 */
+	/*	case 6: {
 				for(y=0;y<8;y++) {
 					c=*(dat+y);
 					int tcol;
@@ -354,20 +346,30 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 				cw=16; ch=8;
 				break;
 			}
+	 */
+		case 6: /* Gr. 1 */
 		case 7: { /* Gr. 2 */
 				for(y=0;y<8;y++) {
 					c=*(dat+y);
 					int tcol;
 					for(x=0;x<8;x++) {
 						tcol=(c&128)?clr:0;
-						SDLPlot(sx+x*2,sy+y*2,clut[tcol]);
-						SDLPlot(sx+(x*2+1),sy+y*2,clut[tcol]);
-						SDLPlot(sx+x*2,sy+y*2+1,clut[tcol]);
-						SDLPlot(sx+(x*2+1),sy+y*2+1,clut[tcol]);
+						if (typ==6) {
+							SDLPlot(sx+x*2,sy+y,clut[tcol]);
+							SDLPlot(sx+(x*2+1),sy+y,clut[tcol]);
+						}
+						else
+						{
+							SDLPlot(sx+x*2,sy+y*2,clut[tcol]);
+							SDLPlot(sx+(x*2+1),sy+y*2,clut[tcol]);
+							SDLPlot(sx+x*2,sy+y*2+1,clut[tcol]);
+							SDLPlot(sx+(x*2+1),sy+y*2+1,clut[tcol]);
+						}
 						c=c<<1;
 					}
 				}
-				cw=ch=16;
+			cw=16;
+			ch=typ==6?8:16;
 				break;
 			}
 		default: {
@@ -445,26 +447,6 @@ int SDLmap_plotchr(int sx, int sy, int chr, int typ, unsigned char *fnt)
 	return SDLCharEngine(sx,sy,chr,typ,clr,dat);
 }
 
-int SDLmap_plot8x8chr(int sx, int sy, int chr, int typ, unsigned char *fnt)
-{
-	unsigned char clr,*dat;
-	
-	clr=0;
-	if ((typ==6)||(typ==7)) {
-		dat=fnt+(chr&63)*8+base;
-		clr=(chr>>6)+1;
-	} else {
-		if (typ==1)
-			clr=10;
-		else if ((typ==2)||(typ==3)) {
-			clr=(clut[3]&240)+(clut[2]&15);
-		}
-		dat=fnt+(chr&127)*8;
-	}
-	
-	return SDLCharEngine(sx,sy,chr,typ,clr,dat);
-}
-
 /*===========================================================================
  * unpack
  * unpack title screen
@@ -499,6 +481,7 @@ int unpack(unsigned char *look, int xs, int ys)
 	}
 	return 1;
 }
+enum {BOX_FILLED,BOX_XOR,BOX_XORHOLLOW,BOX_XORDOTTED};
 
 /*===========================================================================
  * SDLBox
@@ -512,32 +495,11 @@ int unpack(unsigned char *look, int xs, int ys)
  *==========================================================================*/
 int SDLBox(int x1, int y1, int x2, int y2, int clrIdx)
 {
-	Uint32 clr=mainScreen->clut[clrIdx];
-	SDL_Rect rect;
-
-	if (x1>x2) {
-		int tmp=x2;
-		x2=x1;
-		x1=tmp;
-	}
-	if (y1>y2) {
-		int tmp=y2;
-		y2=y1;
-		y1=tmp;
-	}
-	rect.x=x1*mainScreen->zoom;
-	rect.y=y1*mainScreen->zoom;
-	rect.w=(x2+1)*mainScreen->zoom-rect.x;
-	rect.h=(y2+1)*mainScreen->zoom-rect.y;
-	SDL_FillRect(mainScreen->current,&rect,clr);
-	if (mainScreen->update)
-		SDL_UpdateRect(mainScreen->current,rect.x,rect.y,rect.w,rect.h);
-	return 1;
+	return SDLGeneralBox(x1, y1, x2, y2, clrIdx, BOX_FILLED);
 }
 
-enum {BOX_XOR,BOX_XORHOLLOW,BOX_XORDOTTED};
 
-int SDLGeneralBox(int x1, int y1, int x2, int y2, int box_type)
+int SDLGeneralBox(int x1, int y1, int x2, int y2, int clrIdx,  int box_type)
 {
 	SDL_Surface *s,*n;
 	SDL_Rect rect,xorR;
@@ -557,6 +519,16 @@ int SDLGeneralBox(int x1, int y1, int x2, int y2, int box_type)
 	rect.y=y1*mainScreen->zoom;
 	rect.w=(x2+1)*mainScreen->zoom-rect.x;
 	rect.h=(y2+1)*mainScreen->zoom-rect.y;
+	
+	if (box_type==BOX_FILLED)
+	{
+		Uint32 clr=mainScreen->clut[clrIdx];
+		SDL_FillRect(mainScreen->current,&rect,clr);
+		if (mainScreen->update)
+			SDL_UpdateRect(mainScreen->current,rect.x,rect.y,rect.w,rect.h);
+		return 1;
+	}
+	
 	xorR.x=xorR.y=0;
 	
 	s=SDL_CreateRGBSurface(SDL_SWSURFACE,rect.w,rect.h,32,rmask, gmask, bmask, amask);
@@ -590,6 +562,7 @@ int SDLGeneralBox(int x1, int y1, int x2, int y2, int box_type)
 	SDL_FreeSurface(s);
 	SDL_BlitSurface(n,NULL,mainScreen->current,&rect);
 	SDL_FreeSurface(n);
+	
 	if (mainScreen->update)
 		SDL_UpdateRect(mainScreen->current,rect.x,rect.y,rect.w,rect.h);
 	return 1;
@@ -605,7 +578,7 @@ int SDLGeneralBox(int x1, int y1, int x2, int y2, int box_type)
  *==========================================================================*/
 int SDLXORDottedBox(int x1, int y1, int x2, int y2)
 {
-	return SDLGeneralBox(x1, y1, x2, y2, BOX_XORDOTTED);
+	return SDLGeneralBox(x1, y1, x2, y2, 0, BOX_XORDOTTED);
 }
 
 
@@ -620,7 +593,7 @@ int SDLXORDottedBox(int x1, int y1, int x2, int y2)
  *==========================================================================*/
 int SDLXORBox(int x1, int y1, int x2, int y2)
 {
-	return SDLGeneralBox(x1, y1, x2, y2, BOX_XOR);
+	return SDLGeneralBox(x1, y1, x2, y2, 0, BOX_XOR);
 }
 
 /*===========================================================================
@@ -634,7 +607,7 @@ int SDLXORBox(int x1, int y1, int x2, int y2)
  *==========================================================================*/
 int SDLXORHollowBox(int x1, int y1, int x2, int y2)
 {
-	return SDLGeneralBox(x1, y1, x2, y2, BOX_XORHOLLOW);
+	return SDLGeneralBox(x1, y1, x2, y2, 0, BOX_XORHOLLOW);
 }
 
 /*===========================================================================

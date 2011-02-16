@@ -177,6 +177,40 @@ int write_data(char *file, unsigned char *font, int start, int end, int a)
 }
 
 
+void fgetchar( unsigned char * c, FILE * chan)
+{
+	*c=fgetc(chan);
+}
+
+void fputchar( unsigned char * c, FILE * chan)
+{
+	fputc(*c,chan);
+}
+
+// pointer to universal io char put/get function;
+typedef void (* fiocharops) (unsigned char * c, FILE * chn);
+
+void tileMapIOOper(int cnt,unsigned char * map,FILE * chan,fiocharops fiofunc)
+{
+	int i;
+	unsigned char * look;
+	
+	for(i=0;i<cnt;i++) {
+		int tx,ty,w,h;
+		ty=i/16;
+		tx=i%16;
+		look=map+tx*tsx+ty*tsy*tsx*16;
+		for(h=0;h<tsy;h++) {
+			for(w=0;w<tsx;w++) {
+				fiofunc(look,chan);
+				look++;
+			}
+			look+=tile->w-tsx;
+		}
+	}
+}
+
+
 /*=========================================================================*/
 view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 {
@@ -235,9 +269,8 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 			if (tp!=EOF) {
 				switch(tp) {
 					case 1: {
-						int i,num;
-						unsigned char *look;
-						
+						int num;
+												
 						fread(head,6,1,in);
 						tsx=head[1]*256+head[0];
 						tsy=head[3]*256+head[2];
@@ -246,19 +279,7 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 						tile=map_init(MAP_ALLOC,tile,16*tsx, 16*tsy);
 						tile_inited=1;
 						
-						for(i=0;i<num;i++) {
-							int tx,ty,w,h;
-							ty=i/16;
-							tx=i%16;
-							look=tile->map+tx*tsx+ty*tsy*tsx*16;
-							for(h=0;h<tsy;h++) {
-								for(w=0;w<tsx;w++) {
-									*look=fgetc(in);
-									look++;
-								}
-								look+=tile->w-tsx;
-							}	  
-						}
+						tileMapIOOper(num,tile->map,in,fgetchar);
 					}
 						break;
 					case 2: {
@@ -341,8 +362,6 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 	if (!raw) {
 		fwrite(font,1024,1,out);
 		if ((tsx>1)||(tsy>1)) {
-			int i;
-			unsigned char *look;
 			
 			fputc(1,out); /* signal tilemap type 1 block */
 			head[0]=tsx&255;
@@ -353,19 +372,7 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 			head[5]=0;
 			fwrite(head,6,1,out);
 			
-			for(i=0;i<256;i++) {
-				int tx,ty,w,h;
-				ty=i/16;
-				tx=i%16;
-				look=tile->map+tx*tsx+ty*tsy*tsx*16;
-				for(h=0;h<tsy;h++) {
-					for(w=0;w<tsx;w++) {
-						fputc(*look,out);
-						look++;
-					}
-					look+=tile->w-tsx;
-				}
-			}
+			tileMapIOOper(256,tile->map,out,fputchar);
 		}
 		/* mask map corresponds to map->map
 		 * It has the same dimensions

@@ -252,10 +252,10 @@ int num2val(char * chrval)
  * grid
  * update the character grid
  * param chr: character id
- * param rem: flag indicating to remember (put into undo buffer)
+ * param remember: flag indicating to remember (put into undo buffer)
  * returns: flag indicating character change
  *==========================================================================*/
-int grid(int chr, int rem)
+int grid(int chr, int remember)
 {
 	unsigned char *dat,c;
 	char num[16];
@@ -267,7 +267,7 @@ int grid(int chr, int rem)
 	SDLNoUpdate();
 	dat=font+(chr*8);
 
-	if (rem) {
+	if (remember) {
 		memcpy(undo,dat,8);
 	}
 	frame(EDIT_GRID_X,EDIT_GRID_Y,64,64,0);
@@ -1350,9 +1350,6 @@ int edit()
 						  int sym=event.key.keysym.sym;
 						  int ch=event.key.keysym.unicode&0x7f;
 
-						  //if ((sym=='q')&&(event.key.keysym.mod&KMOD_CTRL)) {
-							//  sym=SDLK_ESCAPE;  /* handle ctrl-q */
-						  //}
 						  if ((sym==SDLK_ESCAPE)||(sym==SDLK_LEFT)||(sym==SDLK_RIGHT)||
 								  (sym==SDLK_UP)||(sym==SDLK_DOWN)) {
 							  command(ch,sym);
