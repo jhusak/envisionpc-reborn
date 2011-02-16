@@ -166,7 +166,7 @@ int map_panel()
 }
 
 
-int update_map_font(int b)
+void update_map_font(int b)
 {
 	font=fontbank[b];
 	bank=b;

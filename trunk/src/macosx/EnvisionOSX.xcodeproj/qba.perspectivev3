@@ -321,7 +321,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>30DD212C12F3DB6600B92FCD</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>changes.txt</string>
+								<string>map.c</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -329,11 +329,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>30DD212D12F3DB6600B92FCD</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>changes.txt</string>
+										<string>map.c</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>30E40221130BD6F4007A84F8</string>
+										<string>30E40229130BD71C007A84F8</string>
 										<key>history</key>
 										<array>
 											<string>3080DC9B12FB685B00605DE0</string>
@@ -355,9 +355,9 @@
 											<string>30E4016D130B0975007A84F8</string>
 											<string>30E401CB130BCF11007A84F8</string>
 											<string>30E401E9130BD092007A84F8</string>
-											<string>30E40217130BD59F007A84F8</string>
 											<string>30E4021E130BD6F4007A84F8</string>
-											<string>30E4021F130BD6F4007A84F8</string>
+											<string>30E40226130BD71C007A84F8</string>
+											<string>30E40227130BD71C007A84F8</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -473,6 +473,7 @@
 											<string>30E40209130BD333007A84F8</string>
 											<string>30E40219130BD59F007A84F8</string>
 											<string>30E40220130BD6F4007A84F8</string>
+											<string>30E40228130BD71C007A84F8</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -512,8 +513,6 @@
 									<dict>
 										<key>Frame</key>
 										<string>{{10, 27}, {1054, 163}}</string>
-										<key>RubberWindowFrame</key>
-										<string>-4 59 1280 943 0 0 1280 1002 </string>
 									</dict>
 									<key>Module</key>
 									<string>XCDetailModule</string>
@@ -568,6 +567,8 @@
 									<dict>
 										<key>Frame</key>
 										<string>{{10, 27}, {1054, 163}}</string>
+										<key>RubberWindowFrame</key>
+										<string>-4 59 1280 943 0 0 1280 1002 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>
