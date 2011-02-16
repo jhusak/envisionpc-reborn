@@ -158,12 +158,24 @@ int map_panel()
 	// wolne:0-9ajknopqvxy
 	MAP_MENU_HEIGHT=cmdcnt*10;
 	
-	set_allowed_commands(cmds,cmdcnt);
+	set_allowed_commands(cmds,cmdcnt,1);
 	
 	cmds[0]=MAP_MENU_HEIGHT*10+10;
 	SDLSetContext(MainContext);
 	return 1;
 }
+
+
+int update_map_font(int b)
+{
+	font=fontbank[b];
+	bank=b;
+	if (mode!=fontmode[b]) {
+		mode=fontmode[b];
+		do_mode(mode);
+	}
+}
+
 
 /*===========================================================================
  * curs_pos
@@ -279,6 +291,16 @@ int move(int dx, int dy)
 	return 1;
 }
 
+int askRawFormat(char * aquestion)
+{
+switch (ask("Raw mask input format?","Bi*t|*Byte"))
+	{
+		case 1: return FILE_RAWBITMASK; 
+		case 2:  return FILE_RAWMASK;
+	}
+	return 0;	
+}
+
 /*===========================================================================
  * map_command
  * process a command
@@ -309,15 +331,15 @@ int map_command(int cmd, int sym)
 						  if (typeMode) {
 							  if (typeMode>1) hidden=0;
 							  typeMode=0;
-							  draw_header(1);
 							  map_panel();
+							  draw_header(1);
 							  draw_screen(1);
 							  return 0;
 						  } else if MASK_EDIT_MODE {
 							  draw_cursor();
 							  maskEditMode=0;
-							  draw_header(1);
 							  map_panel();
+							  draw_header(1);
 							  draw_screen(1);
 							  return 0;
 						  } else
@@ -350,6 +372,20 @@ int map_command(int cmd, int sym)
 	if (!is_command_allowed(cmd)) { return 0; }
 
 	switch (cmd) {
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			update_map_font(cmd-'0');
+			draw_header(0);
+
+			break;
 		case 'h': 
 			hidden=!hidden;
 			cacheOk=0;
@@ -417,7 +453,7 @@ int map_command(int cmd, int sym)
 				for (i=0; i<currentView->w*currentView->h; i++)
 					*store++=*look++?1:0;
 				
-			}else {
+			} else {
 				do {
 					i=get_number("Enter ANTIC mode:",mode,-1);
 				} while ((i>=0)&&((i<2)||(i>7)));
@@ -480,89 +516,39 @@ int map_command(int cmd, int sym)
 			if MASK_EDIT_MODE {
 				memset(mask->map,1,mask->h*mask->w);
 				break;
-			} else {
-				fname=get_filename("Save map:",options.disk_image,RUNTIME_STORAGE.save_map_file_name);
-				if (fname) {
-					if (!xfd_format_if_needed()) 
-						if (overwrite(fname)){
-							strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
-							write_map(options.disk_image,fname,font,map,FILE_NATIVE);
-							info_dialog("Map saved.");
-						}
-					free(fname);
-				}
-			}
+			} else 
+				OBJECT_IO("Save map:",1,save_map_file_name,"Map saved.",write_map(fname,font,map,FILE_NATIVE))
+			
 			return 0;
 		case 'w':
 			if MASK_EDIT_MODE {
-				int ans;
-				int rawformat=0;
-				ans=ask("Raw mask output format?","Bi*t|*Byte");
-				if (ans==1) rawformat=FILE_RAWBITMASK;
-				if (ans==2) rawformat=FILE_RAWMASK;
-				if (rawformat) {
-					fname=get_filename("Write raw mask:",options.disk_image,RUNTIME_STORAGE.save_raw_mask_file_name);
-					if (fname) {
-						if (!xfd_format_if_needed())
-							if (overwrite(fname)){
-								strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
-								write_map(options.disk_image,fname,font,map,rawformat);
-								info_dialog("Raw mask written.");
-							}
-						free(fname);
-					}
-				}
+				int rawformat=askRawFormat("Raw mask input format?");
+				if (rawformat)
+					OBJECT_IO("Write raw mask:",1,save_raw_mask_file_name,"Raw mask written.",write_map(fname,font,map,rawformat))
+				
 			} else {
-				fname=get_filename("Write raw map:",options.disk_image,RUNTIME_STORAGE.save_raw_map_file_name);
-				if (fname) {
-					if (!xfd_format_if_needed()) 
-						if (overwrite(fname)){
-							strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
-							write_map(options.disk_image,fname,font,map,FILE_RAWMAP);
-							info_dialog("Raw map written.");
-						}
-					free(fname);
-				}
+				OBJECT_IO("Write raw map:",1,save_raw_map_file_name,"Raw map written.",write_map(fname,font,map,FILE_RAWMAP))
 			}
 			return 0;
 		case 'l':
-			fname=get_filename("Load map:",options.disk_image,NULL);
-			if (fname) {
-				strncpy(RUNTIME_STORAGE.save_map_file_name, fname, 127);
-				read_map(options.disk_image,fname,font,map,FILE_NATIVE);
-				free(fname);
-				draw_header(0);
-				do_mode(mode);
-			}
+			OBJECT_IO("Load map:",0,save_map_file_name,0,read_map(fname,font,map,FILE_NATIVE))
+			draw_header(0);
+			do_mode(mode);
 			break;
 			
 		case 'R':
 			if MASK_EDIT_MODE {
-				int ans;
-				int rawformat=0;
-				ans=ask("Raw mask output format?","Bi*t|*Byte");
-				if (ans==1) rawformat=FILE_RAWBITMASK;
-				if (ans==2) rawformat=FILE_RAWMASK;
-				if (rawformat) {
-					fname=get_filename("Read raw mask:",options.disk_image,NULL);
-					if (fname) {
-						strncpy(RUNTIME_STORAGE.save_raw_mask_file_name, fname, 127);
-						read_map(options.disk_image,fname,font,map,rawformat);
-						free(fname);
-						draw_header(0);
-						do_mode(mode);
-					}
-				}
+				int rawformat=askRawFormat("Raw mask input format?");
+				if (rawformat)
+					OBJECT_IO("Read raw mask:",0,save_raw_mask_file_name,0,read_map(fname,font,map,rawformat))
+				draw_header(0);
+				do_mode(mode);
+
 			} else {
+				OBJECT_IO("Read raw map:",0,save_raw_map_file_name,0,read_map(fname,font,map,FILE_RAWMAP))
 				
-				fname=get_filename("Read raw map:",options.disk_image,NULL);
-				if (fname) {
-					strncpy(RUNTIME_STORAGE.save_raw_map_file_name, fname, 127);
-					read_map(options.disk_image,fname,font,map,FILE_RAWMAP);
-					free(fname);
-					draw_header(0);
-					do_mode(mode);
-				}
+				draw_header(0);
+				do_mode(mode);
 			}
 			break;
 			
@@ -792,6 +778,11 @@ int do_mode(int m)
 {
 	int i,w,h;
 	unsigned char *look;
+	
+	if (fontmode[bank]!=m) {
+		fontmode[bank]=m;
+		update_font(bank);
+	}
 
 	cacheOk=0;
 	if ((m==2)||(m==4)) {
@@ -885,8 +876,12 @@ int draw_header(int update) /* update not used */
 		SDLstring(8,6,"Tile Editor - ");
 		sprintf(buf,"Size [%02dx%02d]",tsx,tsy);
 	}
-	
+	SDLstring(9*8,15,buf);
+
+	sprintf(buf,"Font %01d",bank);
 	SDLstring(8,15,buf);
+	
+	
 	if TILE_MODE {
 		sprintf(buf,"Tile: %03d",currentView->dc);
 		SDLstring(CONFIG.screenWidth-92,15,buf);

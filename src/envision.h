@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 typedef struct opt {
-	char *disk_image;
 	int write_tp;
 	int base, step;
 } opt;
@@ -29,6 +28,7 @@ typedef struct runtime_storage
 		char save_raw_mask_file_name[128];
 		char save_font_file_name[128];
 		char export_font_file_name[128];
+		char dummy[128];
 	} runtime_storage;
 
 typedef enum {COLOR_DISPLAY_HEX, COLOR_DISPLAY_DEC, COLOR_DISPLAY_MAX} color_display_type;
@@ -87,11 +87,26 @@ typedef struct rgb_color {
 #define MASK_EDIT_MODE (maskEditMode)
 #define NOT_MASK_EDIT_MODE (!maskEditMode)
 
+#define OBJECT_IO(O_INFO,O_INIT,O_STORAGE,O_CONFIRM,O_FUNCTION)\
+{\
+fname=get_filename(O_INFO,O_INIT?RUNTIME_STORAGE.O_STORAGE:NULL);\
+if (fname) {\
+if (!O_INIT || overwrite(fname)){\
+strncpy(RUNTIME_STORAGE.O_STORAGE, fname, 127);\
+O_FUNCTION;\
+if (O_CONFIRM) info_dialog(O_CONFIRM);\
+}\
+free(fname);\
+}\
+}
+
+
+
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 enum {VIEW_MAP, VIEW_TILE, VIEW_MASK};
 enum {MAP_NO_ALLOC,MAP_ALLOC};
 enum {FILE_NATIVE,FILE_RAWMAP,FILE_RAWMASK,FILE_RAWBITMASK};
-
+enum {EXPORT_BAS, EXPORT_MAE , EXPORT_M65 , EXPORT_ACT , EXPORT_C };
 
 extern config CONFIG;
 extern int MAP_MENU_HEIGHT;
@@ -99,6 +114,10 @@ extern int bank;
 extern rgb_color colortable[256];
 extern runtime_storage RUNTIME_STORAGE;
 extern char commands_allowed[64];
+extern int fontmode[10];
+// delete after putting into func
+extern unsigned char  *fontbank[10];
+
 
 int title();
 
@@ -119,7 +138,7 @@ int raisedbox(int x, int y, int w, int h);
 int do_defaults();
 unsigned char * resize_map(view * map_view, int x, int y);
 int drawbutton(int x, int y, char *txt);
-char *get_filename(char *title, char *image, char * initial);
+char *get_filename(char *title, char * initial);
 int get_number(char *title, int def, int max);
 int select_char(char *title);
 int do_options();
@@ -146,7 +165,7 @@ int tile_size(int w, int h);
 void txterr(char *txt);
 void setpal();
 void setdefaultpal();
-void set_allowed_commands(int * cmds, int cmdcnt);
+void set_allowed_commands(int * cmds, int cmdcnt, int digits);
 int is_command_allowed(int cmd);
 void bye();
 int command(int cmd, int sym);
@@ -163,24 +182,15 @@ view * map_init(int alloc_map, view * map, int width, int height);
 
 
 // fileio.c
-int overwrite( char * fname);
-int xfd_format_if_needed();
-int xfd_file_format (char * fname);
-int xfd_format(FILE * image);
-int read_xfd_font(char *image, char *file, unsigned char *data, int max);
-int write_xfd_font(char *image, char *file, unsigned char *data, int max, FILE *in);
-int write_xfd_data(char *image, char *file, unsigned char *data, int start, int end);
-
+int overwrite(char * fname);
 int read_font(char *file, unsigned char *font);
 int write_font(char *file, unsigned char *font);
 int write_data(char *file, unsigned char *font, int start, int end, int a);
 
-int write_map(char *image, char *file, unsigned char *font, view *map, int raw);
+int write_map(char *file, unsigned char *font, view *map, int raw);
 int write_file_map(char *file, unsigned char *font, view *map, int raw);
-int write_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
-view *read_map(char *image, char *file, unsigned char *font, view *map, int raw);
+view *read_map(char *file, unsigned char *font, view *map, int raw);
 view *read_file_map(char *file, unsigned char *font, view *map, int raw);
-view *read_xfd_map(char *image, char *file, unsigned char *font, view *map, int raw);
 long flength(FILE * fd);
 int import_palette(char *file, rgb_color * colortable);
 

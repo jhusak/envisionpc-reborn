@@ -180,7 +180,7 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 	SDLVLine(xp-1,yp,yp+8,144);
 	SDLVLine(slen+1,yp,yp+8,152);
 
-	if (init) {
+	if (init && *init) {
 		SDLstring(xp+1,yp,init);
 		cp=strlen(init);
 		cx=xp+1+8*cp;
@@ -275,11 +275,10 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
  * get_filename
  * get a filename from the user
  * param title: the title for the input box
- * param image: the name of the disk image to save to (optional)
  * param default: initial value (optional)
  * returns: the filename
  *==========================================================================*/
-char *get_filename(char *title, char *image, char * initial)
+char *get_filename(char *title, char * initial)
 {
 	char *r;
 	int tmpx;
@@ -288,10 +287,7 @@ char *get_filename(char *title, char *image, char * initial)
 	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
 	SDLstring(tmpx+4,68+tmpy,title);
 	SDLUpdate();
-	if (image)
-		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,initial,2);
-	else
-		r=ginput(tmpx+4,78+tmpy,tmpx+156,24,initial,0);
+	r=ginput(tmpx+4,78+tmpy,tmpx+156,24,initial,0);
 	closeLastDblBufferDialog();
 	return r;
 }
@@ -421,43 +417,13 @@ int do_options()
 
 	yp=EDIT_OFFSET_Y+64;
 	
-	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 200, 108);
+	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 200, 88);
 	SDL_ShowCursor(SDL_DISABLE); /* 144 */
 	SDLNoUpdate();
 	yp+=2;
 	SDLstring(tmpx+28,yp,"Default Options");
 	yp+=20;
-	SDLstring(tmpx+3,yp,"Use disk image? ( / )");
-	SDLplotchr(tmpx+139,yp,57,1,dfont);
-	SDLplotchr(tmpx+155,yp,46,1,dfont);
-	SDLUpdate();
-	do {
-		c=toupper(SDLgetch(0));
-	} while ((c!='Y')&&(c!='N')&&(c!=27));
 
-	if (c==27) goto exit;
-	if (c=='Y') {
-		SDLNoUpdate();
-		SDLBox(tmpx+128,yp,tmpx+181,yp+8,148);
-		SDLstring(tmpx+129,yp,"Yes");
-		SDLUpdate();
-		yp+=10;
-		tmp_name=ginput(tmpx+3,yp,tmpx+198,24,options.disk_image,0);
-		if (!tmp_name) goto exit;
-		SDLNoUpdate();
-		SDLBox(tmpx+2,yp-1,tmpx+200,yp+9,148);
-		if (tmp_name)
-			SDLstring(tmpx+4,yp,tmp_name);
-		else yp-=10;
-	} else {
-		tmp_name=NULL;
-	}
-	if (!tmp_name) {
-		SDLBox(tmpx+128,yp,tmpx+171,yp+8,148);
-		SDLstring(tmpx+129,yp,"No");
-		SDLUpdate();
-	}
-	yp+=16;
 	SDLNoUpdate();
 	SDLstring(tmpx+3,yp,"Select export format:");
 	yp+=8;
@@ -471,7 +437,8 @@ int do_options()
 	do {
 		c=SDLgetch(0);
 		if (c==27) goto exit;
-		oldname=strchr(hot,toupper(c));
+		if (c)
+			oldname=strchr(hot,toupper(c));
 	} while(!oldname);
 	c=oldname-hot;
 	yp-=8;
@@ -513,9 +480,6 @@ int do_options()
 	
 	// Commit dialog values
 	free_name=0;
-	if (options.disk_image) free(options.disk_image);
-	
-	options.disk_image=tmp_name?tmp_name:NULL;
 	
 	options.step=tmp_step;
 	options.base=tmp_base;
@@ -1074,16 +1038,8 @@ int do_move(view *map, int tile_mode)
 		} else goto exit;
 	}
 
-	
-	/*
-	   if (mode<6) mw=40;
-	   else mw=20;
-	   if ((mode==7)||(mode==5)) mh=11;
-	   else if (mode==3) mh=18; 
-	   else mh=22;
-	 */
-	mw=320/map->cw;
-	mh=176/map->ch;
+	mw=CONFIG.screenWidth/map->cw;
+	mh=(CONFIG.screenHeight-24)/map->ch;
 	if (x<mw) {
 		map->scx=0;
 	} else if (x>map->w-mw) {
