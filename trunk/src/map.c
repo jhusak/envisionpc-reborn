@@ -130,9 +130,10 @@ int map_panel()
 	int cmdcnt=0;
 	if NOT_MASK_EDIT_MODE {
 		drawbutton(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
+		drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
 		drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
 		drawbutton(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
-		drawbutton(0,cmdcnt*10,"ShiftBase*up");	cmds[++cmdcnt]='u';
+		drawbutton(0,cmdcnt*10,"ShiftBase*Up");	cmds[++cmdcnt]='U';
 		drawbutton(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
 		drawbutton(0,cmdcnt*10,"*find");	cmds[++cmdcnt]='f';
 		drawbutton(0,cmdcnt*10,"*draw char"); cmds[++cmdcnt]='d';
@@ -145,6 +146,7 @@ int map_panel()
 		drawbutton(0,cmdcnt*10,"Ret*ile");	cmds[++cmdcnt]='i';
 		if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
 	} else {
+		drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
 		drawbutton(0,cmdcnt*10,"*Read RawMask");	cmds[++cmdcnt]='R';
 		drawbutton(0,cmdcnt*10,"*write RawMsk");	cmds[++cmdcnt]='w';
 		drawbutton(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
@@ -930,9 +932,6 @@ int do_map()
 						  int sym=event.key.keysym.sym;
 						  int ch=event.key.keysym.unicode&0x7f;
 
-						  //if ((sym=='q')&&(event.key.keysym.mod&KMOD_CTRL)) {
-							//  sym=SDLK_ESCAPE;  /* handle ctrl-q */
-						  //}
 						  if ((sym==SDLK_ESCAPE)||(sym==SDLK_LEFT)||(sym==SDLK_RIGHT)||
 								  (sym==SDLK_UP)||(sym==SDLK_DOWN)) {
 							  done=map_command(ch,sym);
@@ -954,6 +953,7 @@ int do_map()
 				if (down==3)
 					SDLUpdate();
 				done=map_click(mx,my,event.button.button==1,event.button.button==3,&down);
+
 				break;
 			}
 			case SDL_MOUSEMOTION: {
@@ -969,10 +969,9 @@ int do_map()
 						      }
 						      break;
 					      }
-			case SDL_MOUSEBUTTONUP: {
-							down=0;
-							break;
-						}
+			case SDL_MOUSEBUTTONUP:
+				down=0;
+				break;
 			default:
 						break;
 		}
