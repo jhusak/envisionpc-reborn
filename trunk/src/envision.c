@@ -28,6 +28,7 @@
 #include "preferences.h"
 
 unsigned char *dfont, *font, *copy_from, *fontbank[10];
+int fontmode[10];
 //char bank_mod[10];
 int echr, bank, copy_size, values, act_col=1, back_col=0, menuPanel=1;
 
@@ -119,14 +120,18 @@ void setdefaultpal()
 	}
 }
 
-void set_allowed_commands(int * cmds, int cmdcnt)
+void set_allowed_commands(int * cmds, int cmdcnt,int digits)
 {
 	int i;
 	for (i=1; i<=cmdcnt; i++)
 		commands_allowed[i-1]=cmds[i];
 	commands_allowed[cmdcnt]='\0';
+	if (digits) strcat(commands_allowed,"0123456789");
 	
 }
+
+
+
 
 int is_command_allowed(int cmd)
 {
@@ -278,6 +283,8 @@ int grid(int chr, int rem)
 				c=c<<1;
 			}
 		}
+		SDLBox(EDIT_GRID_X,EDIT_GRID_Y+68,EDIT_GRID_X+15+48,EDIT_GRID_Y+78,0);
+
 	}
 	else if (m==4){
 		setpal();
@@ -344,25 +351,25 @@ int panel(int tp)
 	SDLSetContext(UpdContext);
 	SDLClear(0);
 	idxcnt=0;
-	drawbutton(0,idxcnt*10+8,"Go to *Map"); cmds[++idxcnt]='m';
-	drawbutton(0,idxcnt*10+8,"*Blank"); cmds[++idxcnt]='b';
+	drawbutton(0,idxcnt*10+8,"go to *map"); cmds[++idxcnt]='m';
+	drawbutton(0,idxcnt*10+8,"*blank"); cmds[++idxcnt]='b';
 	drawbutton(0,idxcnt*10+8,"*inverse"); cmds[++idxcnt]='i';
-	drawbutton(0,idxcnt*10+8,"*Undo"); cmds[++idxcnt]='u';
-	drawbutton(0,idxcnt*10+8,"*Atari"); cmds[++idxcnt]='a';
-	drawbutton(0,idxcnt*10+8,"Flip *Horiz"); cmds[++idxcnt]='h';
-	drawbutton(0,idxcnt*10+8,"Flip *Vert"); cmds[++idxcnt]='v';
-	drawbutton(0,idxcnt*10+8,"*Rotate"); cmds[++idxcnt]='r';
-	drawbutton(0,idxcnt*10+8,"*Copy"); cmds[++idxcnt]='c';
-	drawbutton(0,idxcnt*10+8,"*X-copy"); cmds[++idxcnt]='x';
-	drawbutton(0,idxcnt*10+8,"*Transcopy"); cmds[++idxcnt]='t';
-	drawbutton(0,idxcnt*10+8,"*Pick Colors"); cmds[++idxcnt]='p';
+	drawbutton(0,idxcnt*10+8,"*undo"); cmds[++idxcnt]='u';
+	drawbutton(0,idxcnt*10+8,"*atari"); cmds[++idxcnt]='a';
+	drawbutton(0,idxcnt*10+8,"flip *horiz"); cmds[++idxcnt]='h';
+	drawbutton(0,idxcnt*10+8,"flip *vert"); cmds[++idxcnt]='v';
+	drawbutton(0,idxcnt*10+8,"*rotate"); cmds[++idxcnt]='r';
+	drawbutton(0,idxcnt*10+8,"*copy"); cmds[++idxcnt]='c';
+	drawbutton(0,idxcnt*10+8,"*x-copy"); cmds[++idxcnt]='x';
+	drawbutton(0,idxcnt*10+8,"*transcopy"); cmds[++idxcnt]='t';
+	drawbutton(0,idxcnt*10+8,"*pick colors"); cmds[++idxcnt]='p';
 	//drawbutton(0,idxcnt*10+8,"RestorFont"); cmds[++idxcnt]='A';
-	drawbutton(0,idxcnt*10+8,"*Save Font"); cmds[++idxcnt]='s';
-	drawbutton(0,idxcnt*10+8,"*Load Font"); cmds[++idxcnt]='l';
-	drawbutton(0,idxcnt*10+8,"*Export"); cmds[++idxcnt]='e';
-	drawbutton(0,idxcnt*10+8,"*Import Pall"); cmds[++idxcnt]='I';
-	drawbutton(0,idxcnt*10+8,"*Options"); cmds[++idxcnt]='o';
-	drawbutton(0,idxcnt*10+8,"De*faults"); cmds[++idxcnt]='f';
+	drawbutton(0,idxcnt*10+8,"*save font"); cmds[++idxcnt]='s';
+	drawbutton(0,idxcnt*10+8,"*load font"); cmds[++idxcnt]='l';
+	drawbutton(0,idxcnt*10+8,"*export"); cmds[++idxcnt]='e';
+	drawbutton(0,idxcnt*10+8,"*ImprtPalette"); cmds[++idxcnt]='I';
+	drawbutton(0,idxcnt*10+8,"*options"); cmds[++idxcnt]='o';
+	drawbutton(0,idxcnt*10+8,"de*faults"); cmds[++idxcnt]='f';
 	// dfgjknqwyz
 	cmds[0]=idxcnt*10+8;
 	SDLSetContext(MainContext);
@@ -522,26 +529,31 @@ int colors()
 		setdefaultpal();
 		
 		sprintf(buf,"PF%d",(int)i);
-		SDLstring(EDIT_COLOR_X+i*44+5
-				  ,EDIT_COLOR_Y,buf);
-		switch (CONFIG.color_display_mode) {
-			case COLOR_DISPLAY_HEX:
-				sprintf(buf,"$%02X",clut[i]);
-				SDLstring(EDIT_COLOR_X+i*44+5,EDIT_COLOR_Y+8,buf);
-				break;
-			case COLOR_DISPLAY_DEC:
-				sprintf(buf,"%03d",clut[i]);
-				SDLstring(EDIT_COLOR_X+i*44+5,EDIT_COLOR_Y+8,buf);
-				break;
-			default:
-				break;
-		}
-		//sprintf(buf,"%d",clut[i]);
+		SDLstring(EDIT_COLOR_X+i*44+5,EDIT_COLOR_Y,buf);
+		
+		sprintf(buf,CONFIG.color_display_mode==COLOR_DISPLAY_HEX?"$%02X":"%03d",clut[i]);
+		SDLstring(EDIT_COLOR_X+i*44+5,EDIT_COLOR_Y+8,buf);
 	}
 	
 	SDLUpdate();
 	setdefaultpal();
 	return 1;
+}
+
+
+void drawFontMode()
+{
+	SDLBox(EDIT_FONTSEL_X-1,EDIT_FONTSEL_Y,EDIT_FONTSEL_X+33,EDIT_FONTSEL_Y+15,144);
+	SDLstring(EDIT_FONTSEL_X,EDIT_FONTSEL_Y,"Font");
+	SDLplotchr(EDIT_FONTSEL_X,EDIT_FONTSEL_Y+8,126,1,dfont);
+	SDLplotchr(EDIT_FONTSEL_X+24,EDIT_FONTSEL_Y+8,127,1,dfont);
+	
+	SDLBox(EDIT_MODESEL_X-1,EDIT_MODESEL_Y,EDIT_MODESEL_X+33,EDIT_MODESEL_Y+15,144);
+	SDLstring(EDIT_MODESEL_X,EDIT_MODESEL_Y,"Mode");
+	SDLplotchr(EDIT_MODESEL_X,EDIT_MODESEL_Y+8,126,1,dfont);
+	SDLplotchr(EDIT_MODESEL_X+24,EDIT_MODESEL_Y+8,127,1,dfont);
+	SDLplotchr(EDIT_MODESEL_X+12,EDIT_MODESEL_Y+8,16+mode,1,dfont);
+	
 }
 /*===========================================================================
  * update_font
@@ -555,8 +567,15 @@ int update_font(int b)
 
 	font=fontbank[b];
 	bank=b;
-	SDLSetContext(DialogContext);
 	SDLNoUpdate();
+
+	if (mode!=fontmode[b]) {
+		mode=fontmode[b];
+		do_mode(mode);
+//		draw_edit();
+	}
+	
+	SDLSetContext(DialogContext);
 	if (mode==4 || mode==5) setpal();
 	SDLClear(0);
 	sx=0; sy=0;
@@ -566,6 +585,7 @@ int update_font(int b)
 		sx+=8;
 		if (sx>248) { sx=0; sy+=8; }
 	}
+	
 	SDLSetContext(MainContext);
 	frame(EDIT_CHARMAP_X,EDIT_CHARMAP_Y,256,32,0);
 	// copying painted fonts to the main screen
@@ -593,17 +613,8 @@ int draw_edit()
 	SDLClear(0);
 	// unpack(titles,0,0);
 	SDLstring(EDIT_GRID_X-14,EDIT_GRID_Y+82,"Char");
-	
-	SDLBox(EDIT_FONTSEL_X-1,EDIT_FONTSEL_Y,EDIT_FONTSEL_X+33,EDIT_FONTSEL_Y+15,144);
-	SDLstring(EDIT_FONTSEL_X,EDIT_FONTSEL_Y,"Font");
-	SDLplotchr(EDIT_FONTSEL_X,EDIT_FONTSEL_Y+8,126,1,dfont);
-	SDLplotchr(EDIT_FONTSEL_X+24,EDIT_FONTSEL_Y+8,127,1,dfont);
 
-	SDLBox(EDIT_MODESEL_X-1,EDIT_MODESEL_Y,EDIT_MODESEL_X+33,EDIT_MODESEL_Y+15,144);
-	SDLstring(EDIT_MODESEL_X,EDIT_MODESEL_Y,"Mode");
-	SDLplotchr(EDIT_MODESEL_X,EDIT_MODESEL_Y+8,126,1,dfont);
-	SDLplotchr(EDIT_MODESEL_X+24,EDIT_MODESEL_Y+8,127,1,dfont);
-	SDLplotchr(EDIT_MODESEL_X+12,EDIT_MODESEL_Y+8,16+mode,1,dfont);
+	drawFontMode();
 	
 	update_font(bank);
 	i=echr;
@@ -683,16 +694,16 @@ int setup(int zoom, int fullScreen)
 		fontbank[i]=(unsigned char *)malloc(1024);
 		//bank_mod[i]=0;
 		memcpy(fontbank[i],dfont,1024);
+		fontmode[i]=2;
 	}
 
 
 	copy_from=cache=NULL;
-	options.disk_image=NULL;
 	options.base=options.step=0;
 	options.write_tp=1;
 	base=bank=0;
 	ratio=100;
-	mode=2;
+	mode=fontmode[bank];
 	echr=33;
 	menuPanel=1;
 	memset(peek,0,64);
@@ -986,7 +997,9 @@ int click(int x, int y, int b)
 							bit4=back_col;
 						}
 						SDLNoUpdate();
+						setpal();
 						SDLBox(xe4,ye,xe4+15,ye+7,col44);
+						setdefaultpal();
 						update2bits((xe4-EDIT_GRID_X)>>4,(ye-EDIT_GRID_Y)>>3,bit4&3);
 						SDLUpdate();
 
@@ -1270,71 +1283,33 @@ int command(int cmd, int sym)
 			do_defaults();
 				  break;
 		case 'n':
-				  values++;
-				  if (values==3) values=0;
-				  break;
-		case 's':
-				  fname=get_filename("Save font:",options.disk_image,RUNTIME_STORAGE.save_font_file_name);
-				  if (fname) {
-					  if (!xfd_format_if_needed()) 
-						  if (overwrite(fname)){
-							  strncpy(RUNTIME_STORAGE.save_font_file_name,fname,127);
-							  if (options.disk_image)
-								  i=write_xfd_font(options.disk_image,fname,font,1024,NULL);
-							  else
-								  i=write_font(fname,font);
-							  info_dialog("Font saved.");
-						  }
-					  free(fname);
-				  }
-				  break;
-		case 'l':				  fname=get_filename("Load font:",options.disk_image,NULL);
-				  if (fname) {
-					  strncpy(RUNTIME_STORAGE.save_font_file_name,fname,127);
-					  if (options.disk_image)
-						  i=read_xfd_font(options.disk_image,fname,font,1024);
-					  else
-						  i=read_font(fname,font);
-					  free(fname);
-					  update_font(bank);
-				  }
-				  break;
-		case 'I':
-			fname=get_filename("Import color table:",0,NULL);
-			if (fname) {
-				if (import_palette(fname,colortable)) {
-					setpal();
-					setprefs();
-					draw_edit();
-				}
-				free(fname);
-				
-			
-			}
+			values++;
+			if (values==3) values=0;
 			break;
-			
+		case 's':
+			OBJECT_IO("Save font:",1,save_font_file_name,"Font saved.",write_font(fname,font))
+			break;
+		case 'l':		
+			OBJECT_IO("Load font:",0,save_font_file_name,NULL,read_font(fname,font))
+			update_font(bank);
+			break;
+		case 'I':
+			OBJECT_IO("Import color table:",0,dummy,NULL,if (import_palette(fname,colortable)) {	setprefs();})
+			setdefaultpal();
+			draw_edit();
+			break;
 		case 'e':
-				  fname=get_filename("Export font:",options.disk_image,RUNTIME_STORAGE.export_font_file_name);
-				  if (fname) {
-					  strncpy(RUNTIME_STORAGE.export_font_file_name,fname,127);
-					  if (options.disk_image)
-						  i=write_xfd_data(options.disk_image,fname,font,0,127);
-					  else
-						  i=write_data(fname,font,0,127,0);
-					  free(fname);
-				  }
-				  break;
+			OBJECT_IO("Export font:",1,export_font_file_name,"Font exported.",write_data(fname,font,0,127,0))
+			break;
 		case 'o':
 			do_options();
-			
 			break;
 		case 'p':
 				do_colors();
 				update_font(bank);
-				//corner(1);
 			colors();
 				break;
-		case 'm':				  do_map();
+		case 'm': do_map();
 				  draw_edit();
 				  return 0;
 /*		case 'f': {
