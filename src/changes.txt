@@ -84,3 +84,9 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - completely rewritten export font code, now MUCH SIMPLIER with only one "if" inside;
 - added mode to font assignment
 - added 0-9 font change in map and mask edit mode; change antic mode works independent for efery font
+
+2011-02-xx (rev4x)
+- fized bug when resize map/mask up
+- changed the way of the mask edit exit (now press again "a")
+- added some items to menu in mask edit mode
+- fixed issue with header draw in mask edit mode

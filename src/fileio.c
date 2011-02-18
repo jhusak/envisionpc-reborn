@@ -224,8 +224,9 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 		fread(head,10,1,in);
 		mode=head[0];
 
-		map=map_init(MAP_ALLOC, map, head[1]+head[2]*256, head[3]+head[4]*256);
-		mask=map_init(MAP_ALLOC, mask, head[1]+head[2]*256, head[3]+head[4]*256);
+		map=map_init(MAP_ALLOC, map, GET_WORD(head,1), GET_WORD(head,3));
+		mask=map_init(MAP_ALLOC, mask, GET_WORD(head,1), GET_WORD(head,3));
+		undomap=map_init(MAP_ALLOC, undomap, GET_WORD(head,1), GET_WORD(head,3));
 		memcpy(clut,&head[5],5);
 	
 	}
@@ -272,9 +273,9 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 						int num;
 												
 						fread(head,6,1,in);
-						tsx=head[1]*256+head[0];
-						tsy=head[3]*256+head[2];
-						num=head[5]*256+head[4]+1;
+						tsx=GET_WORD(head,0);
+						tsy=GET_WORD(head,2);
+						num=GET_WORD(head,4)+1;
 						
 						tile=map_init(MAP_ALLOC,tile,16*tsx, 16*tsy);
 						tile_inited=1;
@@ -329,10 +330,8 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 
 	if (!raw) {
 		head[0]=mode;
-		head[1]=map->w&255;
-		head[2]=(map->w>>8)&255;
-		head[3]=map->h&255;
-		head[4]=(map->h>>8)&255;
+		SET_WORD(head,1,map->w);
+		SET_WORD(head,3,map->h);
 		head[5]=clut[0];
 		head[6]=clut[1];
 		head[7]=clut[2];
@@ -364,12 +363,10 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 		if ((tsx>1)||(tsy>1)) {
 			
 			fputc(1,out); /* signal tilemap type 1 block */
-			head[0]=tsx&255;
-			head[1]=(tsx>>8)&255;
-			head[2]=tsy&255;
-			head[3]=(tsy>>8)&255;
-			head[4]=255;  /* num tiles -1 */
-			head[5]=0;
+			SET_WORD(head,0,tsx);
+			SET_WORD(head,2,tsy);
+			SET_WORD(head,4,255);  /* num tiles -1 */
+
 			fwrite(head,6,1,out);
 			
 			tileMapIOOper(256,tile->map,out,fputchar);

@@ -197,63 +197,7 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array>
-		<dict>
-			<key>Content</key>
-			<dict>
-				<key>PBXProjectModuleGUID</key>
-				<string>30E40237130C646C007A84F8</string>
-				<key>PBXProjectModuleLabel</key>
-				<string>SDLemu.c</string>
-				<key>PBXSplitModuleInNavigatorKey</key>
-				<dict>
-					<key>Split0</key>
-					<dict>
-						<key>PBXProjectModuleGUID</key>
-						<string>30E40238130C646C007A84F8</string>
-						<key>PBXProjectModuleLabel</key>
-						<string>SDLemu.c</string>
-						<key>_historyCapacity</key>
-						<integer>0</integer>
-						<key>bookmark</key>
-						<string>30E40289130C95E4007A84F8</string>
-						<key>history</key>
-						<array>
-							<string>30E40239130C646C007A84F8</string>
-						</array>
-					</dict>
-					<key>Split1</key>
-					<dict>
-						<key>PBXProjectModuleGUID</key>
-						<string>30E40244130C6743007A84F8</string>
-						<key>PBXProjectModuleLabel</key>
-						<string>SDLemu.c</string>
-						<key>_historyCapacity</key>
-						<integer>0</integer>
-						<key>bookmark</key>
-						<string>30E4028A130C95E4007A84F8</string>
-						<key>history</key>
-						<array>
-							<string>30E40245130C6743007A84F8</string>
-						</array>
-					</dict>
-					<key>SplitCount</key>
-					<string>2</string>
-				</dict>
-				<key>StatusBarVisibility</key>
-				<true/>
-			</dict>
-			<key>Geometry</key>
-			<dict>
-				<key>Frame</key>
-				<string>{{0, 20}, {1202, 858}}</string>
-				<key>PBXModuleWindowStatusBarHidden2</key>
-				<false/>
-				<key>RubberWindowFrame</key>
-				<string>38 77 1202 899 0 0 1280 1002 </string>
-			</dict>
-		</dict>
-	</array>
+	<array/>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>1280</integer>
@@ -336,12 +280,13 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>79</integer>
-									<integer>30</integer>
+									<integer>15</integer>
+									<integer>4</integer>
+									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 510}, {204, 884}}</string>
+							<string>{{0, 0}, {204, 884}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -376,7 +321,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>30DD212C12F3DB6600B92FCD</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>map.c</string>
+								<string>envision.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -384,11 +329,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>30DD212D12F3DB6600B92FCD</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>map.c</string>
+										<string>envision.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>30E40288130C95E3007A84F8</string>
+										<string>30E40330130DD747007A84F8</string>
 										<key>history</key>
 										<array>
 											<string>3080DC9B12FB685B00605DE0</string>
@@ -405,14 +350,13 @@
 											<string>30E4011E130AF1D0007A84F8</string>
 											<string>30E40121130AF1D0007A84F8</string>
 											<string>30E40122130AF1D0007A84F8</string>
-											<string>30E401E9130BD092007A84F8</string>
-											<string>30E4022D130C5FB0007A84F8</string>
-											<string>30E4023E130C6743007A84F8</string>
-											<string>30E4025A130C689E007A84F8</string>
-											<string>30E40271130C7054007A84F8</string>
-											<string>30E4027A130C7A41007A84F8</string>
-											<string>30E4027B130C7A41007A84F8</string>
-											<string>30E4027C130C7A41007A84F8</string>
+											<string>30E402AF130DC4C0007A84F8</string>
+											<string>30E402EE130DD236007A84F8</string>
+											<string>30E40312130DD62C007A84F8</string>
+											<string>30E40324130DD747007A84F8</string>
+											<string>30E40325130DD747007A84F8</string>
+											<string>30E40326130DD747007A84F8</string>
+											<string>30E40327130DD747007A84F8</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -422,8 +366,6 @@
 											<string>3029165C12FA5A0D0045DF5F</string>
 											<string>3028CE6612FC0E990056BE67</string>
 											<string>3028D08F12FC5DB00056BE67</string>
-											<string>3028D0C812FC601A0056BE67</string>
-											<string>3028D11412FC6E1C0056BE67</string>
 											<string>308284D612FDEBCD0096A207</string>
 											<string>308284D812FDEBCD0096A207</string>
 											<string>309DC9BB13048CEE00B51016</string>
@@ -435,16 +377,45 @@
 											<string>30E4FFE6130994BD007A84F8</string>
 											<string>30E4FFF2130995D9007A84F8</string>
 											<string>30E40209130BD333007A84F8</string>
-											<string>30E40219130BD59F007A84F8</string>
 											<string>30E40273130C7054007A84F8</string>
-											<string>30E4027D130C7A41007A84F8</string>
 											<string>30E4027E130C7A41007A84F8</string>
-											<string>30E4027F130C7A41007A84F8</string>
 											<string>30E40280130C7A41007A84F8</string>
-											<string>30E40281130C7A41007A84F8</string>
 											<string>30E40282130C7A41007A84F8</string>
-											<string>30E40283130C7A41007A84F8</string>
 											<string>30E40284130C7A41007A84F8</string>
+											<string>30E40292130D1D7B007A84F8</string>
+											<string>30E40293130D1D7B007A84F8</string>
+											<string>30E40294130D1D7B007A84F8</string>
+											<string>30E40295130D1D7B007A84F8</string>
+											<string>30E40296130D1D7B007A84F8</string>
+											<string>30E40297130D1D7B007A84F8</string>
+											<string>30E40298130D1D7B007A84F8</string>
+											<string>30E40299130D1D7B007A84F8</string>
+											<string>30E4029B130D1D7B007A84F8</string>
+											<string>30E4029F130D1D7B007A84F8</string>
+											<string>30E402A8130DC470007A84F8</string>
+											<string>30E402A9130DC470007A84F8</string>
+											<string>30E402B1130DC4C0007A84F8</string>
+											<string>30E402D9130DD026007A84F8</string>
+											<string>30E402F0130DD236007A84F8</string>
+											<string>30E402FB130DD27B007A84F8</string>
+											<string>30E4030C130DD2DA007A84F8</string>
+											<string>30E40317130DD62C007A84F8</string>
+											<string>30E40318130DD62C007A84F8</string>
+											<string>30E40319130DD62C007A84F8</string>
+											<string>30E4031A130DD62C007A84F8</string>
+											<string>30E4031B130DD62C007A84F8</string>
+											<string>30E4031C130DD62C007A84F8</string>
+											<string>30E4031D130DD62C007A84F8</string>
+											<string>30E4031E130DD62C007A84F8</string>
+											<string>30E4031F130DD62C007A84F8</string>
+											<string>30E40328130DD747007A84F8</string>
+											<string>30E40329130DD747007A84F8</string>
+											<string>30E4032A130DD747007A84F8</string>
+											<string>30E4032B130DD747007A84F8</string>
+											<string>30E4032C130DD747007A84F8</string>
+											<string>30E4032D130DD747007A84F8</string>
+											<string>30E4032E130DD747007A84F8</string>
+											<string>30E4032F130DD747007A84F8</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -757,7 +728,6 @@
 	<array>
 		<string>30E40152130B0292007A84F8</string>
 		<string>30E40153130B0292007A84F8</string>
-		<string>30E40237130C646C007A84F8</string>
 		<string>/Users/qba/devel/envisionpc-reborn/src/macosx/EnvisionOSX.xcodeproj</string>
 	</array>
 	<key>WindowString</key>

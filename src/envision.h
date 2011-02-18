@@ -100,6 +100,9 @@ free(fname);\
 }\
 }
 
+#define GET_WORD(array,index) (array[(index)]+array[(index)+1]*256)
+#define SET_WORD(array,index,value) do{array[(index)]=(value)&0xff;array[(index)+1]=((value)>>8)&0xff;}while(0)
+
 
 
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
@@ -201,7 +204,7 @@ int untile_map(view *map, view *tile);
 int unpack(unsigned char *look, int xs, int ys);
 
 
-extern view *currentView, *map, *tile, *mask;
+extern view *currentView, *map, *tile, *mask, *undomap;
 extern unsigned char *dfont, *font, *cache;
 extern int echr, cacheOk;
 extern opt options;
