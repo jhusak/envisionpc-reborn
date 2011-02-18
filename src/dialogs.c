@@ -211,7 +211,7 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 		if (!c) {
 			c=SDLgetch(0);
 		} else {
-			if (c==27) return NULL;
+			if (c==27) { SDL_ShowCursor(SDL_ENABLE); return NULL;}
 			SDLNoUpdate();
 			if (first && c!=8 && c!=13)
 			{
@@ -875,7 +875,7 @@ unsigned char * resize_map(view * map_view, int x, int y) {
 					else *newmap++=0;
 		}
 		if (y>map_view->h)
-			memset(result+x*map_view->h,48,x*y-x*map_view->h);
+			memset(result+x*map_view->h,0,x*y-x*map_view->h);
 	} else {
 		error_dialog("Cannot allocate new map");
 		return NULL;

@@ -90,3 +90,5 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - changed the way of the mask edit exit (now press again "a")
 - added some items to menu in mask edit mode
 - fixed issue with header draw in mask edit mode
+- fixed bug with not show again the number after ginput a number and pressing esc.
+- fixed draw_select - now one can draw in place of the cursor.
