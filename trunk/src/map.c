@@ -14,7 +14,7 @@
 #include "SDLemu.h"
 #include "envision.h"
 
-view *currentView, *map, *tile, *mask; /* display, map, tile */
+view *currentView, *map, *tile, *mask, *undomap; /* display, map, tile, mask, undobufferformapandmask */
 int typeMode; /* typing mode flag */
 int mode, hidden, ratio; /* ANTIC mode, menu shown flag, replace ratio */
 int base; /* character base */
@@ -146,7 +146,10 @@ int map_panel()
 		drawbutton(0,cmdcnt*10,"Ret*ile");	cmds[++cmdcnt]='i';
 		if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
 	} else {
+		drawbutton(0,cmdcnt*10,"exitM*askEdit");	cmds[++cmdcnt]='a';
 		drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
+		drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
+		drawbutton(0,cmdcnt*10,"ShiftBase*Up");	cmds[++cmdcnt]='U';
 		drawbutton(0,cmdcnt*10,"*Read RawMask");	cmds[++cmdcnt]='R';
 		drawbutton(0,cmdcnt*10,"*write RawMsk");	cmds[++cmdcnt]='w';
 		drawbutton(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
@@ -337,13 +340,14 @@ int map_command(int cmd, int sym)
 							  draw_header(1);
 							  draw_screen(1);
 							  return 0;
-						  } else if MASK_EDIT_MODE {
+						  /*} else if MASK_EDIT_MODE {
 							  draw_cursor();
 							  maskEditMode=0;
 							  map_panel();
 							  draw_header(1);
 							  draw_screen(1);
 							  return 0;
+						   */
 						  } else
 							  bye();
 						  break;
@@ -584,9 +588,10 @@ int map_command(int cmd, int sym)
 			break;
 		case 'a':
 			draw_cursor();
-			maskEditMode=1;
-			map_panel();
+			maskEditMode=!maskEditMode;
 			draw_header(0);
+			map_panel();
+			//draw_screen(1);
 			break;
 			//draw_screen(1);
 			//return 0;
@@ -638,17 +643,14 @@ int map_click(int x, int y, int bleft, int bright, int *down)
 							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=currentView->dc;
 							x=x*currentView->cw;
 							y=MAP_TOP_OFFSET+i*currentView->ch;
-							if TILE_MODE {
-								SDLCharBlt(MainContext,x,y,currentView->dc+256);
-							} else {
-								SDLCharBlt(MainContext,x,y,currentView->dc);
-							}
+							
+							SDLCharBlt(MainContext,x,y,currentView->dc+ (TILE_MODE *256));
+							
 							if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
 								draw_screen(bleft);
 						}
 					}
 					if MASK_EDIT_MODE {
-						// with this "if" works very well.
 						int setmaskfield=1;
 						if (bright) setmaskfield=0;
 						if (bleft) setmaskfield=1;
@@ -659,13 +661,9 @@ int map_click(int x, int y, int bleft, int bright, int *down)
 							//if (setmaskfield) draw_cursor();
 							x=x*currentView->cw;
 							y=MAP_TOP_OFFSET+i*currentView->ch;
-//							if TILE_MODE {
-//								SDLCharBlt(MainContext,x,y,currentView->dc+256);
-//							} else {
-//								SDLCharBlt(MainContext,x,y,currentView->dc);
-//							}
+
 							//if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
-								draw_screen(1);
+							draw_screen(1);
 						}
 					}
 					
@@ -867,7 +865,7 @@ int draw_header(int update) /* update not used */
 	if (!tileEditMode) {
 		SDLstring(8,6,"Map Editor - ");
 		if MASK_EDIT_MODE {
-			SDLBox(11*8,6,CONFIG.screenWidth-1,22,144);
+			SDLBox(11*8,6,CONFIG.screenWidth-1,13,144);
 			SDLstring(11*8,6,": Mask Edit Mode");
 		}
 		if ((currentView->w>999)||(currentView->h>999))

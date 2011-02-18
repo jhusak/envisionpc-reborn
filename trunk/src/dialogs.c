@@ -874,8 +874,8 @@ unsigned char * resize_map(view * map_view, int x, int y) {
 					if (i<map_view->w) *newmap++=*look++;
 					else *newmap++=0;
 		}
-		if (x*y>map_view->w*map_view->h)
-			memset(result+map_view->w*map_view->h,0,x*y-map_view->w*map_view->h);
+		if (y>map_view->h)
+			memset(result+x*map_view->h,48,x*y-x*map_view->h);
 	} else {
 		error_dialog("Cannot allocate new map");
 		return NULL;

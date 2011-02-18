@@ -714,6 +714,7 @@ int setup(int zoom, int fullScreen)
 	currentView=map;
 
 	mask=map_init(MAP_ALLOC,NULL,CONFIG.defaultMapWidth,CONFIG.defaultMapHeight);
+	undomap=map_init(MAP_ALLOC,NULL,CONFIG.defaultMapWidth,CONFIG.defaultMapHeight);
 	
 	for(i=0;i<256;i++)
 		map->map[i]=i;
@@ -822,17 +823,6 @@ int click(int x, int y, int b)
 
 	if (b!=1)
 		b=0;
-
-	// select panel 2 Disk
-	/*
-	if ((menuPanel==1)&&IN_BOX(x-EDIT_MENU_X,y-EDIT_MENU_Y,33,63,3,7)) {
-		panel(2);
-		return 0;
-	// select panel 1 Edit
-	} else if ((menuPanel==2)&&IN_BOX(x-EDIT_MENU_X,y-EDIT_MENU_Y,1,30,3,7)) {
-		panel(1);
-		return 0;
-	} else*/
 	
 	for(i=0;i<5;i++) {
 		if (IN_BOX(x-EDIT_COLOR_X,y-EDIT_COLOR_Y,i*44,i*44+33,17,33))
