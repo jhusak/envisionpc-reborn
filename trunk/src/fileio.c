@@ -177,12 +177,12 @@ int write_data(char *file, unsigned char *font, int start, int end, int a)
 }
 
 
-void fgetchar( unsigned char * c, FILE * chan)
+void h_fgetchar( unsigned char * c, FILE * chan)
 {
 	*c=fgetc(chan);
 }
 
-void fputchar( unsigned char * c, FILE * chan)
+void h_fputchar( unsigned char * c, FILE * chan)
 {
 	fputc(*c,chan);
 }
@@ -280,7 +280,7 @@ view *read_file_map(char *file, unsigned char *font, view *map, int raw)
 						tile=map_init(MAP_ALLOC,tile,16*tsx, 16*tsy);
 						tile_inited=1;
 						
-						tileMapIOOper(num,tile->map,in,fgetchar);
+						tileMapIOOper(num,tile->map,in,h_fgetchar);
 					}
 						break;
 					case 2: {
@@ -369,7 +369,7 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 
 			fwrite(head,6,1,out);
 			
-			tileMapIOOper(256,tile->map,out,fputchar);
+			tileMapIOOper(256,tile->map,out,h_fputchar);
 		}
 		/* mask map corresponds to map->map
 		 * It has the same dimensions

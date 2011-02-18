@@ -130,7 +130,7 @@ int map_panel()
 	int cmdcnt=0;
 	if NOT_MASK_EDIT_MODE {
 		drawbutton(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
-		drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
+		//drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
 		drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
 		drawbutton(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
 		drawbutton(0,cmdcnt*10,"ShiftBase*Up");	cmds[++cmdcnt]='U';
@@ -147,7 +147,7 @@ int map_panel()
 		if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
 	} else {
 		drawbutton(0,cmdcnt*10,"exitM*askEdit");	cmds[++cmdcnt]='a';
-		drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
+		//drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
 		drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
 		drawbutton(0,cmdcnt*10,"ShiftBase*Up");	cmds[++cmdcnt]='U';
 		drawbutton(0,cmdcnt*10,"*Read RawMask");	cmds[++cmdcnt]='R';
@@ -632,13 +632,13 @@ int map_click(int x, int y, int bleft, int bright, int *down)
 		if ((ox+currentView->scx>=currentView->w)||
 				(i+currentView->scy>=currentView->h))
 			return 0;
-		// witn this "if" works much better, but still not in edit tile mode
-		if (ox!=currentView->cx || oy!=currentView->cy) {
+		// with this "if" works much better, but still not in edit tile mode
+		//if (ox!=currentView->cx || oy!=currentView->cy) {
 			if (bleft || bright) {
 				if (!typeMode) {
 					if NOT_MASK_EDIT_MODE {
 						// with this "if" works very well.
-						if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=currentView->dc)
+						//if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=currentView->dc)
 						{
 							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=currentView->dc;
 							x=x*currentView->cw;
@@ -670,7 +670,7 @@ int map_click(int x, int y, int bleft, int bright, int *down)
 				}
 			}
 			move(ox-currentView->cx,oy-currentView->cy);
-		}
+		//}
 	}
 	return 0;
 }
