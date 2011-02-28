@@ -980,11 +980,12 @@ int click(int x, int y, int b)
 						if IN_RANGE(b,1,3) {
 							col44=clut[edc[b-1]];
 							bit4=edc[b-1];
+							setpal();
+							SDLBox(xe4,ye,xe4+15,ye+7,col44);
+							setdefaultpal();
+							update2bits((xe4-EDIT_GRID_X)>>4,(ye-EDIT_GRID_Y)>>3,bit4&3);
 						}
-						setpal();
-						SDLBox(xe4,ye,xe4+15,ye+7,col44);
-						setdefaultpal();
-						update2bits((xe4-EDIT_GRID_X)>>4,(ye-EDIT_GRID_Y)>>3,bit4&3);
+						
 						SDLRedraw();
 
 				};
