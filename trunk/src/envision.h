@@ -17,7 +17,7 @@ typedef struct view {
 	int scx, scy; /* Upper left corner of screen */
 	int cx, cy;   /* Cursor offset from upper left */
 	int cw, ch;   /* Cursor width, height */
-	int dc;       /* draw color */
+	int dc[3];       /* draw color Left Middle Right MB*/
 	unsigned char *map;
 } view;
 
@@ -42,13 +42,16 @@ typedef struct config
 		int screenWidth;
 		int defaultMapWidth;
 		int defaultMapHeight;
-		color_display_type color_display_mode;
+		color_display_type color_display_mode; // hex/dec
+		int maxMapSize;
+		
 	} config;
 
+/*
 typedef struct rgb_color {
 	unsigned char r,g,b;
 } rgb_color;// __attribute__((__packed__));
-
+*/
 #define IN_RANGE(x,lx,rx) ((x)>=(lx)&&(x)<=(rx))
 #define IN_BOX(x,y,lx,rx,ly,ry) (IN_RANGE((x),(lx),(rx))&&IN_RANGE((y),(ly),(ry)))
 
@@ -57,7 +60,7 @@ typedef struct rgb_color {
 #define MAX_DIALOG_HEIGHT 128
 
 #define EDIT_OFFSET_X 64
-#define EDIT_OFFSET_Y 64
+#define EDIT_OFFSET_Y 80
 
 #define EDIT_GRID_X (272+EDIT_OFFSET_X)
 #define EDIT_GRID_Y (32+EDIT_OFFSET_Y)
@@ -92,19 +95,22 @@ typedef struct rgb_color {
 fname=get_filename(O_INFO,O_INIT?RUNTIME_STORAGE.O_STORAGE:NULL);\
 if (fname) {\
 if (!O_INIT || overwrite(fname)){\
-strncpy(RUNTIME_STORAGE.O_STORAGE, fname, 127);\
-O_FUNCTION;\
+int result = O_FUNCTION;\
+if (!result) strncpy(RUNTIME_STORAGE.O_STORAGE, fname, 127);\
 if (O_CONFIRM) info_dialog(O_CONFIRM);\
 }\
 free(fname);\
 }\
 }
 
+#define INITARR3(d,a,b,c) do{d[0]=(a);d[1]=(b);d[2]=(c);}while(0)
+
+
 #define GET_WORD(array,index) (array[(index)]+array[(index)+1]*256)
 #define SET_WORD(array,index,value) do{array[(index)]=(value)&0xff;array[(index)+1]=((value)>>8)&0xff;}while(0)
 
 
-
+enum {MBUTTON_LEFT=1, MBUTTON_MIDDLE, MBUTTON_RIGHT};
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 enum {VIEW_MAP, VIEW_TILE, VIEW_MASK};
 enum {MAP_NO_ALLOC,MAP_ALLOC};
@@ -114,15 +120,18 @@ enum {EXPORT_BAS, EXPORT_MAE , EXPORT_M65 , EXPORT_ACT , EXPORT_C };
 extern config CONFIG;
 extern int MAP_MENU_HEIGHT;
 extern int bank;
-extern rgb_color colortable[256];
+extern unsigned char  colortable[3*256];
 extern runtime_storage RUNTIME_STORAGE;
 extern char commands_allowed[64];
 extern int fontmode[10];
 // delete after putting into func
 extern unsigned char  *fontbank[10];
+extern unsigned char  tpal[3*256];
 
-
+// title.c
 int title();
+int title_header();
+
 
 //dialog.c
 int get_8x8_mode(int m);
@@ -130,7 +139,7 @@ int do_colors();
 int do_size(int tile_mode);
 int do_exit();
 int do_move(view *map, int tile_mode);
-int select_draw(char *title);
+int select_draw(char *title, int * dc);
 int ask(char *msg,char * answers);
 int askNoYes(char *msg);
 int error_dialog(char *error);
@@ -192,10 +201,10 @@ int write_data(char *file, unsigned char *font, int start, int end, int a);
 
 int write_map(char *file, unsigned char *font, view *map, int raw);
 int write_file_map(char *file, unsigned char *font, view *map, int raw);
-view *read_map(char *file, unsigned char *font, view *map, int raw);
-view *read_file_map(char *file, unsigned char *font, view *map, int raw);
+int read_map(char *file, unsigned char *font, view *map, int raw);
+int read_file_map(char *file, unsigned char *font, view *map, int raw);
 long flength(FILE * fd);
-int import_palette(char *file, rgb_color * colortable);
+int import_palette(char *file, unsigned char * colortable);
 
 // util.c
 int tile_map(int w, int h, view *map, view *tile);

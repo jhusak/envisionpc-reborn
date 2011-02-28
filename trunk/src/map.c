@@ -235,7 +235,6 @@ int move(int dx, int dy)
 {
 	int ox,oy,m;
 
-	SDLNoUpdate();
 	if ((currentView->cx+currentView->scx+dx>=currentView->w)||
 			(currentView->cy+currentView->scy+dy>=currentView->h))
 		return 0;
@@ -298,14 +297,28 @@ int move(int dx, int dy)
 
 int askRawFormat(char * aquestion)
 {
-switch (ask("Raw mask input format?","Bi*t|*Byte"))
+switch (ask(aquestion,"Bi*t|*Byte"))
 	{
 		case 1: return FILE_RAWBITMASK; 
-		case 2:  return FILE_RAWMASK;
+		case 2: return FILE_RAWMASK;
 	}
 	return 0;	
 }
 
+void fill_draw_char(view * currentView, unsigned char f, int find)
+{
+	int i,j,r;
+	unsigned char * look;
+	j=currentView->w*currentView->h;
+	look=currentView->map;
+	for(i=0;i<j;i++) {
+		if (!find || (*look==f)) {
+			r=(int)(100.0*UNI);
+			if (r<ratio) *look=currentView->dc[0];
+		}
+		look++;
+	}
+}
 /*===========================================================================
  * map_command
  * process a command
@@ -399,37 +412,24 @@ int map_command(int cmd, int sym)
 			
 		case 'f': 
 			if TILE_MODE
-				f=currentView->dc=get_number("Tile to replace:", 1,255);
+				f=currentView->dc[0]=get_number("Tile to replace:", 1,255);
 			else
-				f=select_draw("Select character to replace:");
-			j=currentView->w*currentView->h;
-			look=currentView->map;
-			for(i=0;i<j;i++) {
-				if (*look==f) {
-					r=(int)(100.0*UNI);
-					if (r<ratio) *look=currentView->dc;
-				}
-				look++;
-			}
+				f=select_draw("Select character to replace:",NULL);
+			fill_draw_char(currentView, f, 1);
+
 			cacheOk=0;
 			draw_header(0);
 			break;
 			
-		case 'c': 
+		case 'c':
 			if MASK_EDIT_MODE {
 				memset(mask->map,0,mask->h*mask->w);
 				break;
 			} else {
 				if (ratio==100) {
-					memset(currentView->map,currentView->dc,currentView->w*currentView->h);
+					memset(currentView->map,currentView->dc[0],currentView->w*currentView->h);
 				} else {
-					j=currentView->w*currentView->h;
-					look=currentView->map;
-					for(i=0;i<j;i++) {
-						r=(int)(100.0*UNI);
-						if (r<ratio) *look=currentView->dc;
-						look++;
-					}
+					fill_draw_char(currentView, 0, 0);
 				}
 				cacheOk=0;
 			}
@@ -441,9 +441,9 @@ int map_command(int cmd, int sym)
 			
 		case 'd': 
 			if TILE_MODE
-				currentView->dc=get_number("New draw tile:", currentView->dc,255);
+				currentView->dc[0]=get_number("New draw tile:", currentView->dc[0],255);
 			else
-				currentView->dc=select_draw("Select or type new draw char:");
+				select_draw("Select or type new draw char:",currentView->dc);
 			draw_header(0);
 			cacheOk=0;
 			break;
@@ -508,7 +508,7 @@ int map_command(int cmd, int sym)
 			draw_header(0);
 			break;
 		}
-		case 'u':
+		case 'U':
 			
 			if (base) base=0;
 			else base=64*8;
@@ -528,7 +528,7 @@ int map_command(int cmd, int sym)
 			return 0;
 		case 'w':
 			if MASK_EDIT_MODE {
-				int rawformat=askRawFormat("Raw mask input format?");
+				int rawformat=askRawFormat("Raw mask output format?");
 				if (rawformat)
 					OBJECT_IO("Write raw mask:",1,save_raw_mask_file_name,"Raw mask written.",write_map(fname,font,map,rawformat))
 				
@@ -552,7 +552,6 @@ int map_command(int cmd, int sym)
 
 			} else {
 				OBJECT_IO("Read raw map:",0,save_raw_map_file_name,0,read_map(fname,font,map,FILE_RAWMAP))
-				
 				draw_header(0);
 				do_mode(mode);
 			}
@@ -587,10 +586,13 @@ int map_command(int cmd, int sym)
 				draw_header(0);
 			break;
 		case 'a':
+			cacheOk=0;
 			draw_cursor();
 			maskEditMode=!maskEditMode;
+			cacheOk=0;
 			draw_header(0);
 			map_panel();
+			
 			//draw_screen(1);
 			break;
 			//draw_screen(1);
@@ -604,17 +606,25 @@ int map_command(int cmd, int sym)
 	return 0;
 }
 
+int get_draw_color(view * currentView, int buttonnumber)
+{
+	if IN_RANGE(buttonnumber,1,3)
+		return currentView->dc[buttonnumber-1];
+	return currentView->dc[0];
+}
+
+
 /*===========================================================================
  * map_click
  * process a mouse click
  * param x: x position of the mouse
  * param y: y position of the mouse
- * param bleft: 1 if left mousebutton is pressed
+ * param buttonnumber: 1 if left mousebutton is pressed 2=middle, 3=right, 4 and more untested
  * param bright: 1 if left mousebutton is pressed
  * param down: returns mouse button status
  * returns: 0 if user is exiting map screen
  *==========================================================================*/
-int map_click(int x, int y, int bleft, int bright, int *down)
+int map_click(int x, int y, int buttonnumber, int *down)
 {
 	int i,ox,oy;
 
@@ -634,26 +644,28 @@ int map_click(int x, int y, int bleft, int bright, int *down)
 			return 0;
 		// with this "if" works much better, but still not in edit tile mode
 		//if (ox!=currentView->cx || oy!=currentView->cy) {
-			if (bleft || bright) {
+			if (buttonnumber) {
 				if (!typeMode) {
 					if NOT_MASK_EDIT_MODE {
+						
+						int drawcolor=get_draw_color(currentView, buttonnumber);
 						// with this "if" works very well.
-						//if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=currentView->dc)
+						if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=drawcolor)
 						{
-							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=currentView->dc;
+							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=drawcolor;
 							x=x*currentView->cw;
 							y=MAP_TOP_OFFSET+i*currentView->ch;
 							
-							SDLCharBlt(MainContext,x,y,currentView->dc+ (TILE_MODE *256));
+							SDLCharBlt(MainContext,x,y,drawcolor+ (TILE_MODE *256));
 							
 							if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
-								draw_screen(bleft);
+								draw_screen(0);
 						}
 					}
 					if MASK_EDIT_MODE {
 						int setmaskfield=1;
-						if (bright) setmaskfield=0;
-						if (bleft) setmaskfield=1;
+						if (buttonnumber==MBUTTON_RIGHT) setmaskfield=0;
+						if (buttonnumber==MBUTTON_LEFT) setmaskfield=1;
 						
 						if (mask->map[(x+mask->scx)+(i+mask->scy)*mask->w]!=setmaskfield)
 						{
@@ -729,15 +741,15 @@ int draw_screen(int b) /* b not used in this func */
 			} 
 			if TILE_MODE
 				i+=256;
-			
-//			if ((!cacheOk)||(*check!=i)) {
+			// this has to be solved in the future
+			// if ((!cacheOk)||(*check!=i)) {
 				SDLCharBlt(MainContext,x,MAP_TOP_OFFSET+y,i);
-//			}
 			
 			if MASK_EDIT_MODE {
 				if (m)
 					SDLXORDottedBox(x,MAP_TOP_OFFSET+y, x+mask->cw-1,MAP_TOP_OFFSET+y+mask->ch-1);
 			}
+			//}
 			
 			x+=currentView->cw;
 			*check++=i;
@@ -764,7 +776,6 @@ int draw_screen(int b) /* b not used in this func */
 		SDLContextBlt(MainContext,CONFIG.screenWidth-BUTTON_WIDTH*8-5,MAP_TOP_OFFSET,UpdContext,0,0,BUTTON_WIDTH*8+8,MAP_MENU_HEIGHT-1);
 	}
 	draw_cursor();
-	//SDLUpdate();
 	return 1;
 }
 
@@ -883,13 +894,15 @@ int draw_header(int update) /* update not used */
 	
 	
 	if TILE_MODE {
-		sprintf(buf,"Tile: %03d",currentView->dc);
+		sprintf(buf,"Tile: %03d",currentView->dc[0]);
 		SDLstring(CONFIG.screenWidth-92,15,buf);
-	} else {
-		SDLstring(CONFIG.screenWidth-92,15,"Draw Char:");
+	} else if NOT_MASK_EDIT_MODE {
+		SDLstring(CONFIG.screenWidth-4-21*8,15,"Draw Char L:  M:  R: ");
 
 		setpal();
-		plot_draw_char(CONFIG.screenWidth-12, 15, currentView->dc);
+		int i;
+		for (i=0; i<3; i++)
+			plot_draw_char(CONFIG.screenWidth-12-(2-i)*4*8, 15, currentView->dc[i]);
 		setdefaultpal();
 	}
 	
@@ -919,7 +932,8 @@ int do_map()
 	typeMode=0;
 
 	do {
-		SDLUpdate();
+		SDLRedraw();
+
 		SDL_WaitEvent(&event);
 
 		switch(event.type){  /* Process the appropiate event type */
@@ -950,7 +964,7 @@ int do_map()
 				down=event.button.button;
 				if (down==3)
 					SDLUpdate();
-				done=map_click(mx,my,event.button.button==1,event.button.button==3,&down);
+				done=map_click(mx,my,event.button.button,&down);
 
 				break;
 			}
@@ -962,7 +976,7 @@ int do_map()
 							      oy=(my-MAP_TOP_OFFSET)/currentView->ch;
 							      ox=mx/currentView->cw;
 							      if (((hidden)||(mx<CONFIG.screenWidth-BUTTON_WIDTH*8-6))&&((ox!=currentView->cx)||(oy!=currentView->cy))) {
-								      done=map_click(mx,my,down==1,down==3,&down);
+								      done=map_click(mx,my,down,&down);
 							      }
 						      }
 						      break;
