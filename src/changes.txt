@@ -86,9 +86,18 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - added 0-9 font change in map and mask edit mode; change antic mode works independent for efery font
 
 2011-02-xx (rev4x)
-- fized bug when resize map/mask up
+- fixed bug when resize map/mask up
 - changed the way of the mask edit exit (now press again "a")
 - added some items to menu in mask edit mode
 - fixed issue with header draw in mask edit mode
 - fixed bug with not show again the number after ginput a number and pressing esc.
 - fixed draw_select - now one can draw in place of the cursor.
+
+2011-02-24 (rev4x)
+- added use of three mouse buttons for char edit and map edit mode with three different colors/chars
+- changed the idea of screen refreshness - simplified. Now everything goes ultra fast.
+- added soft limit for map size to 4MB
+- removed error-prone ifs in read/write map functions
+- fixed some bugs in dialogs
+	
+

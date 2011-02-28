@@ -30,14 +30,15 @@
 unsigned char *dfont, *font, *copy_from, *fontbank[10];
 int fontmode[10];
 //char bank_mod[10];
-int echr, bank, copy_size, values, act_col=1, back_col=0, menuPanel=1;
+int echr, bank, copy_size, values,  menuPanel=1;
+int edc[3];
 
 int cmds[32];
 unsigned char undo[8];
 unsigned char peek[64], plot[64];
 opt options;
 
-rgb_color colortable[256];
+unsigned char colortable[3*256];
 
 unsigned char clut[9]={0,40,202,148,70,0,0,0,0};
 unsigned char clut_default[9]={0,40,202,148,70,0,0,0,0};
@@ -94,30 +95,33 @@ void txterr(char *txt)
 	exit(1);
 }
 
+
+void set_palette(unsigned char * palette)
+{
+	int x;
+	
+	for(x=0;x<256;x++) {
+		SDLsetPalette(x,palette[x*3],palette[x*3+1],palette[x*3+2]);
+	}
+}
+
+void setdefaultpal()
+{
+	set_palette(colortable_default);
+}
+
 /*===========================================================================
  * setpal
  * set the Atari palette
  *==========================================================================*/
 void setpal()
 {
-	int x;
-	
-	for(x=0;x<256;x++) {
-		
-		//SDLsetPalette(x,(colortable[x]>>16)&0xff,(colortable[x]>>8)&0xff,(colortable[x])&0xff);
-		SDLsetPalette(x,colortable[x].r,colortable[x].g,colortable[x].b);
-	}
+	set_palette(colortable);
 }
 
-void setdefaultpal()
+void titlepal()
 {
-	int x;
-
-	for(x=0;x<256;x++) {
-		
-		//SDLsetPalette(x,(colortable[x]>>16)&0xff,(colortable[x]>>8)&0xff,(colortable[x])&0xff);
-		SDLsetPalette(x,colortable_default[x*3],colortable_default[x*3+1],colortable_default[x*3+2]);
-	}
+	set_palette(tpal);
 }
 
 void set_allowed_commands(int * cmds, int cmdcnt,int digits)
@@ -208,19 +212,22 @@ void show_char_typefaces(int echr)
 
 /*===========================================================================
  * update_color_chooser
- * updates the color chooser in sertain mode graphics
- * param act_col: actual draw color;
+ * updates the color chooser in certain mode graphics
  *==========================================================================*/
 
-void update_color_chooser(int act_col, int back_col){
-	int j;
+void update_color_chooser(){
+	int i,j;
 	setpal();
 	for (j=0;j<4;++j)
 		SDLBox(EDIT_GRID_X+(j<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(j<<4),EDIT_GRID_Y+78,clut[j]);
-	setdefaultpal();
+	for (j=0; j<3; j++)
+		for (i=2; i<=10; i+=4)
+			SDLBox(EDIT_GRID_X+(edc[j]<<4)+i,EDIT_GRID_Y+68,EDIT_GRID_X+i+2+(edc[j]<<4),EDIT_GRID_Y+72,4);
+	for (j=0; j<3; j++) {
+		SDLHollowBox(EDIT_GRID_X+(edc[j]<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(edc[j]<<4),EDIT_GRID_Y+78,8);
+		SDLBox(EDIT_GRID_X+(edc[j]<<4)+2+j*4,EDIT_GRID_Y+68,EDIT_GRID_X+4+j*4+(edc[j]<<4),EDIT_GRID_Y+72,10);
+	}
 	
-	SDLHollowBox(EDIT_GRID_X+(back_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(back_col<<4),EDIT_GRID_Y+78,2);
-	SDLHollowBox(EDIT_GRID_X+(act_col<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(act_col<<4),EDIT_GRID_Y+78,10);
 }
 
 /*===========================================================================
@@ -264,7 +271,6 @@ int grid(int chr, int remember)
 	if (chr==echr) return 0;
 	m=get_8x8_mode(mode);
 	
-	SDLNoUpdate();
 	dat=font+(chr*8);
 
 	if (remember) {
@@ -297,7 +303,7 @@ int grid(int chr, int remember)
 			}
 		}
 		setdefaultpal();
-		update_color_chooser(act_col,back_col);
+		update_color_chooser();
 		
 	}
 
@@ -328,7 +334,6 @@ int grid(int chr, int remember)
 	SDLplotchr(EDIT_GRID_X+86,EDIT_GRID_Y+82,echr,2,dfont);
 	
 	draw_numbers(values,dat);
-	SDLUpdate();
 
 	corner(0);
 	return 1;
@@ -402,7 +407,6 @@ int corner(int all)
 	} else { w=16; h=8; msk=63; }
 
 	match=echr&msk;
-	SDLNoUpdate();
 	frame(EDIT_CORNER_X,EDIT_CORNER_Y,64,64,0);
 	if (mode>=4) setpal();
 	if (all) {
@@ -506,7 +510,6 @@ int corner(int all)
 	SDLSetContext(MainContext);
 	//if (f)
 		SDLContextBlt(MainContext,EDIT_CORNER_X,EDIT_CORNER_Y,BackContext,0,0,63,63);
-	SDLUpdate();
 	
 	
 	return 1;
@@ -517,7 +520,6 @@ int colors()
 	char buf[32];
 	int i;
 
-	SDLNoUpdate();
 	SDLBox(EDIT_COLOR_X-3,EDIT_COLOR_Y,EDIT_COLOR_X+4*44+36,EDIT_COLOR_Y+33,0);
 	
 	//SDLstring(tmpx+18,yp,"Color Registers");
@@ -535,7 +537,6 @@ int colors()
 		SDLstring(EDIT_COLOR_X+i*44+5,EDIT_COLOR_Y+8,buf);
 	}
 	
-	SDLUpdate();
 	setdefaultpal();
 	return 1;
 }
@@ -567,8 +568,7 @@ int update_font(int b)
 
 	font=fontbank[b];
 	bank=b;
-	SDLNoUpdate();
-
+	
 	if (mode!=fontmode[b]) {
 		mode=fontmode[b];
 		do_mode(mode);
@@ -595,7 +595,6 @@ int update_font(int b)
 	// font set number plotting
 	SDLBox(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,EDIT_FONTSEL_X+20,EDIT_FONTSEL_Y+15,144);
 	SDLplotchr(EDIT_FONTSEL_X+12,EDIT_FONTSEL_Y+8,16+b,1,dfont);
-	SDLUpdate();
 	setdefaultpal();
 	return 1;
 }
@@ -610,8 +609,10 @@ int draw_edit()
 	int i;
 
 	SDLNoUpdate();
-	SDLClear(0);
-	// unpack(titles,0,0);
+		SDLClear(0);
+	title_header();
+	setdefaultpal();
+
 	SDLstring(EDIT_GRID_X-14,EDIT_GRID_Y+82,"Char");
 
 	drawFontMode();
@@ -622,7 +623,8 @@ int draw_edit()
 	grid(i,1);
 	panel(1);
 	colors();
-	SDLUpdate();
+
+	SDLRedraw();
 	return 1;
 }
 
@@ -633,7 +635,7 @@ view * map_init(int alloc_map, view * map, int width, int height) {
 	}
 	map->w=width; map->h=height;
 	map->ch=map->cw=8;
-	map->dc=1;
+	INITARR3(map->dc,1,0,0);
 	map->cx=map->cy=map->scx=map->scy=0;
 	if (map->map) free(map->map);
 	map->map=NULL;
@@ -736,10 +738,13 @@ int setup(int zoom, int fullScreen)
 	s1=time(NULL);
 	s2=0x01234567^s1;
 
+	INITARR3(edc,1,0,0);
+	SDLNoUpdate();
 	title();
 
 	setdefaultpal();
 	draw_edit();
+	
 	if (get_error())	error_dialog(get_error());
 
 	return 1;
@@ -821,8 +826,8 @@ int click(int x, int y, int b)
 	SDL_Event event;
 	int i,ox,oy,done;
 
-	if (b!=1)
-		b=0;
+//	if (b!=1)
+//		b=0;
 	
 	for(i=0;i<5;i++) {
 		if (IN_BOX(x-EDIT_COLOR_X,y-EDIT_COLOR_Y,i*44,i*44+33,17,33))
@@ -878,9 +883,7 @@ int click(int x, int y, int b)
 		if (copy_from) {
 			copy_from=NULL;
 			copy_size=0;
-			SDLNoUpdate();
 			clr_ext_cmd();
-			SDLUpdate();
 		}
 		if (cmds[i]) command(cmds[i],0);
 		return 0;
@@ -933,10 +936,8 @@ int click(int x, int y, int b)
 						return 0;
 					}
 					copy_size=x;
-					SDLNoUpdate();
 					clr_ext_cmd();
 					SDLstring(EDIT_CHARMAP_X,EDIT_CHARMAP_Y-10,"Copy range to:");
-					SDLUpdate();
 				}
 				return 0;
 			}
@@ -964,34 +965,27 @@ int click(int x, int y, int b)
 						// I hate such constructs (JH)
 						//i=10+(1-b)*(138-((((xe>>3)+(ye>>3))&1)<<2));//true 144 false 148
 						grid_checker=(xe&8)^(ye&8);
+						if(b!=1) b=0;
 						if (b)
 							i=CONFIG.whiteColor;
 						else 
 							i=(grid_checker?CONFIG.checkersLo:CONFIG.checkersHi);
-						SDLNoUpdate();
 						SDLBox(xe,ye,xe+7,ye+7,i);
 						update1bit((xe-EDIT_GRID_X)>>3,(ye-EDIT_GRID_Y)>>3,b);
-						SDLUpdate();
+						SDLRedraw();
 						break;
 					case 4:
 					case 5:
 						xe4=xe&0xfffffff0;
-						if (b)
-						{
-							col44=clut[act_col];
-							bit4=act_col;
+						if IN_RANGE(b,1,3) {
+							col44=clut[edc[b-1]];
+							bit4=edc[b-1];
 						}
-						else
-						{
-							col44=clut[back_col];
-							bit4=back_col;
-						}
-						SDLNoUpdate();
 						setpal();
 						SDLBox(xe4,ye,xe4+15,ye+7,col44);
 						setdefaultpal();
 						update2bits((xe4-EDIT_GRID_X)>>4,(ye-EDIT_GRID_Y)>>3,bit4&3);
-						SDLUpdate();
+						SDLRedraw();
 
 				};
 
@@ -1001,22 +995,20 @@ int click(int x, int y, int b)
 			if (mode==4 || mode==5)
 			{
 				const int xe=x&0xfffffff0;
-				SDLNoUpdate();
 				if (IN_BOX(x-EDIT_GRID_X,y-EDIT_GRID_Y,0,63,68,78))
 				{
-					if (b)
-						act_col=(xe-EDIT_GRID_X)>>4;
-					else
-						back_col=(xe-EDIT_GRID_X)>>4;
+					if IN_RANGE(b,1,3)
+						edc[b-1]=(xe-EDIT_GRID_X)>>4;
 				}
-				update_color_chooser(act_col,back_col);
+				update_color_chooser();
 				
-				SDLUpdate();
-
+				SDLRedraw();
 			}
 		}
 
 		do {
+			SDLRedraw();
+
 			int err=SDL_WaitEvent(&event);
 			if (!err)
 				return 0;
@@ -1148,7 +1140,6 @@ int down(unsigned char *dat, unsigned char *work)
 void draw_numbers(int vals, unsigned char *work){
 	int i;
 	char buf[4];
-	SDLNoUpdate();
 	SDLBox(EDIT_GRID_X-28,EDIT_GRID_Y,EDIT_GRID_X-3,EDIT_GRID_Y+64,0);
 	if (vals) {
 		for(i=0;i<8;i++) {
@@ -1159,7 +1150,6 @@ void draw_numbers(int vals, unsigned char *work){
 			SDLstring(EDIT_GRID_X-26,EDIT_GRID_Y+i*8,buf);
 		}
 	}
-	SDLUpdate();
 }
 
 /*===========================================================================
@@ -1243,27 +1233,21 @@ int command(int cmd, int sym)
 		case 'c':
 				  copy_from=dat;
 				  copy_size=8;
-				  SDLNoUpdate();
 				  clr_ext_cmd();
 				  SDLstring(EDIT_CHARMAP_X,EDIT_CHARMAP_Y-10,"Copy to:");
-				  SDLUpdate();
 				  break;
 		case 'x':
 				  copy_from=dat;
 				  copy_size=0;
-				  SDLNoUpdate();
 				  clr_ext_cmd();
 				  SDLstring(EDIT_CHARMAP_X,EDIT_CHARMAP_Y-10,"Select range end:");
-				  SDLUpdate();
 				  break;
 			  
 		case 't':
 				  copy_from=dat;
 				  copy_size=-8;
-				  SDLNoUpdate();
 				  clr_ext_cmd();
 				  SDLstring(EDIT_CHARMAP_X,EDIT_CHARMAP_Y-10,"Transcopy to:");
-				  SDLUpdate();
 				  break;
 		case 'A':
 			memcpy(font,dfont,1024);
@@ -1284,7 +1268,7 @@ int command(int cmd, int sym)
 			update_font(bank);
 			break;
 		case 'I':
-			OBJECT_IO("Import color table:",0,dummy,NULL,if (import_palette(fname,colortable)) {	setprefs();})
+			OBJECT_IO("Import color table:",0,dummy,NULL,((import_palette(fname,colortable))?setprefs(),0:1))
 			setdefaultpal();
 			draw_edit();
 			break;
@@ -1315,6 +1299,7 @@ int command(int cmd, int sym)
 	}
 	
 	i=echr; echr=0; grid(i,0);
+	SDLRedraw();
 	return 0;
 }
 
@@ -1329,6 +1314,8 @@ int edit()
 	int done=0;
 
 	do {
+		SDLRedraw();
+
 		SDL_WaitEvent(&event);
 
 		switch(event.type){  /* Process the appropiate event type */
@@ -1352,7 +1339,7 @@ int edit()
 							  int mx,my;
 							  mx=SDLTranslateClick(event.button.x);
 							  my=SDLTranslateClick(event.button.y);
-							  click(mx,my,(event.button.button==1));
+							  click(mx,my,event.button.button);
 							  break;
 						  }
 			default:

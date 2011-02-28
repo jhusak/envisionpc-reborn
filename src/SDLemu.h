@@ -15,6 +15,8 @@
 
 int SDLNoUpdate();
 int SDLUpdate();
+int SDLRedraw();
+
 
 int SDLsetPalette(int idx, int r, int g, int b);
 int SDLPlot(int x, int y, int clrIdx);

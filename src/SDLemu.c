@@ -102,6 +102,11 @@ int SDLUpdate()
 	return 1;
 }
 
+int SDLRedraw()
+{
+	SDLUpdate();
+	SDLNoUpdate();
+}
 /*===========================================================================
  * SDLClip
  * set SDL clipping window
@@ -457,11 +462,11 @@ int unpack(unsigned char *look, int xs, int ys)
 {
 	int i,x,y,c,t;
 
-	SDLClear(0);
+	//SDLClear(0);
 	if ((mainScreen->zoom==1)&&(SDL_MUSTLOCK(mainScreen->current))) {
 		SDL_LockSurface(mainScreen->current);
 	}
-	x=44; y=76; c=t=0;
+	x=44; y=6; c=t=0;
 	do {
 		if (!t) {
 			c=*look++;
@@ -475,7 +480,7 @@ int unpack(unsigned char *look, int xs, int ys)
 		SDLPlot(x+xs,y+ys,c);
 		x++;
 		if (x==253) { x=44; y++; }
-	} while(y<130);
+	} while(y<60);
 	if ((mainScreen->zoom==1)&&(SDL_MUSTLOCK(mainScreen->current))) {
 		SDL_UnlockSurface(mainScreen->current);
 	}
@@ -717,6 +722,7 @@ int SDLgetch(int click)
 	ch=done=0;
 
 	while(!done) {
+		SDLRedraw();
 		err=SDL_WaitEvent(&event);
 		if (!err)
 			return 0;
@@ -760,6 +766,7 @@ int SDLrelease()
 	SDL_Event event;
 
 	while(1) {
+		SDLRedraw();
 		err=SDL_WaitEvent(&event);
 		if (err)
 			return 0;
