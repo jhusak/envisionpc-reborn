@@ -328,9 +328,9 @@ void fill_draw_char(view * currentView, unsigned char f, int find)
  *==========================================================================*/
 int map_command(int cmd, int sym)
 {
-	int i,j,r,f;
+	int i,f;
 	char *fname;
-	unsigned char *look;
+
 
 	if (typeMode) {
 		if (!sym) {

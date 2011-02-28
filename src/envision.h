@@ -176,6 +176,7 @@ int tile_size(int w, int h);
 // envision.c
 void txterr(char *txt);
 void setpal();
+void titlepal();
 void setdefaultpal();
 void set_allowed_commands(int * cmds, int cmdcnt, int digits);
 int is_command_allowed(int cmd);
