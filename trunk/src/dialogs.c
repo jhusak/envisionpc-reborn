@@ -18,6 +18,11 @@
 #include "envision.h"
 #include "preferences.h"
 
+int drawbevelledbox(int x, int y, int w, int h)
+{
+	return raisedbox(x, y, x+w, y+h,0);
+}
+
 /*===========================================================================
  * drawbutton
  * draw a push button
@@ -26,7 +31,6 @@
  * param txt: button text
  * returns: nothing useful
  *==========================================================================*/
-
 
 int drawbuttonwidth(int x, int y, char *txt, int width)
 {
@@ -47,15 +51,11 @@ int drawbuttonwidth(int x, int y, char *txt, int width)
 		o=(f-txt)*8;
 	}
 	l=width*4-strlen(btxt)*4;
-	SDLBox(x+1,y+1,x+width*8-1,y+8,148);
-	SDLLine(x,y,x+width*8,y,152);
-	SDLLine(x+width*8,y,x+width*8,y+9,144);
-	SDLLine(x,y+9,x+width*8,y+9,144);
-	SDLLine(x,y+1,x,y+9,152);
-	SDLstring(x+l,y+1,btxt);
+	drawbevelledbox(x,y,width*8+5,9);
+	SDLstring(x+l+2,y+1,btxt);
 	if (c) {
 		if (c<96) c-=32;
-		SDLplotchr(x+l+o,y+1,c,1,dfont);
+		SDLplotchr(x+l+2+o,y+1,c,1,dfont);
 	}
 	return 1;
 }
@@ -63,6 +63,10 @@ int drawbuttonwidth(int x, int y, char *txt, int width)
 int drawbutton(int x, int y, char *txt)
 {
 	return drawbuttonwidth(x,y,txt,BUTTON_WIDTH);
+}
+int drawbutton_map(int x, int y, char *txt)
+{
+	return drawbuttonwidth(x,y,txt,MAP_BUTTON_WIDTH);
 }
 
 struct dblBufferTmpStorage
@@ -81,7 +85,7 @@ struct dblBufferTmpStorage
  * returns: computed x of the box or passed through
  *==========================================================================*/
 
-int openDblBufferDialog(int x, int y, int w, int h)
+int openDblBufferDialog(int x, int y, int w, int h, char * title, int hidecursor)
 {
 	
 	if (x<0)
@@ -99,17 +103,22 @@ int openDblBufferDialog(int x, int y, int w, int h)
 	
 	SDLNoUpdate();
 	SDLContextBlt(DialogContext,0,0,MainContext,x,y,x+w+2,y+h+2);
-	raisedbox(x,y,x+w,y+h);
+	raisedbox(x,y,x+w,y+h,3);
 	dblBufferTmpStorage.x=x;
 	dblBufferTmpStorage.y=y;
 	dblBufferTmpStorage.w=w+2;
 	dblBufferTmpStorage.h=h+2;
+	
+	if (hidecursor) SDL_ShowCursor(SDL_DISABLE);
+	SDLstring(x+(w/2-strlen(title)*4)&(~0x7),y+2,title);
+	
 	return x;
 }
 
 void closeLastDblBufferDialog()
 {
 	SDLContextBlt(MainContext,dblBufferTmpStorage.x,dblBufferTmpStorage.y,DialogContext,0,0,dblBufferTmpStorage.w,dblBufferTmpStorage.h);
+	SDL_ShowCursor(SDL_ENABLE);
 	SDLRedraw();
 }
 
@@ -120,10 +129,12 @@ void closeLastDblBufferDialog()
  * param y: upper left y-position of box
  * param w: box width
  * param h: box height
+ * param d: box depth
  * returns: computed x of the box or passed through
  *==========================================================================*/
-int raisedbox(int x, int y, int w, int h)
+int raisedbox(int x, int y, int w, int h, int d)
 {
+	int i;
 	w=w-x;
 	h=h-y;
 	
@@ -133,10 +144,10 @@ int raisedbox(int x, int y, int w, int h)
 	SDLLine(x+w,y+1,x+w,y+h,144);
 	SDLLine(x,y+h,x+w,y+h,144);
 	SDLLine(x,y+1,x,y+h,152);
-	SDLLine(x+w+1,y+1,x+w+1,y+h+1,0);
-	SDLLine(x+w+2,y+2,x+w+2,y+h+2,0);
-	SDLLine(x+1,y+h+1,x+w+1,y+h+1,0);
-	SDLLine(x+2,y+h+2,x+w+2,y+h+2,0);
+	for (i=1; i<d; i++) {
+		SDLLine(x+w+i,y+i,x+w+i,y+h+i,0);
+		SDLLine(x+i,y+h+i,x+w+i,y+h+i,0);
+	}
 	return x;
 }
 
@@ -230,7 +241,7 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 				dd=500;
 			} else { // rest chars
 				if ((cp<len)&&(cx+8<slen)&&((isalnum(c))||(c=='$')||(c=='.')
-											||(c=='\\')||(c=='/')))
+											||(c=='\\')||(c=='/')||(TILDE_ALLOWED && c=='~')))
 				{
 					if ((tp==1)&&(!cp)&&(!isdigit(c))&&(c!='$')); // first char neither digit nor $ 
 					else if ((tp==1)&&cp&&(buffer[0]!='$')&&(!isdigit(c))) ; // first char digit and adjacent not digit
@@ -279,9 +290,9 @@ char *get_filename(char *title, char * initial)
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y;
 
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
-	SDLstring(tmpx+4,68+tmpy,title);
-	r=ginput(tmpx+4,78+tmpy,tmpx+156,24,initial,0);
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 320, 32, title, 0);
+	//SDLstring(tmpx+4,68+tmpy,title);
+	r=ginput(tmpx+4,78+tmpy,tmpx+312,38,initial,0);
 	closeLastDblBufferDialog();
 	return r;
 }
@@ -342,8 +353,8 @@ int message_dialog(char * title, char *error, char * answers)
 	char buf[32];
 	
 	
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, width+8, 40);
-	SDLstring(tmpx+(width+8-48)/2,68+tmpy,title);
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, width+8, 40, title, 1);
+	// SDLstring(tmpx+(width+8-48)/2,68+tmpy,title);
 	SDLstring(tmpx+4,78+tmpy,error);
 	if (!answers)
 	{
@@ -409,13 +420,17 @@ int do_options()
 
 	yp=EDIT_OFFSET_Y+64;
 	
-	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 200, 88);
-	SDL_ShowCursor(SDL_DISABLE); /* 144 */
-	yp+=2;
-	SDLstring(tmpx+28,yp,"Default Options");
-	yp+=20;
+	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 208, 88, "Default Options",1);
+	//SDL_ShowCursor(SDL_DISABLE); /* 144 */
+	//yp+=2;
+	//SDLstring(tmpx+44,yp,"Default Options");
+	yp+=22;
+	
+	SDLstring(tmpx+3,yp,"Export format:");
+	SDLstring(tmpx+3+15*8,yp,names[options.write_tp]);
+	yp+=12;
 
-	SDLstring(tmpx+3,yp,"Select export format:");
+	SDLstring(tmpx+3,yp,"Select new export format:");
 	yp+=8;
 	SDLstring(tmpx+11,yp,".BAS .MAE .M65 .ACT .C");
 	SDLplotchr(tmpx+19,yp,34,1,dfont);
@@ -431,9 +446,9 @@ int do_options()
 	} while(!oldname);
 	c=oldname-hot;
 	yp-=8;
-	SDLBox(tmpx+3,yp,tmpx+190,yp+16,148);
+	SDLBox(tmpx+3,yp,tmpx+206,yp+16,148);
 	SDLstring(tmpx+3,yp,"Export format:");
-	SDLstring(tmpx+119,yp,names[c]);
+	SDLstring(tmpx+3+15*8,yp,names[c]);
 	tmp_write_tp=c;
 	if ((!c)||(c==2)) {
 		yp+=10;
@@ -536,11 +551,8 @@ int do_defaults()
 	
 	yp=EDIT_OFFSET_Y+64;
 	
-	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 200, (sizeof(options)/sizeof( char *))*16+40);
-	SDL_ShowCursor(SDL_DISABLE);
-	yp+=2;
-	SDLstring(tmpx+28,yp,"Reset to default:");
-	yp+=20;
+	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 200, (sizeof(options)/sizeof( char *))*16+40, "Reset to default:",1);
+	yp+=22;
 	
 	int i;
 	
@@ -602,7 +614,7 @@ int palette_click(int i, int mx, int my)
 
 int show_palette(i,x,y)
 {
-	openDblBufferDialog(x-32,y-130,129,113);
+	openDblBufferDialog(x-32,y-130,129,113,"",0);
 	SDL_Event event;
 	int done=0;
 	int col,lum;
@@ -671,11 +683,8 @@ int do_colors()
 	unsigned char c;
 
 	yp=64+EDIT_OFFSET_Y;
-	tmpx = openDblBufferDialog(DIALOG_CENTER,yp, 178, 96);
-	SDL_ShowCursor(SDL_DISABLE);
-	yp+=2;
-	SDLstring(tmpx+18,yp,"Color Registers");
-	yp+=10;
+	tmpx = openDblBufferDialog(DIALOG_CENTER,yp, 178, 96, "Color Registers", 1);
+	yp+=16;
 	for(i=0;i<5;i++) {
 		SDLHollowBox(tmpx+11,yp,tmpx+21,yp+8,0);
 		SDLBox(tmpx+12,yp+1,tmpx+20
@@ -720,7 +729,72 @@ int get_8x8_mode(int m)
 	return 2;
 }
 
-
+int select_draw_event_loop(int x, int y, int * dc, int hchar, SDL_Event * evt_in) {
+	
+	int vchar=256/hchar;
+	int yp=0;
+	int i, sx,sy;
+	SDL_Event event;
+	SDL_Event * evt;
+	
+	evt=NULL;
+	i=-1;
+	do {
+		
+		SDLRedraw();
+		
+		if (!evt_in) {
+			SDL_WaitEvent(&event);
+			evt=&event;
+		} else {
+			evt=evt_in;
+			yp=1;
+		}
+		
+		switch(evt->type){
+			case SDL_KEYDOWN: {
+				i=stoa(evt->key.keysym.unicode&0x7f);
+				if ((i)||((evt->key.keysym.unicode==' '))) {
+					if ((evt->key.keysym.mod&KMOD_ALT))
+						i=i+128;
+					if (dc) dc[0]=i;
+					yp=1;
+				}
+			}
+				break;
+			case SDL_MOUSEBUTTONUP: {
+				
+				if (IN_RANGE(evt->button.button,1,3)) {
+					int mx,my;
+					
+					mx=SDLTranslateClick(evt->button.x);
+					my=SDLTranslateClick(evt->button.y);
+					// DEBUG PURPOSES JH
+			
+					if ((mx>=x)&&(mx<=x+hchar*8-1)&&(my>=y)&&(my<=y+vchar*8-1)) {
+						sx=(mx-x)/8; sy=(my-y)/8;
+						if (0) {
+							char buf[128];
+							SDLBox(28*8,6,48*8,22,144);
+							sprintf(buf,"mxmy  [%05dx%05d]",sx,sy);
+							SDLstring(28*8,6,buf);
+							sprintf(buf,"scxscy[%05dx%05d]",x,y);
+							SDLstring(28*8,14,buf);
+						}
+						i=sy*hchar+sx;
+						if (dc) dc[evt->button.button-1]=i;
+						yp=1;
+					}
+				}
+			}
+			default:
+				
+				//if (hchar==16) yp=1;
+				break;
+		}
+	} while (!yp);
+	return i;
+}
 /*===========================================================================
  * select_draw
  * get a draw character from the user
@@ -728,64 +802,48 @@ int get_8x8_mode(int m)
  * param dc: array of draw colors indexed by mousebutton
  * returns: the selected character
  *==========================================================================*/
-int select_draw(char *title, int * dc)
+int select_draw(int x, int y, char *title, int * dc, int hchar, int process_events)
 {
 	int i,sx,sy,yp;
-	SDL_Event evt;
+	int hb;
+	int vb;
+	int add;
+	hb=8;
+	vb=6;
+	if (hchar==16) {
+		hb=3;
+		vb=0;
+	}
+	
+	int vchar=256/hchar;
 
-	raisedbox(24,32,296,120);
-	SDLstring(33,36,title);
-	yp=104;
-	SDLBox(31,48,289,yp+8,clut[0]);
-	SDLHLine(30,290,47,144);
-	SDLHLine(30,290,yp+9,152);
-	SDLVLine(30,48,yp+8,144);
-	SDLVLine(290,48,yp+8,152);
+	raisedbox(x,y,x+hchar*8+2*hb-1,y+vchar*8+16+vb+2,2);
+	yp=vchar*8+y;
+	add=0;
+	if (title) {
+		SDLstring(x+hb,y+4,title);
+		add=14;
+	}
+	yp+=add;
+	
+	SDLBox(x+hb-1,y+add,x+hchar*8+hb,yp+2,clut[0]);
+	SDLHLine(x+hb-2,x+hchar*8+hb+1,y+add,144);
+	SDLHLine(x+hb-2,x+hchar*8+hb+1,yp+3,152);
+	SDLVLine(x+hb-2,y+add+1,yp+3,144);
+	SDLVLine(x+hchar*8+hb+1,y+15,yp+3,152);
 	sx=0; sy=0;
 	
 	setpal();
 	for(i=0;i<256;i++) {
-		plot_draw_char(32+sx, 48+sy, i);
+		plot_draw_char(x+hb+sx, y+add+2+sy, i);
 		sx+=8;
-		if (sx>248) { sx=0; sy+=8; }
+		if (sx>=hchar*8) { sx=0; sy+=8; }
 	}
 	setdefaultpal();
 
-	yp=0;
-	do {
-		SDLRedraw();
-
-		SDL_WaitEvent(&evt);
-
-		switch(evt.type){
-			case SDL_KEYDOWN: {
-						  i=stoa(evt.key.keysym.unicode&0x7f);
-						  if ((i)||((evt.key.keysym.unicode==' '))) {
-							  if ((evt.key.keysym.mod&KMOD_ALT))
-								  i=i+128;
-							  if (dc) dc[0]=i;
-							  yp=1;
-						  }
-					  }
-				break;
-			case SDL_MOUSEBUTTONUP: {
-							if (evt.button.button<=3) {
-								int mx,my;
-								mx=SDLTranslateClick(evt.button.x);
-								my=SDLTranslateClick(evt.button.y);
-								if ((mx>=31)&&(mx<=289)&&(my>=48)&&(my<=112)) {
-									sx=(mx-32)/8; sy=(my-48)/8;
-									i=sy*32+sx;
-									if (dc) dc[evt.button.button-1]=i;
-									yp=1;
-								}
-							}
-						}
-			default:
-						break;
-		}
-	} while (!yp);
-	return i;
+	if (process_events)	return select_draw_event_loop(x+hb,y+add+2,currentView->dc,hchar,NULL);
+	
+	return 0;
 }
 
 /*===========================================================================
@@ -803,8 +861,8 @@ int get_number(char *title, int def, int max)
 
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
-	SDLstring(tmpx+4,68+tmpy,title);
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32, title, 0);
+	//SDLstring(tmpx+4,68+tmpy,title);
 
 	if (def>=0)
 		sprintf(buf,"%d",def);
@@ -870,7 +928,7 @@ int do_size(int tile_mode)
 
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y;
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 160, 32);
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 160, 32,/*tile_mode?"Tile width:":"New width:"*/"",0);
 	
 	if (!tile_mode) {
 		SDLstring(tmpx+4,68+tmpy,"New Width:");
@@ -956,7 +1014,7 @@ int do_move(view *map, int tile_mode)
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y;
 
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 168, 32);
+	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 168, 32,"",0);
 	
 	if (tile_mode) {
 
@@ -1040,9 +1098,9 @@ int do_exit()
 	int x;
 	
 	int tmpy=EDIT_OFFSET_Y;
-	x=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32);
-	SDLstring(x+4+16,76+tmpy,"Really Exit? Y/N");
-	SDLplotchr(x+4+128-8,76+tmpy,stoa('Y'),1,dfont);
+	x=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 164, 32,"Warning!",1);
+	SDLstring(x+4+16,78+tmpy,"Really Exit? Y/N");
+	SDLplotchr(x+4+128+8,78+tmpy,stoa('N'),1,dfont);
 	setprefs();
 	
 	ch=SDLgetch(1);

@@ -6,6 +6,7 @@
  * Started: 07/29/97                                                      *
  =========================================================================*/
 #include <stdio.h>
+#include "SDLemu.h"
 
 typedef struct opt {
 	int write_tp;
@@ -83,6 +84,7 @@ typedef struct rgb_color {
 #define EDIT_COLOR_Y (176+EDIT_OFFSET_Y)
 
 #define BUTTON_WIDTH 12
+#define MAP_BUTTON_WIDTH 16
 
 #define TILE_MODE ((!tileEditMode)&&((tsx>1)||(tsy>1)))
 #define NOT_TILE_MODE (!TILE_MODE)
@@ -139,17 +141,20 @@ int do_colors();
 int do_size(int tile_mode);
 int do_exit();
 int do_move(view *map, int tile_mode);
-int select_draw(char *title, int * dc);
+int select_draw(int x, int y, char *title, int * dc, int hchar, int process_events);
+int select_draw_event_loop(int x, int y, int * dc, int hchar, SDL_Event * evt_in);
 int ask(char *msg,char * answers);
 int askNoYes(char *msg);
 int error_dialog(char *error);
 int info_dialog(char *error);
 int message_dialog(char * title, char *error, char * answers);
 char stoa(char s);
-int raisedbox(int x, int y, int w, int h);
+int raisedbox(int x, int y, int w, int h, int d);
+int drawbevelledbox(int x, int y, int w, int h);
 int do_defaults();
 unsigned char * resize_map(view * map_view, int x, int y);
 int drawbutton(int x, int y, char *txt);
+int drawbutton_map(int x, int y, char *txt);
 char *get_filename(char *title, char * initial);
 int get_number(char *title, int def, int max);
 int select_char(char *title);
@@ -225,4 +230,5 @@ extern int mode, ratio;
 extern int base;
 extern int tsx, tsy, tileEditMode;
 extern int maskEditMode;
+extern int do_probe;
 extern unsigned long s1,s2;
