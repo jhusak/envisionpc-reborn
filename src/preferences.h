@@ -13,6 +13,15 @@ typedef struct CONFIG_ENTRY {
 #define CONFIG_ENTRY_CNT 3
 extern CONFIG_ENTRY CONFIG_ENTRIES[CONFIG_ENTRY_CNT];
 
+#if defined(_WIN64) || defined(__WIN64__) || defined(WIN64) || defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#define TILDE_ALLOWED 0
+#elif defined(__APPLE__)
+#define TILDE_ALLOWED 1
+#else
+// linux/unix/etc
+#define TILDE_ALLOWED 1
+#endif
+
 
 char * get_preferences_filepath();
 int readpref(FILE * fd);

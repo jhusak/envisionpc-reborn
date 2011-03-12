@@ -22,6 +22,8 @@ char * get_preferences_filepath()
 	return buf;
 }
 
+#define TILDE_ALLOWED 0
+
 #elif defined(__APPLE__)
 // ~/Library/Preferences
 char * get_preferences_filepath()
@@ -33,6 +35,7 @@ char * get_preferences_filepath()
 	sprintf (buf,"%s/%s/%s",result,"Library/Preferences","envisionPCreborn.pref");
 	return buf;
 }
+#define TILDE_ALLOWED 1
 
 #else
 // linux/unix/etc, home catalog begun with . (dot)
@@ -45,6 +48,7 @@ char * get_preferences_filepath()
 	sprintf (buf,"%s/%s",result,".envisionPCreborn.dat");
 	return buf;
 }
+#define TILDE_ALLOWED 1
 #endif
 
 int skip_to_eol(FILE * fd)
@@ -98,8 +102,9 @@ int readpref(FILE * fd)
 	if (feof(fd)) return EOF;
 	if ('\n'==fgetc(fd))
 	{
-		// zeroify in case of shorter prefs in file
-		memset(prefset->buffer, 0, prefset->len);
+		// This was wrong! the default values were reset here
+		// NOT zeroify in case of shorter prefs in file
+		// memset(prefset->buffer, 0, prefset->len);
 
 		memcpy(prefset->buffer, localbuf, len);
 		return 1;

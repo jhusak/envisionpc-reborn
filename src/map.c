@@ -21,6 +21,7 @@ int base; /* character base */
 int tsx, tsy; /* tile width, height */
 int cacheOk, tileEditMode; /* cache valid flag, tile edit mode flag */
 int maskEditMode; /* mask mode edit flag */
+int do_probe; /* probe flag; if set, the char/tile the user clicked goes to draw_char */
 unsigned char *cache; /* cache */
 SDL_Surface *charTable[512];
 
@@ -129,43 +130,49 @@ int map_panel()
 	
 	int cmdcnt=0;
 	if NOT_MASK_EDIT_MODE {
-		drawbutton(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
+		drawbutton_map(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
 		//drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
-		drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
-		drawbutton(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
-		drawbutton(0,cmdcnt*10,"ShiftBase*Up");	cmds[++cmdcnt]='U';
-		drawbutton(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
-		drawbutton(0,cmdcnt*10,"*find");	cmds[++cmdcnt]='f';
-		drawbutton(0,cmdcnt*10,"*draw char"); cmds[++cmdcnt]='d';
-		drawbutton(0,cmdcnt*10,"*load map");	cmds[++cmdcnt]='l';
-		drawbutton(0,cmdcnt*10,"*Read RawMap");	cmds[++cmdcnt]='R';
-		drawbutton(0,cmdcnt*10,"*save map");	cmds[++cmdcnt]='s';
-		drawbutton(0,cmdcnt*10,"*writeRawMap");	cmds[++cmdcnt]='w';
-		drawbutton(0,cmdcnt*10,"*clear map");	cmds[++cmdcnt]='c';
-		drawbutton(0,cmdcnt*10,"*block");	cmds[++cmdcnt]='b';
-		drawbutton(0,cmdcnt*10,"Ret*ile");	cmds[++cmdcnt]='i';
-		if NOT_TILE_MODE {drawbutton(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
+		drawbutton_map(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
+		drawbutton_map(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
+		drawbutton_map(0,cmdcnt*10,"Shift CHBase *Up");	cmds[++cmdcnt]='U';
+		drawbutton_map(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
+		drawbutton_map(0,cmdcnt*10,"*find");	cmds[++cmdcnt]='f';
+		drawbutton_map(0,cmdcnt*10,"*draw char"); cmds[++cmdcnt]='d';
+		drawbutton_map(0,cmdcnt*10,"*probe"); cmds[++cmdcnt]='p';
+		drawbutton_map(0,cmdcnt*10,"*load map");	cmds[++cmdcnt]='l';
+		drawbutton_map(0,cmdcnt*10,"*Read raw map");	cmds[++cmdcnt]='R';
+		drawbutton_map(0,cmdcnt*10,"*save map");	cmds[++cmdcnt]='s';
+		drawbutton_map(0,cmdcnt*10,"*write raw map");	cmds[++cmdcnt]='w';
+		drawbutton_map(0,cmdcnt*10,"*clear map");	cmds[++cmdcnt]='c';
+		drawbutton_map(0,cmdcnt*10,"*block");	cmds[++cmdcnt]='b';
+		drawbutton_map(0,cmdcnt*10,"ret*ile");	cmds[++cmdcnt]='i';
+		if NOT_TILE_MODE {drawbutton_map(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
 	} else {
-		drawbutton(0,cmdcnt*10,"exitM*askEdit");	cmds[++cmdcnt]='a';
-		//drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
-		drawbutton(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
-		drawbutton(0,cmdcnt*10,"ShiftBase*Up");	cmds[++cmdcnt]='U';
-		drawbutton(0,cmdcnt*10,"*Read RawMask");	cmds[++cmdcnt]='R';
-		drawbutton(0,cmdcnt*10,"*write RawMsk");	cmds[++cmdcnt]='w';
-		drawbutton(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
-		drawbutton(0,cmdcnt*10,"*clear mask");	cmds[++cmdcnt]='c';
-		drawbutton(0,cmdcnt*10,"Set from *map");	cmds[++cmdcnt]='m';
+		drawbutton_map(0,cmdcnt*10,"exit M*ask Edit");	cmds[++cmdcnt]='a';
+		//drawbutton_map(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
+		drawbutton_map(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
+		drawbutton_map(0,cmdcnt*10,"Shift CHBase *Up");	cmds[++cmdcnt]='U';
+		drawbutton_map(0,cmdcnt*10,"*Read Raw Mask");	cmds[++cmdcnt]='R';
+		drawbutton_map(0,cmdcnt*10,"*write Raw Mask");	cmds[++cmdcnt]='w';
+		drawbutton_map(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
+		drawbutton_map(0,cmdcnt*10,"*clear mask");	cmds[++cmdcnt]='c';
+		drawbutton_map(0,cmdcnt*10,"set from *map");	cmds[++cmdcnt]='m';
 	}
 	
-	drawbutton(0,cmdcnt*10,"*go to XY");	cmds[++cmdcnt]='g';
-	if (NOT_MASK_EDIT_MODE && !tileEditMode)  { drawbutton(0,cmdcnt*10,"M*ask edit");	cmds[++cmdcnt]='a';}
-		drawbutton(0,cmdcnt*10,"*hide");	cmds[++cmdcnt]='h';
-	// wolne:0-9ajknopqvxy
+	drawbutton_map(0,cmdcnt*10,"*go to XY");	cmds[++cmdcnt]='g';
+	if (NOT_MASK_EDIT_MODE && !tileEditMode)  { drawbutton_map(0,cmdcnt*10,"M*ask edit");	cmds[++cmdcnt]='a';}
+		drawbutton_map(0,cmdcnt*10,"*hide");	cmds[++cmdcnt]='h';
+	// wolne:ajknoqvxy
 	MAP_MENU_HEIGHT=cmdcnt*10;
 	
 	set_allowed_commands(cmds,cmdcnt,1);
 	
 	cmds[0]=MAP_MENU_HEIGHT*10+10;
+	
+	if NOT_MASK_EDIT_MODE {
+		select_draw(0,CONFIG.screenHeight-171,"Char chooser:", map->dc, 16,0);
+	}
+	
 	SDLSetContext(MainContext);
 	return 1;
 }
@@ -353,14 +360,6 @@ int map_command(int cmd, int sym)
 							  draw_header(1);
 							  draw_screen(1);
 							  return 0;
-						  /*} else if MASK_EDIT_MODE {
-							  draw_cursor();
-							  maskEditMode=0;
-							  map_panel();
-							  draw_header(1);
-							  draw_screen(1);
-							  return 0;
-						   */
 						  } else
 							  bye();
 						  break;
@@ -414,7 +413,7 @@ int map_command(int cmd, int sym)
 			if TILE_MODE
 				f=currentView->dc[0]=get_number("Tile to replace:", 1,255);
 			else
-				f=select_draw("Select character to replace:",NULL);
+				f=select_draw(24,32,"Select character to replace:",NULL,32,1);
 			fill_draw_char(currentView, f, 1);
 
 			cacheOk=0;
@@ -443,11 +442,16 @@ int map_command(int cmd, int sym)
 			if TILE_MODE
 				currentView->dc[0]=get_number("New draw tile:", currentView->dc[0],255);
 			else
-				select_draw("Select or type new draw char:",currentView->dc);
+				select_draw(24,32,"Select draw char",currentView->dc,32,1);
 			draw_header(0);
 			cacheOk=0;
 			break;
 			
+		case 'p':
+			SDLBox(CONFIG.screenWidth-172,15,CONFIG.screenWidth-1,22,144);
+			SDLstring(CONFIG.screenWidth-172,15,TILE_MODE?"Please probe the tile":"Please probe the char");
+			do_probe=1;
+			break;
 		case 'm': 
 			if MASK_EDIT_MODE {
 				int i;
@@ -467,6 +471,7 @@ int map_command(int cmd, int sym)
 				if (i>0) {
 					currentView->cx=currentView->cy=currentView->scx=currentView->scy=0;
 					mode=i;
+					map_panel();
 					draw_header(0);
 					do_mode(mode);
 				}
@@ -512,7 +517,9 @@ int map_command(int cmd, int sym)
 			
 			if (base) base=0;
 			else base=64*8;
+			map_panel();
 			do_mode(mode);
+			
 			break;
 			
 		case 'e': 
@@ -565,10 +572,8 @@ int map_command(int cmd, int sym)
 			}
 			typeMode=1;
 			if (!hidden) typeMode++;
-			SDLNoUpdate();
-			SDLBox(CONFIG.screenWidth-92,15,CONFIG.screenWidth-1,22,144);
+			SDLBox(CONFIG.screenWidth-172,15,CONFIG.screenWidth-1,22,144);
 			SDLstring(CONFIG.screenWidth-92,15,"Type Mode");
-			SDLUpdate();
 			cacheOk=0;
 			hidden=1;
 			break;
@@ -613,6 +618,12 @@ int get_draw_color(view * currentView, int buttonnumber)
 	return currentView->dc[0];
 }
 
+void set_draw_color(view * currentView, int buttonnumber, int color)
+{
+	if IN_RANGE(buttonnumber,1,3)
+		currentView->dc[buttonnumber-1]=color;
+}
+
 
 /*===========================================================================
  * map_click
@@ -628,14 +639,16 @@ int map_click(int x, int y, int buttonnumber, int *down)
 {
 	int i,ox,oy;
 
-	// menu at the rigth
-	if ((!hidden)&&(IN_BOX(x,y,CONFIG.screenWidth-BUTTON_WIDTH*8-5,CONFIG.screenWidth-5,MAP_TOP_OFFSET,cmds[0]))) {
+	// menu at the right
+	if ((!hidden)&&(IN_BOX(x,y,CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-5,CONFIG.screenWidth-5,MAP_TOP_OFFSET,cmds[0]))) {
 		i=(y-MAP_TOP_OFFSET+10)/10;
 		SDLrelease(); /* wait for mouse to unclick */
 		*down=0;
 		if (cmds[i]) return(map_command(cmds[i],0));
 		return 0;
 	}
+
+	
 	if (y>=MAP_TOP_OFFSET) {
 		oy=i=(y-MAP_TOP_OFFSET)/currentView->ch;
 		ox=x=x/currentView->cw;
@@ -647,7 +660,15 @@ int map_click(int x, int y, int buttonnumber, int *down)
 			if (buttonnumber) {
 				if (!typeMode) {
 					if NOT_MASK_EDIT_MODE {
-						
+						if (do_probe)
+						{
+							set_draw_color(currentView,
+										   buttonnumber,
+										   currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]
+										   );
+							do_probe=0;
+							draw_header(0);
+						}
 						int drawcolor=get_draw_color(currentView, buttonnumber);
 						// with this "if" works very well.
 						if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=drawcolor)
@@ -658,7 +679,7 @@ int map_click(int x, int y, int buttonnumber, int *down)
 							
 							SDLCharBlt(MainContext,x,y,drawcolor+ (TILE_MODE *256));
 							
-							if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
+							if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6))
 								draw_screen(0);
 						}
 					}
@@ -674,7 +695,7 @@ int map_click(int x, int y, int buttonnumber, int *down)
 							x=x*currentView->cw;
 							y=MAP_TOP_OFFSET+i*currentView->ch;
 
-							//if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-BUTTON_WIDTH*8-6))
+							//if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6))
 							draw_screen(1);
 						}
 					}
@@ -772,8 +793,8 @@ int draw_screen(int b) /* b not used in this func */
 	SDLClip(0);
 
 	if (!hidden) {
-		SDLBox(CONFIG.screenWidth-BUTTON_WIDTH*8-8,MAP_TOP_OFFSET,CONFIG.screenWidth-1,CONFIG.screenHeight,0);
-		SDLContextBlt(MainContext,CONFIG.screenWidth-BUTTON_WIDTH*8-5,MAP_TOP_OFFSET,UpdContext,0,0,BUTTON_WIDTH*8+8,MAP_MENU_HEIGHT-1);
+		SDLBox(CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-8,MAP_TOP_OFFSET,CONFIG.screenWidth-1,CONFIG.screenHeight,0);
+		SDLContextBlt(MainContext,CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6,MAP_TOP_OFFSET,UpdContext,0,0,MAP_BUTTON_WIDTH*8+8,CONFIG.screenHeight);
 	}
 	draw_cursor();
 	return 1;
@@ -964,7 +985,19 @@ int do_map()
 				down=event.button.button;
 				if (down==3)
 					SDLUpdate();
-				done=map_click(mx,my,event.button.button,&down);
+				
+				
+				int res;
+				
+				if ((!hidden)&&(IN_BOX(mx,my,CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-3,CONFIG.screenWidth-4,CONFIG.screenHeight-131,CONFIG.screenHeight-4))) {
+								
+					res=select_draw_event_loop(CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-3,CONFIG.screenHeight-131,currentView->dc,16,NULL);
+					
+					draw_header(0);
+					//down=0;
+				}
+				
+				if (!done) done=map_click(mx,my,event.button.button,&down);
 
 				break;
 			}
@@ -975,7 +1008,7 @@ int do_map()
 							      my=SDLTranslateClick(event.button.y);
 							      oy=(my-MAP_TOP_OFFSET)/currentView->ch;
 							      ox=mx/currentView->cw;
-							      if (((hidden)||(mx<CONFIG.screenWidth-BUTTON_WIDTH*8-6))&&((ox!=currentView->cx)||(oy!=currentView->cy))) {
+							      if (((hidden)||(mx<CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6))&&((ox!=currentView->cx)||(oy!=currentView->cy))) {
 								      done=map_click(mx,my,down,&down);
 							      }
 						      }

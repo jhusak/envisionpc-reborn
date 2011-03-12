@@ -1,6 +1,10 @@
-EnvisionPC: Release 0.8 ("The March Hare Edition")
+EnvisionPC: Release 0.8.xx
 
 by Mark Schmelzenbach
+
+modified by:
+Jakub Husak
+STC (4-colour char edit mode) 
 Copyright (c)1997-2006
 
 
@@ -52,7 +56,7 @@ where
 
 -z <n> or -zoom <n>: sets the zoom level of the screen.  For instance,
     running "-z 4" magnifies the screen four times.  By default, the zoom
-    level is set to 3, which puts it pretty close to 1024x768.
+    level is set to 3, which puts it pretty close to 1024x768. The recommended and default zoom is 2
 
 Also, EnvisionPC now supports both character maps (the default) and
 tile maps.
@@ -78,29 +82,41 @@ program.  However, since I haven't actually used the program in over 8
 years, don't expect it to be the same.
 
 The character editor screen is divided into four main sections:
-  Along the bottom of the screen is the font currently being edited.  The
+  Near the bottom of the screen is the font currently being edited.  The
 current 'cell' actually being changed is highlighted by a blue square.
 Clicking on any letter in this section will select that letter for editing.
-  The right hand side of the screen is a gird...this is an enlarged
-version of the selected cell. Left clicking on the grid will fill in a
-pixel, while right clicking will erase the pixel.  The mouse button can be
-held down for continuous drawing.  Along side the grid is an example of what
+  The right upper side of the screen is a grid...this is an enlarged
+version of the selected cell. In two-colour edit mode left clicking on the
+grid will fill in a pixel, while right clicking will erase the pixel.
+In four-color edit mode user can choose three colors out -of four by use
+left, middle or right mouse button. The mouse button can be
+held down for continuous drawing. Along side the grid is an example of what
 the character will look like in Antic mode 6 (Graphics 1), 7 (Graphics 2)
-and 4.
+and 4. The borders around chars help in realising character layout and margins.
   The left hand side of the screen contains the command menu.  All commands
 are accessible through either the keyboard or the command menu.  To activate
 a command, click on the command button with the mouse or press the letter
-that is highlighted.  There are multiple command menus, accessible by clicking
-on the tabs along the top.  Notice that the keyboard commands are always
-active, even if the equivalent button is not displayed.
-  The center of the screen is a copy of the upper left-hand corner of the
-map.  You can edit this box (and change the graphics mode) from the map
+that is highlighted.
+  The center of the screen is a copy of the map in the cursor position. You
+  can edit this box (and change the graphics mode) from the map
 editor.
-The font editor can hold up to 10 font 'banks' in memory at a time.  To change
-between banks, press the numbers 0-9 to select the appropriate font.  Also,
-the arrows next to the bank indicator can similarly be used.
+  In the bottom of the char editor one can find five color registers which
+can be set with the mouse. Their dec/hex values are shown above them; dec/hex format
+can be changed by clicking on the area with color values.
+  The lower-right corner contains two "sliders" - font choice and Antic mode 
+choice. User can change between banks either by presing the numbers 0-9 to select
+the appropriate font, or by clicking arrows next to the bank indicator.
+  The font editor can hold up to 10 font 'banks' in memory at a time.  To change
+between banks, press the numbers 0-9 to select the appropriate font either
+in char edit mode or map edit mode.
+  The Antic mode is bounded to the font set - by change the font set
+the Antic mode changes also. To set particular Antic mode, press the arrows next
+to the Antic mode indicator.
+
 
 Currently the commands available in the character editor are:
+
+'m': enters the map mode
 
 'b': blank
   clears the currently selected character
@@ -147,13 +163,11 @@ Currently the commands available in the character editor are:
 
 'g': toggles the GTIA register.  <currently not implemented>
 
-'p': poke
+'p': pick colors
    This command allows you to set the color registers to desired values.
-   The colors are taken from a header file from David Firth's Atari 800
+   The default colors are taken from a header file from David Firth's Atari 800
    emulator.  He includes a note that these colors were provided by Chris
-   Lam.  I think that they ar fairly accurate, although I could have sworn
-   that the color 70 was red.  Here is seems to be a lavander.  Can anyone
-   confirm and/or deny this?
+   Lam. The values can be put in decimal or hexadecimal with a dollar "$" prefix.
 
 'n': numbers
    This displays the values that make up the currently defined charater.
@@ -167,17 +181,22 @@ arrow keys: slide
 0-9: select font bank
    The number keys select the appropriate font bank
 
+'I': import palette
+   This lets to import standard 768-bytes atari palette, used for example in
+   Atari800. The values in the file are three-byte words or one byte r g b value
+   (3*256 bytes=768 bytes). The palette is stored in the preferences file,
+   so there's no need to import it every time.
+
 'o': options
    This is where the basic options for file input/output are set.  You will
-   be prompted for a disk image file name (or none, if you wish to use the
-   harddrive instead), the export format, and line numbering parameters, if
+   be prompted for the export format, and line numbering parameters, if
    appropriate.
 
 'l': load a font
-   Loads a font, either from the harddrive or from an .XFD disk-image
+   Loads a font from the harddrive
 
 's': save a font
-   Saves a font, either to the harddrive or to an .XFD disk-image
+   Saves a font to the harddrive
 
 'e': export a font
    This command allows the font to be written to disk in a form useful for
@@ -194,24 +213,31 @@ arrow keys: slide
      MAC/65 -- written out as .BYTE statements, seperated by commas from a
                given linenumber, incrementing by a given step.
      Action! -- written as a byte array.
+     C -- written as an unsigned char array.
 
      The format is set in the default options menu, accessed by the 'o'
      command described above.  Let me know if you think there are other
      formats that would be useful.
 
-'m': enters map mode
+'f': sets default values for values stored in the preferences file. User
+   can choose 'Y' or 'N' for several questions, or press ESC to leave the
+   dialog.
 
-Pressing Escape or control-q will exit the program.
-
+Pressing Escape will exit the program (assure the user wands this).
 
 The Map maker
 
-The map screen is divided into three sections:  the character palette, the
-command menu and the map itself.  Clicking on a character will select that
-as the current drawing character.  Left clicking on the map display will
-place the character at the current cursor position.
+The map screen is divided into two sections: the command menu and the map
+itself. On the right side user can found the menu which can be (un)hidden
+by pressing 'h' key.  By clicking on the map display will place the
+character at the current cursor position. The different character can be
+bound to left, middle and right mouse button.
 
 Available commands in the map editor:
+'e': returns to the editor
+
+'0'-'9' : change the font along with Antic mode.
+
 'f': find
    This performs a search/replace on the current map.  You will be prompted
    for the character to search for, and it will be replaced by the current
@@ -220,17 +246,17 @@ Available commands in the map editor:
    set the draw character to 'B', then execute this command and select 'A'.
 
 'c': clear
-   This fills the entire map with the current draw character.  This command
-   is effected by the current ratio (below).  A ratio of 100 will fill the
-   entire map with the draw character.  Smaller ratios will result is
-   characters 'spotting' the map.
+   This fills the entire map with the current draw character (assigned to
+   left mouse button).  This command is affected by the current ratio (below).
+   A ratio of 100 will fill the entire map with the draw character.  Smaller
+   ratios will result in characters 'spotting' the map.
 
 'r': ratio
    This commands sets the ratio value for the find and clear commands.  A
    ratio of 100 means that the character will always be replaced/set.  A
    ratio of 10 means that it will be replaced/set 10% of the time.
 
-'u': upper/under
+'U': upper/under
    In ANTIC modes 6 and 7 (graphic modes 1 and 2), there are only 64
    characters available.  Normally, the upper 64 are visible.  This command
    toggles between the upper 64 and lower 64 possible characters.
@@ -244,14 +270,22 @@ Available commands in the map editor:
    map)  If you are editing a tile map instead of a character map,
    this command will be disabled.
 
-'d': select a draw character
+'d': select a draw character/tile
    This command will allow you to pick a character to use as the new
    draw character.  Either select the desired character with the
-   mouse, or use the keyboard to type the character.  When typing a
+   mouse (with left, middle or right mouse button) or use the keyboard
+   to type the character (emulated as left-click).  When typing a
    character, the ALT key acts as the ATARI key to select inverse
    characters.  If you are editing a tile map instead of a character
    map, this command will prompt you to input a tile number to use for
    drawing instead of using a pick box.
+
+'p': probe a draw character/tile
+   This command will allow you to pick a character to use as the new
+   draw character by picking it from the map itself. Simply click
+   the desired character with the mouse (with left, middle or right mouse
+   button). If you are editing a tile map, this command will select the tile
+   under cursor instead.
 
 'l': load a map
    This loads a map from the harddrive/.XFD image (depending on the options
@@ -286,25 +320,42 @@ Available commands in the map editor:
       ...
       tile data: (tile width * tile height * number of tiles) bytes
 
+      [2]: byte indicating a maskmap type block
+      mask data: (map width*map height) bytes. There is redundancy in
+      case the number of masks would raise (to max 8) - one bit of mask
+      is saved in one byte.
+
       Currently tile width and height are constrained to be between
       1-8, and the maximum number of tiles is 256.
 
+      It is possible to read old-format file without the mask included.
+      The mask will be initialised to be empty.
+
 's': save a map
-   Saves a .map file.  Note, a tile based map file cannot currently be
-   saved onto an Atari .XFD disk image.
+   Saves a .map file.
+
+'R': read a RAW map
+   This reads the raw file as the map.  No mode/size/font change is performed.
+   If the file is shorter than the map size, the empty space will be erased.
 
 'w': write a RAW map
    This saves only the raw data of the map.  No mode/size/font info is
    included.
 
 'm': select Antic mode
-   Enter the desired graphics mode.  Valid modes are ANTIC modes (2-7)
+   Enter the desired graphics mode.  Valid modes are ANTIC modes (2-7).
+   The Antic mode is bound to font bank, so this changes the assignment to
+   the current font.
    See the chart below for details.
 
 'z': resize a map
    This resizes the map.  If you are making the map smaller, map data
    outside the new boundries will be lost.  The map dimensions can range
    up to 65535x65535.  The smallest size map is 1x1.
+   Warning: The default soft-limit for map size is 4MB (over four million
+   chars). The limit was introduced due to huge memory allocations when
+   reading very huge (max dimensions) or bad map file. The max dimensions
+   lead to 4GB(!) map memory and similar mask memory area
 
 'g': go to a map position
    This moves the cursor to a given position, which can be very useful
@@ -322,7 +373,9 @@ Available commands in the map editor:
 'b': toggle block editor
    This enters the block editor (see below)
 
-'e': returns to the editor
+'a': toggle mask editor
+   This enters the mask editor (see below)
+
 
 arrow keys move the cursor/scroll the display
 
@@ -371,6 +424,27 @@ you are currently editing.
 
 When a tile definition is changed on this screen, all instances of the
 tile will be updated on the map screen.
+
+Mask Editor
+
+The Mask Editor lets add the attribute "set/unset" to the every char/tile 
+of map field. The mask is saved along with the map file.
+'0'-'9' : change the font along with Antic mode.
+'a': toggle mask mode to return to map mode
+'z': resize map - as in map edit mode
+'U': shift base up/down - as in map edit mode
+'R': read Raw mask - reads raw file as mask
+  the question Bit/byte format resolves the problem in automatic format
+  detection.
+'w': write raw mask - writes mask as bit/byte series.
+  the question Bit/byte format selects write format
+'s': sets the whole mask to "set"
+'c': sets the whole mask to "cleared"
+'m': sets "set" where there is something in the map, "cleared" otherwise.
+  The something means not zero.
+'g': as in map editor
+'h': as in map editor
+
 
 Tile mode walk-through:
 

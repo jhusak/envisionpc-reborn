@@ -173,7 +173,7 @@ int SDLstring(int x, int y, char *str)
 	sx=x;
 	for(i=0;i<strlen(str);i++) {
 		c=*(str+i);
-		if ((c<97)||(c>123)) c=c-32;
+		if ((c!=126)&&((c<97)||(c>123))) c=c-32;
 		if (c) SDLplotchr(sx,y,c,2,dfont);
 		sx+=8;
 	}
@@ -890,7 +890,7 @@ int toggleFullScreen()
 	mainScreen->current=mainScreen->surfaces[MainContext];
 
 	if (mainScreen->surfaces[UpdContext]) SDL_FreeSurface(mainScreen->surfaces[UpdContext]);
-	s=SDL_CreateRGBSurface(SDL_SWSURFACE,224*mainScreen->zoom,192*mainScreen->zoom,32,rmask, gmask, bmask, amask);
+	s=SDL_CreateRGBSurface(SDL_SWSURFACE,224*mainScreen->zoom,CONFIG.screenHeight*mainScreen->zoom,32,rmask, gmask, bmask, amask);
 	mainScreen->surfaces[UpdContext]=SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 

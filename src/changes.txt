@@ -1,89 +1,89 @@
 Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 2011-01-29 (rev1)
-- changed the way of exiting program (now you must press Y)
-- modified draw_char command (in draft) to reflect graphics mode and font modified by user.
+- changed the way of exiting program (now you must press Y) *
+- modified draw_char command (in draft) to reflect graphics mode and font modified by user. *
 
 2011-02-01 (rev2)
 - speed-up some dialogs
 
 2011-02-03 (rev15)
 - speed up some dialogs
-- added and fixed char edit in 4-color mode (STC has begun this)
+- added and fixed char edit in 4-color mode (STC has begun this) *
 - fixed forgotten changes during introducing edit in 4-color mode
-- added some frames around chars
+- added some frames around chars *
 - pc version: cross-compile with mingw on mac
 
 2011-02-03 (rev17)
 - added offset and frame to corner window
-- added mode change to char edit screen
+- added mode change to char edit screen *
 - added background color instead of blue to select char window
 
 2011-02-04 (rev25)
 - Dialog code simplify
 - fixed bug that caused garbage on the map during map scroll
 - parametrisation of some hard-coded values
-- added support for wider screen (64 chars, but this is variable now)
-- added support for wider taller screen (46 chars, but this is variable now)
+- added support for wider screen (64 chars, but this is variable now) *
+- added support for wider taller screen (46 chars, but this is variable now) *
 - dialod draw_char now displays chars in mode 6 and 7 in good colors.
-- removed handling ctrl-q due to unexpected results in type mode 
-- added C format export for font sets 
-- added color register change with pallettes.
+- removed handling ctrl-q due to unexpected results in type mode *
+- added C format export for font sets *
+- added color register change with pallettes. *
 
 2011-02-05 (rev26)
-- added textual representation of colors in the pallette
-- one can click on the textual representation to change the format of display (hex/dec)
+- added textual representation of colors in the pallette *
+- one can click on the textual representation to change the format of display (hex/dec) *
 - fixed bug that prevented palette chooser from display before char editing in modes 4 and 5
 - fixed small bug causing wrong painted boxes with colors in poke dialog.
 - fixed small issue with drawing background during char clicking on the font palette.
 
 2011-02-07 (rev29)
-- added preferences file operations
+- added preferences file operations *
 - fixed some memory leaks during dialog handling
-- added possibility to enter hex number everywhere when number prompt
-- added erasing of text field when key other than backspace and enter pressed
-- added config and pallette to preferences file
+- added possibility to enter hex number everywhere when number prompt *
+- added erasing of text field when key other than backspace and enter pressed *
+- added config and pallette to preferences file *
 - menu buttons got wider due to bigger screen.
-- reorganized menu, added Import Color Table (G2F and Atari800 palette format of 768 bytes length)
-- added Defaults button to reset some values to default ones - removed RestoreFont button and moved here
+- reorganized menu, added Import Color Table (G2F and Atari800 palette format of 768 bytes length) *
+- added Defaults button to reset some values to default ones - removed RestoreFont button and moved here *
 - renamed some menus to more meaning form.
-- storing CLUT (color lookup table) in preferences
-- so does color palette
+- storing CLUT (color lookup table) in preferences *
+- so does color palette *
 - added Makefile.linux (thanks sebako)
 2011-02-07 (rev30)
-- fixed bug in read_xfd_map
-- added save raw map to the menu
-- added read raw map function (well, that was easy) - should work either on plain file or xfd
+- fixed bug in read_xfd_map 
+- added save raw map to the menu *
+- added read raw map function (well, that was easy) - should work either on plain file or xfd *
 
 2011-02-10 (rev32)
-- added two-colors by two-buttons char edit in modes 4 and 5
+- added two-colors by two-buttons char edit in modes 4 and 5 *
 - improved preferences reading - now adding or removing preference entries does not reset the whole thing
-- added quicksave in form that filenames are preserved between load and save operations;
+- added quicksave in form that filenames are preserved between load and save operations; *
 - some repaint speed-ups
 - corrected light direction of buttons (now upper-left)
-- added escape handling to almost all dialogs (except retile, ie get_number in general)
+- added escape handling to almost all dialogs (except retile, ie get_number in general) *
 
 2011-02-11 (rev 33)
 - divided palettes into system default and modifyable atari. GUI paints always with default palette, the edit contents with user-imported palette.
 - fixed issue with garbage on screen during cursor moving by mouse especially in tile edit mode
 - some code cleanups
 - added code that blocks execution of commands not in menu
-- now typeMode restores hidden status of right menu.
+- now typeMode restores hidden status of right menu. *
 
 2011-02-13 (rev 35)
 - fixed bug not saving tiles when save map in tile edit mode
 - fixed issue with ghost chars where in typeMode and right edge of the screen reached (and map right edge not)
-- added map editing and file operations with mask (xfd untested)
+- added map editing and file operations with mask (xfd untested) *
 
 2011-02-14 (rev37)
-- added confirmation dialogs when overwritting files.
-- added raw mask write in bit format.
+- added confirmation dialogs when overwritting files. *
+- added raw mask write in bit format. *
 - tested some code in xfd operations, but still some bugs exist.
 
 2011-02-15 (rev39)
-- completely removed dirty code with utilising xfd operations.
+- completely removed dirty code with utilising xfd operations. *
 - completely rewritten export font code, now MUCH SIMPLIER with only one "if" inside;
-- added mode to font assignment
-- added 0-9 font change in map and mask edit mode; change antic mode works independent for efery font
+- added mode to font assignment *
+- added 0-9 font change in map and mask edit mode; change antic mode works independent for efery font *
 
 2011-02-xx (rev4x)
 - fixed bug when resize map/mask up
@@ -93,11 +93,23 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - fixed bug with not show again the number after ginput a number and pressing esc.
 - fixed draw_select - now one can draw in place of the cursor.
 
-2011-02-24 (rev4x)
-- added use of three mouse buttons for char edit and map edit mode with three different colors/chars
+2011-02-24 (rev44)
+- added use of three mouse buttons for char edit and map edit mode with three different colors/chars *
 - changed the idea of screen refreshness - simplified. Now everything goes ultra fast.
-- added soft limit for map size to 4MB
+- added soft limit for map size to 4MB *
 - removed error-prone ifs in read/write map functions
 - fixed some bugs in dialogs
-	
+- fixed small potential bug in color chooser during 4-color char edit mode
+- new version of binaries
+
+2011-03-01 (rev45)
+- added "probe" command
+- widened the right menu in the map edit mode to fit all 256 chars
+- fixed bug in char edit mode in antic modes 4 and 5 - edited char is now highlighted.
+- some plain code put in procedures (reduced redundation)
+- added char select area near the right menu in the map edit mode
+- fixed bug that resulted in wrong init of new added variables that are writter in the preferences file
+- fixed bug when char in font was updated incorrectly in antic modes 5,6,7
+
+
 

@@ -315,6 +315,8 @@ int grid(int chr, int remember)
 	topos(echr,&x,&y);
 	SDLBox(x,y,x+7,y+7,148);
 	SDLplotchr(x,y,echr,m,font);
+	if (mode==4 || mode==5)
+		SDLXORBox(x, y, x+7, y+7);
 	setdefaultpal();
 
 	SDLSetContext(UpdContext);
@@ -708,6 +710,7 @@ int setup(int zoom, int fullScreen)
 	mode=fontmode[bank];
 	echr=33;
 	menuPanel=1;
+	do_probe=0;
 	memset(peek,0,64);
 	memset(plot,0,64);
 
@@ -760,11 +763,13 @@ int setup(int zoom, int fullScreen)
 
 int update(int x, int y)
 {
+	int m;
 	topos(echr,&x,&y);
 	SDLSetContext(UpdContext);
 	setpal();
 	SDLBox(0,0,7,7,clut[0]);
-	SDLplotchr(0,0,echr,mode,font);
+	m=get_8x8_mode(mode);
+	SDLplotchr(0,0,echr,m,font);
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,x,y,UpdContext,0,0,7,7);
 	setdefaultpal();
@@ -1250,10 +1255,6 @@ int command(int cmd, int sym)
 				  clr_ext_cmd();
 				  SDLstring(EDIT_CHARMAP_X,EDIT_CHARMAP_Y-10,"Transcopy to:");
 				  break;
-		case 'A':
-			memcpy(font,dfont,1024);
-			update_font(bank);
-			break;
 		case 'f':
 			do_defaults();
 				  break;

@@ -89,6 +89,7 @@ int import_palette(char *file, unsigned char * colortable)
 int read_font(char *file, unsigned char *font)
 {
 	FILE *in;
+	if(!(in=openFile(file,"rb",file))) return -1;
 	if(!(in=openFile(file,"rb","Cannot open font!"))) return -1;
 
 	fread(font,1024,1,in);
