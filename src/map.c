@@ -402,7 +402,7 @@ int map_command(int cmd, int sym)
 		case '9':
 			update_map_font(cmd-'0');
 			draw_header(0);
-
+			do_mode(mode);
 			break;
 		case 'h': 
 			hidden=!hidden;
