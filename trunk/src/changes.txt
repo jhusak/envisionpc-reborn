@@ -111,5 +111,7 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - fixed bug that resulted in wrong init of new added variables that are writter in the preferences file
 - fixed bug when char in font was updated incorrectly in antic modes 5,6,7
 
+2011-03-01 (rev46)
+- fixed bug with redraw map after font change
 
 
