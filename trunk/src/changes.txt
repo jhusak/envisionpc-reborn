@@ -119,4 +119,4 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - fixed bug with redraw char chooser after font change
 - added block copypaste map commands (copy with shift copies either map or mask; paste with shift advances the cursor vertically instead of horizontally)
 - added default mode switch by clicking on the draw chars (upper right corner in map edit mode)
-
+- added cursor positioning by control-click (places the cursor without drawing) - useful when copying.
