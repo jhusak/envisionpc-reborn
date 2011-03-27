@@ -33,7 +33,7 @@ typedef struct runtime_storage
 	} runtime_storage;
 
 typedef enum {COLOR_DISPLAY_HEX, COLOR_DISPLAY_DEC, COLOR_DISPLAY_MAX} color_display_type;
-
+enum {COPY_NONE,COPY_MAP,COPY_MASK};
 typedef struct config
 	{
 		int checkersHi;
@@ -48,6 +48,16 @@ typedef struct config
 		
 	} config;
 
+typedef struct copybuffer {
+	int filled;
+	int x;
+	int y;
+	int width;
+	int height;
+	unsigned char * data;
+	unsigned char * mask;
+} copybuffer;
+
 /*
 typedef struct rgb_color {
 	unsigned char r,g,b;
@@ -57,7 +67,7 @@ typedef struct rgb_color {
 #define IN_BOX(x,y,lx,rx,ly,ry) (IN_RANGE((x),(lx),(rx))&&IN_RANGE((y),(ly),(ry)))
 
 #define MAP_TOP_OFFSET	24
-#define MAX_DIALOG_WIDTH 320
+#define MAX_DIALOG_WIDTH 336
 #define MAX_DIALOG_HEIGHT 128
 
 #define EDIT_OFFSET_X 64
@@ -85,6 +95,7 @@ typedef struct rgb_color {
 
 #define BUTTON_WIDTH 12
 #define MAP_BUTTON_WIDTH 16
+#define BUTTON_HEIGHT 9
 
 #define TILE_MODE ((!tileEditMode)&&((tsx>1)||(tsy>1)))
 #define NOT_TILE_MODE (!TILE_MODE)
@@ -111,6 +122,9 @@ free(fname);\
 #define GET_WORD(array,index) (array[(index)]+array[(index)+1]*256)
 #define SET_WORD(array,index,value) do{array[(index)]=(value)&0xff;array[(index)+1]=((value)>>8)&0xff;}while(0)
 
+#define KEYMOD_CTRL 256
+#define KEYMOD_SHIFT 512
+
 
 enum {MBUTTON_LEFT=1, MBUTTON_MIDDLE, MBUTTON_RIGHT};
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
@@ -124,11 +138,12 @@ extern int MAP_MENU_HEIGHT;
 extern int bank;
 extern unsigned char  colortable[3*256];
 extern runtime_storage RUNTIME_STORAGE;
-extern char commands_allowed[64];
+extern int commands_allowed[64];
 extern int fontmode[10];
 // delete after putting into func
 extern unsigned char  *fontbank[10];
 extern unsigned char  tpal[3*256];
+extern int default_font_mode; 
 
 // title.c
 int title();
@@ -184,6 +199,7 @@ void setpal();
 void titlepal();
 void setdefaultpal();
 void set_allowed_commands(int * cmds, int cmdcnt, int digits);
+void add_allowed_command(int cmd);
 int is_command_allowed(int cmd);
 void bye();
 int command(int cmd, int sym);
@@ -215,6 +231,8 @@ int import_palette(char *file, unsigned char * colortable);
 // util.c
 int tile_map(int w, int h, view *map, view *tile);
 int untile_map(view *map, view *tile);
+void copyblock(int dstx, int dsty, int dstbmwidth, unsigned char * dstbuf,
+			   int srcx, int srcy, int srcwidth, int srcheight, int srcbmwidth, unsigned char * srcbuf);
 
 int unpack(unsigned char *look, int xs, int ys);
 
@@ -231,4 +249,8 @@ extern int base;
 extern int tsx, tsy, tileEditMode;
 extern int maskEditMode;
 extern int do_probe;
+extern int do_copy;
+extern int control_pressed;
 extern unsigned long s1,s2;
+extern copybuffer copy_buffer; // buffer to store copy block
+

@@ -26,7 +26,7 @@
 
 #include "envision.h"
 #include "preferences.h"
-
+#include "undo.h"
 unsigned char *dfont, *font, *copy_from, *fontbank[10];
 int fontmode[10];
 //char bank_mod[10];
@@ -46,7 +46,7 @@ int orit[8]={128,64,32,16,8,4,2,1};
 int andit[8]={127,191,223,239,247,251,253,254};
 
 char * preferences_filepath;
-char commands_allowed[64];
+int commands_allowed[64];
 
 
 config CONFIG;
@@ -124,13 +124,30 @@ void titlepal()
 	set_palette(tpal);
 }
 
-void set_allowed_commands(int * cmds, int cmdcnt,int digits)
+void add_allowed_command(int cmd)
 {
 	int i;
-	for (i=1; i<=cmdcnt; i++)
-		commands_allowed[i-1]=cmds[i];
-	commands_allowed[cmdcnt]='\0';
-	if (digits) strcat(commands_allowed,"0123456789");
+	i=0;
+	while (commands_allowed[i]){i++;};
+	commands_allowed[i++]=cmd;
+	commands_allowed[i]=0;
+}
+
+void set_allowed_commands(int * cmds, int cmdcnt,int digits)
+{
+	int i,j;
+	i=0;
+	while (i<cmdcnt)
+	{
+		commands_allowed[i]=cmds[i+1];
+		i++;
+	}
+	
+	if (digits)
+		for (j='0'; j<='9'; j++)
+			commands_allowed[i++]=j;
+	
+	commands_allowed[i]=0;
 	
 }
 
@@ -139,7 +156,13 @@ void set_allowed_commands(int * cmds, int cmdcnt,int digits)
 
 int is_command_allowed(int cmd)
 {
-	if (strchr(commands_allowed,cmd)) return 1;
+	int i;
+	i=0;
+	while (commands_allowed[i]) {
+		if (commands_allowed[i]==cmd) return 1;
+		i++;
+	}
+			
 	return 0;
 }
 
@@ -358,27 +381,27 @@ int panel(int tp)
 	SDLSetContext(UpdContext);
 	SDLClear(0);
 	idxcnt=0;
-	drawbutton(0,idxcnt*10+8,"go to *map"); cmds[++idxcnt]='m';
-	drawbutton(0,idxcnt*10+8,"*blank"); cmds[++idxcnt]='b';
-	drawbutton(0,idxcnt*10+8,"*inverse"); cmds[++idxcnt]='i';
-	drawbutton(0,idxcnt*10+8,"*undo"); cmds[++idxcnt]='u';
-	drawbutton(0,idxcnt*10+8,"*atari"); cmds[++idxcnt]='a';
-	drawbutton(0,idxcnt*10+8,"flip *horiz"); cmds[++idxcnt]='h';
-	drawbutton(0,idxcnt*10+8,"flip *vert"); cmds[++idxcnt]='v';
-	drawbutton(0,idxcnt*10+8,"*rotate"); cmds[++idxcnt]='r';
-	drawbutton(0,idxcnt*10+8,"*copy"); cmds[++idxcnt]='c';
-	drawbutton(0,idxcnt*10+8,"*x-copy"); cmds[++idxcnt]='x';
-	drawbutton(0,idxcnt*10+8,"*transcopy"); cmds[++idxcnt]='t';
-	drawbutton(0,idxcnt*10+8,"*pick colors"); cmds[++idxcnt]='p';
-	//drawbutton(0,idxcnt*10+8,"RestorFont"); cmds[++idxcnt]='A';
-	drawbutton(0,idxcnt*10+8,"*save font"); cmds[++idxcnt]='s';
-	drawbutton(0,idxcnt*10+8,"*load font"); cmds[++idxcnt]='l';
-	drawbutton(0,idxcnt*10+8,"*export"); cmds[++idxcnt]='e';
-	drawbutton(0,idxcnt*10+8,"*ImprtPalette"); cmds[++idxcnt]='I';
-	drawbutton(0,idxcnt*10+8,"*options"); cmds[++idxcnt]='o';
-	drawbutton(0,idxcnt*10+8,"de*faults"); cmds[++idxcnt]='f';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"go to *map"); cmds[++idxcnt]='m';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*blank"); cmds[++idxcnt]='b';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*inverse"); cmds[++idxcnt]='i';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*undo"); cmds[++idxcnt]='u';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*atari"); cmds[++idxcnt]='a';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"flip *horiz"); cmds[++idxcnt]='h';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"flip *vert"); cmds[++idxcnt]='v';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*rotate"); cmds[++idxcnt]='r';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*copy"); cmds[++idxcnt]='c';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*x-copy"); cmds[++idxcnt]='x';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*transcopy"); cmds[++idxcnt]='t';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*pick colors"); cmds[++idxcnt]='p';
+	//drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"RestorFont"); cmds[++idxcnt]='A';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*save font"); cmds[++idxcnt]='s';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*load font"); cmds[++idxcnt]='l';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*export"); cmds[++idxcnt]='e';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*ImprtPalette"); cmds[++idxcnt]='I';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*options"); cmds[++idxcnt]='o';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"de*faults"); cmds[++idxcnt]='f';
 	// dfgjknqwyz
-	cmds[0]=idxcnt*10+8;
+	cmds[0]=idxcnt*BUTTON_HEIGHT+8;
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,EDIT_MENU_X,EDIT_MENU_Y,UpdContext,0,0,BUTTON_WIDTH*8,cmds[0]);
 	return 1;
@@ -711,6 +734,11 @@ int setup(int zoom, int fullScreen)
 	echr=33;
 	menuPanel=1;
 	do_probe=0;
+	control_pressed=0;
+	default_font_mode=0;
+	do_copy=COPY_NONE;
+	initUndo();
+	memset(&copy_buffer, 0, sizeof (copy_buffer));
 	memset(peek,0,64);
 	memset(plot,0,64);
 
@@ -882,8 +910,8 @@ int click(int x, int y, int b)
 		return 0;
 		// menu 
 	} else if (IN_BOX(x-EDIT_MENU_X,y-EDIT_MENU_Y,0,64,0,cmds[0])) {
-		i=(y-EDIT_MENU_Y+2)/10;
-		y=(y/10)*10;
+		i=(y-EDIT_MENU_Y+2)/BUTTON_HEIGHT;
+		y=(y/BUTTON_HEIGHT)*BUTTON_HEIGHT;
 		SDLrelease();
 		if (copy_from) {
 			copy_from=NULL;

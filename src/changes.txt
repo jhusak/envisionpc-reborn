@@ -114,4 +114,9 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 2011-03-01 (rev46)
 - fixed bug with redraw map after font change
 
+2011-03-27 (rev47)
+- added escape from probe command (presc esc when you do not want to probe char)
+- fixed bug with redraw char chooser after font change
+- added block copypaste map commands (copy with shift copies either map or mask; paste with shift advances the cursor vertically instead of horizontally)
+- added default mode switch by clicking on the draw chars (upper right corner in map edit mode)
 
