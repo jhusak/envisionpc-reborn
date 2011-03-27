@@ -88,7 +88,7 @@ Clicking on any letter in this section will select that letter for editing.
   The right upper side of the screen is a grid...this is an enlarged
 version of the selected cell. In two-colour edit mode left clicking on the
 grid will fill in a pixel, while right clicking will erase the pixel.
-In four-color edit mode user can choose three colors out -of four by use
+In four-color edit mode user can choose three colors out of four by use
 left, middle or right mouse button. The mouse button can be
 held down for continuous drawing. Along side the grid is an example of what
 the character will look like in Antic mode 6 (Graphics 1), 7 (Graphics 2)
@@ -231,7 +231,10 @@ The map screen is divided into two sections: the command menu and the map
 itself. On the right side user can found the menu which can be (un)hidden
 by pressing 'h' key.  By clicking on the map display will place the
 character at the current cursor position. The different character can be
-bound to left, middle and right mouse button.
+bound to left, middle and right mouse button. By control-clicking the cursor
+will be moved to that position (useful when copying).
+On the top of the screen one can find the status bar, where some useful
+information is displayed.
 
 Available commands in the map editor:
 'e': returns to the editor
@@ -279,6 +282,9 @@ Available commands in the map editor:
    characters.  If you are editing a tile map instead of a character
    map, this command will prompt you to input a tile number to use for
    drawing instead of using a pick box.
+   The char may be choosed by clicking on the Char Chooser at the
+   right menu near bottom of the screen. In Tile Map Edit this selects
+   an appropriate tile.
 
 'p': probe a draw character/tile
    This command will allow you to pick a character to use as the new
@@ -286,6 +292,19 @@ Available commands in the map editor:
    the desired character with the mouse (with left, middle or right mouse
    button). If you are editing a tile map, this command will select the tile
    under cursor instead.
+
+ctrl-'c':  copies the rectangle to the copy buffer. Position the cursor (with
+   control-click or arrow keys), press control-c and click the lower right
+   corner of a copy rectangle. This command works on actual (map or mask)
+   plane.
+
+ctrl-shift-c: copies the rectangle of both layers (mask and map).
+
+ctrl-'v': pastes copied rectangle at the place of the cursor and advances
+   the cursor right
+
+ctrl-shift-'v': pastes copied rectangle at the place of the cursor and
+   advances the cursor down
 
 'l': load a map
    This loads a map from the harddrive/.XFD image (depending on the options
