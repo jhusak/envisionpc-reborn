@@ -13,6 +13,7 @@
 #include "SDL.h"
 #include "SDLemu.h"
 #include "envision.h"
+#include "undo.h"
 
 view *currentView, *map, *tile, *mask, *undomap; /* display, map, tile, mask, undobufferformapandmask */
 int typeMode; /* typing mode flag */
@@ -20,10 +21,14 @@ int mode, hidden, ratio; /* ANTIC mode, menu shown flag, replace ratio */
 int base; /* character base */
 int tsx, tsy; /* tile width, height */
 int cacheOk, tileEditMode; /* cache valid flag, tile edit mode flag */
+int default_font_mode; /* shows default font/edited font in map mode */
 int maskEditMode; /* mask mode edit flag */
 int do_probe; /* probe flag; if set, the char/tile the user clicked goes to draw_char */
+int do_copy; /* copy flag; if set, the rect coords the user clicked goes to copy buf */
+int control_pressed;
 unsigned char *cache; /* cache */
 SDL_Surface *charTable[512];
+copybuffer copy_buffer; // buffer to store copy block
 
 int MAP_MENU_HEIGHT;
 
@@ -130,47 +135,51 @@ int map_panel()
 	
 	int cmdcnt=0;
 	if NOT_MASK_EDIT_MODE {
-		drawbutton_map(0,cmdcnt*10,"Go to *edit");	cmds[++cmdcnt]='e';
-		//drawbutton(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
-		drawbutton_map(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
-		drawbutton_map(0,cmdcnt*10,"Antic *mode");	cmds[++cmdcnt]='m';
-		drawbutton_map(0,cmdcnt*10,"Shift CHBase *Up");	cmds[++cmdcnt]='U';
-		drawbutton_map(0,cmdcnt*10,"*ratio");	cmds[++cmdcnt]='r';
-		drawbutton_map(0,cmdcnt*10,"*find");	cmds[++cmdcnt]='f';
-		drawbutton_map(0,cmdcnt*10,"*draw char"); cmds[++cmdcnt]='d';
-		drawbutton_map(0,cmdcnt*10,"*probe"); cmds[++cmdcnt]='p';
-		drawbutton_map(0,cmdcnt*10,"*load map");	cmds[++cmdcnt]='l';
-		drawbutton_map(0,cmdcnt*10,"*Read raw map");	cmds[++cmdcnt]='R';
-		drawbutton_map(0,cmdcnt*10,"*save map");	cmds[++cmdcnt]='s';
-		drawbutton_map(0,cmdcnt*10,"*write raw map");	cmds[++cmdcnt]='w';
-		drawbutton_map(0,cmdcnt*10,"*clear map");	cmds[++cmdcnt]='c';
-		drawbutton_map(0,cmdcnt*10,"*block");	cmds[++cmdcnt]='b';
-		drawbutton_map(0,cmdcnt*10,"ret*ile");	cmds[++cmdcnt]='i';
-		if NOT_TILE_MODE {drawbutton_map(0,cmdcnt*10,"*type mode");	cmds[++cmdcnt]='t';	}
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"Go to *edit");	cmds[++cmdcnt]='e';
+		//drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*undo");	cmds[++cmdcnt]='u';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"Resi*ze Map");	cmds[++cmdcnt]='z';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"Antic *mode");	cmds[++cmdcnt]='m';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"Shift CHBase *Up");	cmds[++cmdcnt]='U';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*ratio");	cmds[++cmdcnt]='r';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*find");	cmds[++cmdcnt]='f';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*draw char"); cmds[++cmdcnt]='d';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*probe"); cmds[++cmdcnt]='p';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*load map");	cmds[++cmdcnt]='l';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*Read raw map");	cmds[++cmdcnt]='R';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*save map");	cmds[++cmdcnt]='s';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*write raw map");	cmds[++cmdcnt]='w';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*clear map");	cmds[++cmdcnt]='c';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*block");	cmds[++cmdcnt]='b';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"ret*ile");	cmds[++cmdcnt]='i';
+		if NOT_TILE_MODE {drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*type mode");	cmds[++cmdcnt]='t';	}
 	} else {
-		drawbutton_map(0,cmdcnt*10,"exit M*ask Edit");	cmds[++cmdcnt]='a';
-		//drawbutton_map(0,cmdcnt*10,"*undo");	cmds[++cmdcnt]='u';
-		drawbutton_map(0,cmdcnt*10,"Resi*ze Map");	cmds[++cmdcnt]='z';
-		drawbutton_map(0,cmdcnt*10,"Shift CHBase *Up");	cmds[++cmdcnt]='U';
-		drawbutton_map(0,cmdcnt*10,"*Read Raw Mask");	cmds[++cmdcnt]='R';
-		drawbutton_map(0,cmdcnt*10,"*write Raw Mask");	cmds[++cmdcnt]='w';
-		drawbutton_map(0,cmdcnt*10,"*set mask");	cmds[++cmdcnt]='s';
-		drawbutton_map(0,cmdcnt*10,"*clear mask");	cmds[++cmdcnt]='c';
-		drawbutton_map(0,cmdcnt*10,"set from *map");	cmds[++cmdcnt]='m';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"exit M*ask Edit");	cmds[++cmdcnt]='a';
+		//drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*undo");	cmds[++cmdcnt]='u';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"Resi*ze Map");	cmds[++cmdcnt]='z';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"Shift CHBase *Up");	cmds[++cmdcnt]='U';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*Read Raw Mask");	cmds[++cmdcnt]='R';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*write Raw Mask");	cmds[++cmdcnt]='w';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*set mask");	cmds[++cmdcnt]='s';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*clear mask");	cmds[++cmdcnt]='c';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"set from *map");	cmds[++cmdcnt]='m';
 	}
 	
-	drawbutton_map(0,cmdcnt*10,"*go to XY");	cmds[++cmdcnt]='g';
-	if (NOT_MASK_EDIT_MODE && !tileEditMode)  { drawbutton_map(0,cmdcnt*10,"M*ask edit");	cmds[++cmdcnt]='a';}
-		drawbutton_map(0,cmdcnt*10,"*hide");	cmds[++cmdcnt]='h';
+	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*go to XY");	cmds[++cmdcnt]='g';
+	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"ctl(shft)-*copy");	cmds[++cmdcnt]='c'+KEYMOD_CTRL;
+	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"ctl(shft)-*vpaste");	cmds[++cmdcnt]='v'+KEYMOD_CTRL; // look below at add_allowed_commands
+	if (NOT_MASK_EDIT_MODE && !tileEditMode)  { drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"M*ask edit");	cmds[++cmdcnt]='a';}
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*hide");	cmds[++cmdcnt]='h';
 	// wolne:ajknoqvxy
-	MAP_MENU_HEIGHT=cmdcnt*10;
+	MAP_MENU_HEIGHT=cmdcnt*BUTTON_HEIGHT;
 	
 	set_allowed_commands(cmds,cmdcnt,1);
+	add_allowed_command('v'+KEYMOD_CTRL+KEYMOD_SHIFT); // missing ctrl-shift paste (vertical)
+	add_allowed_command('c'+KEYMOD_CTRL+KEYMOD_SHIFT); // missing ctrl-shift copy (all)
 	
-	cmds[0]=MAP_MENU_HEIGHT*10+10;
+	cmds[0]=MAP_MENU_HEIGHT*BUTTON_HEIGHT+BUTTON_HEIGHT;
 	
 	if NOT_MASK_EDIT_MODE {
-		select_draw(0,CONFIG.screenHeight-171,"Char chooser:", map->dc, 16,0);
+		select_draw(0,CONFIG.screenHeight-167,"Char chooser:", map->dc, 16,0);
 	}
 	
 	SDLSetContext(MainContext);
@@ -293,7 +302,7 @@ int move(int dx, int dy)
 	
 	curs_pos();
 	// was:
-	//if ((ox==currentView->cx)&&(oy==currentView->cy))
+	// if ((ox==currentView->cx)&&(oy==currentView->cy))
 	// but it lead to shadows during moving cursor beyound borders (JH)
 	
 	if ((ox==currentView->cx)||(oy==currentView->cy))
@@ -326,6 +335,28 @@ void fill_draw_char(view * currentView, unsigned char f, int find)
 		look++;
 	}
 }
+
+void paste() {
+	if (copy_buffer.filled)
+	{
+		int xcut=0, ycut=0;
+		if (currentView->cx+currentView->scx+copy_buffer.width > currentView->w)
+			xcut = currentView->cx+currentView->scx+copy_buffer.width - currentView->w;
+		
+		if (currentView->cy+currentView->scy+copy_buffer.height > currentView->h)
+			ycut = currentView->cy+currentView->scy+copy_buffer.height - currentView->h;
+		
+		if (copy_buffer.filled & COPY_MAP)
+			copyblock(currentView->cx+currentView->scx, currentView->cy+currentView->scy,
+					  currentView->w, currentView->map,
+					  0, 0, copy_buffer.width-xcut, copy_buffer.height-ycut, copy_buffer.width, copy_buffer.data);
+		if (copy_buffer.filled & COPY_MASK)
+			copyblock(currentView->cx+currentView->scx, currentView->cy+currentView->scy,
+					  currentView->w, mask->map,
+					  0, 0, copy_buffer.width-xcut, copy_buffer.height-ycut, copy_buffer.width, copy_buffer.mask);
+	}
+}
+
 /*===========================================================================
  * map_command
  * process a command
@@ -360,6 +391,14 @@ int map_command(int cmd, int sym)
 							  draw_header(1);
 							  draw_screen(1);
 							  return 0;
+						  }
+						  else if (do_probe) {
+							  do_probe=0;
+						  draw_header(0);
+						  }
+						  else if (do_copy) {
+							  do_copy=COPY_NONE;
+							  draw_header(0);
 						  } else
 							  bye();
 						  break;
@@ -386,9 +425,8 @@ int map_command(int cmd, int sym)
 					}
 		}
 	}
-	
 	if (!is_command_allowed(cmd)) { return 0; }
-
+	
 	switch (cmd) {
 		case '0':
 		case '1':
@@ -401,8 +439,10 @@ int map_command(int cmd, int sym)
 		case '8':
 		case '9':
 			update_map_font(cmd-'0');
-			draw_header(0);
 			do_mode(mode);
+			map_panel();
+			draw_header(0);
+
 			break;
 		case 'h': 
 			hidden=!hidden;
@@ -419,9 +459,46 @@ int map_command(int cmd, int sym)
 			cacheOk=0;
 			draw_header(0);
 			break;
+		case 'c'+KEYMOD_CTRL+KEYMOD_SHIFT:
+		case 'c'+KEYMOD_CTRL:
+			SDLBox(8,15,CONFIG.screenWidth-1,22,144);
+			SDLstring(8,15,"Please select the lower-right corner of copy rectangle");
 			
+			copy_buffer.x=currentView->cx+currentView->scx;
+			copy_buffer.y=currentView->cy+currentView->scy;
+			if (cmd=='c'+KEYMOD_CTRL)
+				if MASK_EDIT_MODE 
+					do_copy=COPY_MASK;
+				else
+					do_copy=COPY_MAP;
+			else
+				do_copy=COPY_MASK | COPY_MAP;
+			
+			break;
+		case 'v'+KEYMOD_CTRL+KEYMOD_SHIFT:
+		case 'v'+KEYMOD_CTRL:
+			if (copy_buffer.filled) {
+				paste();
+				if (cmd=='v'+KEYMOD_CTRL) {
+					move(copy_buffer.width,0);
+				} else {
+					move(0,copy_buffer.height);
+				}
+			}
+			else
+				info_dialog("Copy buffer empty.");
+			break;
+			if (copy_buffer.filled) {
+				paste();
+			}			else
+				info_dialog("Copy buffer empty.");
+			break;
+		case 'u':
+			break;
 		case 'c':
 			if MASK_EDIT_MODE {
+				storeUndo(VIEW_MASK,mask->map, mask->h*mask->w);
+				
 				memset(mask->map,0,mask->h*mask->w);
 				break;
 			} else {
@@ -460,6 +537,7 @@ int map_command(int cmd, int sym)
 				
 				// this does not work well in automatic tiles
 				// but when tile 0 is empty, this is good
+				// TODO: implement ratio 
 				for (i=0; i<currentView->w*currentView->h; i++)
 					*store++=*look++?1:0;
 				
@@ -471,17 +549,19 @@ int map_command(int cmd, int sym)
 				if (i>0) {
 					currentView->cx=currentView->cy=currentView->scx=currentView->scy=0;
 					mode=i;
+					do_mode(mode);
 					map_panel();
 					draw_header(0);
-					do_mode(mode);
 				}
 			}
 			break;
 			
-		case 'z': 
-			do_size(tileEditMode);
-			draw_header(0);
-			cacheOk=0;
+		case 'z':
+			if (do_size(tileEditMode)) {
+				draw_header(0);
+				cacheOk=0;
+				clearUndo(tileEditMode?VIEW_TILE:VIEW_MAP);
+			} 
 			break;
 			
 		case 'i': {
@@ -489,19 +569,25 @@ int map_command(int cmd, int sym)
 			if (tileEditMode) {
 				break;
 			}
-			
 			cacheOk=0;
 			itsx=itsy=0;
 			if ((tsy==1)&&(tsx==1)) {
 				do {
 					itsx=get_number("Enter tile width:",2,8);
+					if (itsx<0) break;
 				} while((itsx<1)||(itsx>8)||(itsx>map->w));
-				do {
-					itsy=get_number("Enter tile height:",2,8);	
-				} while((itsy<1)||(itsy>8)||(itsy>map->h));
+				if (itsx>=1) {
+					do {
+						itsy=get_number("Enter tile height:",2,8);	
+						if (itsy<0) break;
+					} while((itsy<1)||(itsy>8)||(itsy>map->h));
+				}
+				if (itsy<0 || itsx<0)
+					break;
 				if ((itsy==1)&&(itsx==1))
 					break;
 			}
+			clearUndo(VIEW_TILE);
 			set_mapview(VIEW_TILE);
 			if ((tsy>1)||(tsx>1)) {
 				untile_map(map,tile);
@@ -517,8 +603,9 @@ int map_command(int cmd, int sym)
 			
 			if (base) base=0;
 			else base=64*8;
-			map_panel();
 			do_mode(mode);
+			map_panel();
+
 			
 			break;
 			
@@ -545,8 +632,10 @@ int map_command(int cmd, int sym)
 			return 0;
 		case 'l':
 			OBJECT_IO("Load map:",0,save_map_file_name,0,read_map(fname,font,map,FILE_NATIVE))
-			draw_header(0);
 			do_mode(mode);
+			draw_header(0);
+			map_panel();
+
 			break;
 			
 		case 'R':
@@ -554,13 +643,13 @@ int map_command(int cmd, int sym)
 				int rawformat=askRawFormat("Raw mask input format?");
 				if (rawformat)
 					OBJECT_IO("Read raw mask:",0,save_raw_mask_file_name,0,read_map(fname,font,map,rawformat))
-				draw_header(0);
 				do_mode(mode);
+				draw_header(0);
 
 			} else {
 				OBJECT_IO("Read raw map:",0,save_raw_map_file_name,0,read_map(fname,font,map,FILE_RAWMAP))
-				draw_header(0);
 				do_mode(mode);
+				draw_header(0);
 			}
 			break;
 			
@@ -641,13 +730,21 @@ int map_click(int x, int y, int buttonnumber, int *down)
 
 	// menu at the right
 	if ((!hidden)&&(IN_BOX(x,y,CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-5,CONFIG.screenWidth-5,MAP_TOP_OFFSET,cmds[0]))) {
-		i=(y-MAP_TOP_OFFSET+10)/10;
+		i=(y-MAP_TOP_OFFSET+BUTTON_HEIGHT)/BUTTON_HEIGHT;
 		SDLrelease(); /* wait for mouse to unclick */
 		*down=0;
 		if (cmds[i]) return(map_command(cmds[i],0));
 		return 0;
 	}
 
+	for (i=0; i<3; i++)
+		if (IN_BOX(x,y,CONFIG.screenWidth-12-(2-i)*4*8,CONFIG.screenWidth-12-(2-i)*4*8+7, 15,22))
+		{
+			default_font_mode=!default_font_mode;
+			draw_header(0);
+			map_panel();
+			draw_screen(1);
+		}
 	
 	if (y>=MAP_TOP_OFFSET) {
 		oy=i=(y-MAP_TOP_OFFSET)/currentView->ch;
@@ -657,46 +754,76 @@ int map_click(int x, int y, int buttonnumber, int *down)
 			return 0;
 		// with this "if" works much better, but still not in edit tile mode
 		//if (ox!=currentView->cx || oy!=currentView->cy) {
-			if (buttonnumber) {
+		if (buttonnumber) {
 				if (!typeMode) {
-					if NOT_MASK_EDIT_MODE {
-						if (do_probe)
+					if (do_copy) {
+														
+						if (copy_buffer.x <= x+currentView->scx && copy_buffer.y <= i+currentView->scy)
 						{
-							set_draw_color(currentView,
-										   buttonnumber,
-										   currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]
-										   );
-							do_probe=0;
-							draw_header(0);
-						}
-						int drawcolor=get_draw_color(currentView, buttonnumber);
-						// with this "if" works very well.
-						if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=drawcolor)
-						{
-							currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=drawcolor;
-							x=x*currentView->cw;
-							y=MAP_TOP_OFFSET+i*currentView->ch;
+							copy_buffer.width=x+currentView->scx-copy_buffer.x+1;
+							copy_buffer.height=i+currentView->scy-copy_buffer.y+1;
+							copy_buffer.filled=do_copy;
 							
-							SDLCharBlt(MainContext,x,y,drawcolor+ (TILE_MODE *256));
+							if (do_copy & COPY_MAP) {
+								if (copy_buffer.data) free(copy_buffer.data);
+								copy_buffer.data=malloc(copy_buffer.width * copy_buffer.height);
+								copyblock(0, 0, copy_buffer.width, copy_buffer.data, copy_buffer.x, copy_buffer.y, copy_buffer.width, copy_buffer.height, currentView->w, currentView->map);
+							}
 							
-							if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6))
-								draw_screen(0);
+							if (do_copy & COPY_MASK) {
+								if (copy_buffer.mask) free(copy_buffer.mask);
+								copy_buffer.mask=malloc(copy_buffer.width * copy_buffer.height);
+								copyblock(0, 0, copy_buffer.width, copy_buffer.mask, copy_buffer.x, copy_buffer.y, copy_buffer.width, copy_buffer.height, mask->w, mask->map);
+							}
+							
 						}
+						draw_header(0);
+						do_copy=COPY_NONE;
+						// do not draw
 					}
-					if MASK_EDIT_MODE {
-						int setmaskfield=1;
-						if (buttonnumber==MBUTTON_RIGHT) setmaskfield=0;
-						if (buttonnumber==MBUTTON_LEFT) setmaskfield=1;
-						
-						if (mask->map[(x+mask->scx)+(i+mask->scy)*mask->w]!=setmaskfield)
-						{
-							mask->map[(x+mask->scx)+(i+mask->scy)*mask->w]=setmaskfield;
-							//if (setmaskfield) draw_cursor();
-							x=x*currentView->cw;
-							y=MAP_TOP_OFFSET+i*currentView->ch;
-
-							//if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6))
-							draw_screen(1);
+					else {
+						if NOT_MASK_EDIT_MODE {
+							if (do_probe)
+							{
+								set_draw_color(currentView,
+											   buttonnumber,
+											   currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]
+											   );
+								do_probe=0;
+								draw_header(0);
+							}
+							int drawcolor=get_draw_color(currentView, buttonnumber);
+							// with this "if" works very well.
+							if (currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]!=drawcolor)
+							{
+								
+								if(!control_pressed) {
+									currentView->map[(x+currentView->scx)+(i+currentView->scy)*currentView->w]=drawcolor;
+									x=x*currentView->cw;
+									y=MAP_TOP_OFFSET+i*currentView->ch;
+									SDLCharBlt(MainContext,x,y,drawcolor+ (TILE_MODE *256));
+								}
+								
+								if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6))
+									draw_screen(0);
+							}
+						}
+						if MASK_EDIT_MODE {
+							int setmaskfield=1;
+							if (buttonnumber==MBUTTON_RIGHT) setmaskfield=0;
+							if (buttonnumber==MBUTTON_LEFT) setmaskfield=1;
+							
+							if (mask->map[(x+mask->scx)+(i+mask->scy)*mask->w]!=setmaskfield)
+							{
+								if(!control_pressed)
+									mask->map[(x+mask->scx)+(i+mask->scy)*mask->w]=setmaskfield;
+								//if (setmaskfield) draw_cursor();
+								x=x*currentView->cw;
+								y=MAP_TOP_OFFSET+i*currentView->ch;
+								
+								//if ((!hidden)&&(x+currentView->cw>CONFIG.screenWidth-MAP_BUTTON_WIDTH*8-6))
+								draw_screen(1);
+							}
 						}
 					}
 					
@@ -810,12 +937,13 @@ int do_mode(int m)
 {
 	int i,w,h;
 	unsigned char *look;
-	
+	default_font_mode=0;
+
 	if (fontmode[bank]!=m) {
 		fontmode[bank]=m;
 		update_font(bank);
 	}
-
+	
 	cacheOk=0;
 	if ((m==2)||(m==4)) {
 		tile->ch=tile->cw=8;
@@ -868,16 +996,22 @@ void plot_draw_char(int x, int y, unsigned char c) {
 	char * dat;
 	int clr;
 	int m;
-
+	
 	m=get_8x8_mode(mode);
 	SDLBox(x,y,x+7,y+7,clut[0]);
-	
-	if (mode>=6) {
-		dat=(char *)(font+(c&63)*8+base);
-		clr=(c>>6)+1;
-		SDLCharEngine(x,y,c&63,1,clut[clr],(unsigned char *)dat);
-	} else
-		SDLmap_plotchr(x,y,c,m,font);
+	if (!default_font_mode)
+	{
+		if (mode>=6) {
+			dat=(char *)(font+(c&63)*8+base);
+			clr=(c>>6)+1;
+			SDLCharEngine(x,y,c&63,1,clut[clr],(unsigned char *)dat);
+		} else
+			SDLmap_plotchr(x,y,c,m,font);
+	}
+	else
+		SDLmap_plotchr(x,y,c,2,dfont);
+
+		
 }
 
 /*===========================================================================
@@ -961,6 +1095,13 @@ int do_map()
 			case SDL_QUIT: {
 					       done=map_command(0,SDLK_ESCAPE);
 				       }
+			case SDL_KEYUP: {
+				int sym=event.key.keysym.sym;
+				if (sym==SDLK_RCTRL || sym==SDLK_LCTRL) {
+					control_pressed=0;
+				}
+				break;
+			}
 			case SDL_KEYDOWN: {
 						  int sym=event.key.keysym.sym;
 						  int ch=event.key.keysym.unicode&0x7f;
@@ -968,12 +1109,26 @@ int do_map()
 						  if ((sym==SDLK_ESCAPE)||(sym==SDLK_LEFT)||(sym==SDLK_RIGHT)||
 								  (sym==SDLK_UP)||(sym==SDLK_DOWN)) {
 							  done=map_command(ch,sym);
+						  } else if (sym==SDLK_RCTRL || sym==SDLK_LCTRL) {
+							  control_pressed=1;
 						  } else if (ch) {
 							  if (typeMode) {
 								  ch=stoa(ch);
 								  if ((event.key.keysym.mod&KMOD_ALT))
 									  ch+=128;
 							  }
+							  if (!typeMode) {
+								  if ((event.key.keysym.mod&KMOD_CTRL)) {
+									  if (sym<128)
+										  ch=KEYMOD_CTRL+sym;
+								  }
+								  if ((event.key.keysym.mod&KMOD_CTRL)&&(event.key.keysym.mod&KMOD_SHIFT)) {
+									  if (sym<128)
+										  ch=KEYMOD_SHIFT+KEYMOD_CTRL+sym;
+								  }
+							  }
+							  
+							  
 							  done=map_command(ch,0);
 						  }
 						  break;

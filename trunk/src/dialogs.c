@@ -32,7 +32,7 @@ int drawbevelledbox(int x, int y, int w, int h)
  * returns: nothing useful
  *==========================================================================*/
 
-int drawbuttonwidth(int x, int y, char *txt, int width)
+int drawbuttonwidth(int x, int y, char *txt, int width,int height)
 {
 	int l,o,c;
 	char *f,btxt[16];
@@ -51,22 +51,22 @@ int drawbuttonwidth(int x, int y, char *txt, int width)
 		o=(f-txt)*8;
 	}
 	l=width*4-strlen(btxt)*4;
-	drawbevelledbox(x,y,width*8+5,9);
-	SDLstring(x+l+2,y+1,btxt);
+	drawbevelledbox(x,y,width*8+5,height-1);
+	SDLstring(x+l+2,y,btxt);
 	if (c) {
 		if (c<96) c-=32;
-		SDLplotchr(x+l+2+o,y+1,c,1,dfont);
+		SDLplotchr(x+l+2+o,y,c,1,dfont);
 	}
 	return 1;
 }
 
 int drawbutton(int x, int y, char *txt)
 {
-	return drawbuttonwidth(x,y,txt,BUTTON_WIDTH);
+	return drawbuttonwidth(x,y,txt,BUTTON_WIDTH,9);
 }
 int drawbutton_map(int x, int y, char *txt)
 {
-	return drawbuttonwidth(x,y,txt,MAP_BUTTON_WIDTH);
+	return drawbuttonwidth(x,y,txt,MAP_BUTTON_WIDTH,9);
 }
 
 struct dblBufferTmpStorage
@@ -358,7 +358,7 @@ int message_dialog(char * title, char *error, char * answers)
 	SDLstring(tmpx+4,78+tmpy,error);
 	if (!answers)
 	{
-		drawbuttonwidth(tmpx+(width-6*8)/2,90+tmpy,"Okay",6);
+		drawbuttonwidth(tmpx+(width-6*8)/2,90+tmpy,"Okay",6,10);
 		SDLgetch(1);
 	}
 	else
@@ -377,7 +377,7 @@ int message_dialog(char * title, char *error, char * answers)
 			*c='\0';
 			co=strchr(ans,'*');
 			*a++=tolower(*(++co));
-			drawbuttonwidth(tmpx+width/4+i*(5*8+10),90+tmpy,ans,5);
+			drawbuttonwidth(tmpx+width/4+i*(5*8+10),90+tmpy,ans,5,10);
 			ans=++c;
 			i++;
 
@@ -816,24 +816,28 @@ int select_draw(int x, int y, char *title, int * dc, int hchar, int process_even
 	}
 	
 	int vchar=256/hchar;
-
-	raisedbox(x,y,x+hchar*8+2*hb-1,y+vchar*8+16+vb+2,2);
-	yp=vchar*8+y;
 	add=0;
 	if (title) {
-		SDLstring(x+hb,y+4,title);
-		add=14;
+		add=10+vb;
 	}
+	yp=vchar*8+y;
 	yp+=add;
 	
-	SDLBox(x+hb-1,y+add,x+hchar*8+hb,yp+2,clut[0]);
+	raisedbox(x,y,x+hchar*8+2*hb-1,yp+4+vb,2);
+	if (title) SDLstring(x+hb,y+hb/2,title);
+	
 	SDLHLine(x+hb-2,x+hchar*8+hb+1,y+add,144);
 	SDLHLine(x+hb-2,x+hchar*8+hb+1,yp+3,152);
 	SDLVLine(x+hb-2,y+add+1,yp+3,144);
-	SDLVLine(x+hchar*8+hb+1,y+15,yp+3,152);
+	SDLVLine(x+hchar*8+hb+1,y+add+1,yp+3,152);
 	sx=0; sy=0;
 	
 	setpal();
+	//if (!default_font_mode)
+	//	SDLBox(x+hb-1,y+add+1,x+hchar*8+hb,yp+2,clut[0]);
+	//else
+	SDLBox(x+hb-1,y+add+1,x+hchar*8+hb,yp+2,clut[3]);
+	
 	for(i=0;i<256;i++) {
 		plot_draw_char(x+hb+sx, y+add+2+sy, i);
 		sx+=8;
@@ -921,6 +925,7 @@ int do_size(int tile_mode)
 {
 	int x, y, loop, tmax;
 	char buf[16], *size;
+	int result=0;
 	
 	if (tile_mode) {
 		tile_mode=8; tmax=16;
@@ -982,6 +987,7 @@ int do_size(int tile_mode)
 		mask->map=result_mask;
 		map->w=mask->w=x;
 		map->h=mask->h=y;
+		result=1;
 		
 	} else {
 		if (!result_map)  error_dialog("Failed to realloc map");
@@ -996,7 +1002,7 @@ int do_size(int tile_mode)
 exit:
 	closeLastDblBufferDialog();
 
-	return 0;
+	return result;
 }
 
 /*===========================================================================

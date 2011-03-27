@@ -107,6 +107,27 @@ int hash_tile(hashTable *hash, unsigned char *tile) {
   return newNode->id;
 }
 
+/* ==========================================================================
+ * copyblock
+ * copies rectangle from source bitmap to destination bitmap
+ * ==========================================================================*/
+void copyblock(int dstx, int dsty, int dstbmwidth, unsigned char * dstbuf,
+			   int srcx, int srcy, int srcwidth, int srcheight, int srcbmwidth, unsigned char * srcbuf)
+{
+	int i, j;
+	unsigned char * src, * dst;
+	src=srcbuf+ srcx + srcy * srcbmwidth;
+	dst=dstbuf+ dstx + dsty * dstbmwidth;
+	for (j=0; j<srcheight; j++) {
+		for (i=0; i<srcwidth; i++)
+		{
+			*dst++=*src++;
+		}
+		dst+=dstbmwidth - srcwidth;
+		src+=srcbmwidth - srcwidth;
+	}
+}
+
 /*===========================================================================
  * store_tile
  * update the tile map to reflect tiles in hashmap

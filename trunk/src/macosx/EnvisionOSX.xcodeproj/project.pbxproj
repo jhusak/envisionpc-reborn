@@ -69,6 +69,8 @@
 		308284EA12FEBF390096A207 /* preferences.c in Sources */ = {isa = PBXBuildFile; fileRef = 308284E812FEBF390096A207 /* preferences.c */; };
 		308284EB12FEBF390096A207 /* preferences.h in Headers */ = {isa = PBXBuildFile; fileRef = 308284E912FEBF390096A207 /* preferences.h */; };
 		30DD217612F3E3B900B92FCD /* changes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 30DD217512F3E3B900B92FCD /* changes.txt */; };
+		30F689E3133F635100E1EB86 /* undo.h in Headers */ = {isa = PBXBuildFile; fileRef = 30F689E1133F635100E1EB86 /* undo.h */; };
+		30F689E4133F635100E1EB86 /* undo.c in Sources */ = {isa = PBXBuildFile; fileRef = 30F689E2133F635100E1EB86 /* undo.c */; };
 		F5A47AA101A0483001D3D55B /* SDLMain.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A47A9D01A0482F01D3D55B /* SDLMain.h */; };
 		F5A47AA301A0483001D3D55B /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = F5A47A9E01A0483001D3D55B /* SDLMain.m */; };
 /* End PBXBuildFile section */
@@ -95,6 +97,8 @@
 		308284E812FEBF390096A207 /* preferences.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = preferences.c; path = ../preferences.c; sourceTree = SOURCE_ROOT; };
 		308284E912FEBF390096A207 /* preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = preferences.h; path = ../preferences.h; sourceTree = SOURCE_ROOT; };
 		30DD217512F3E3B900B92FCD /* changes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = changes.txt; path = ../changes.txt; sourceTree = SOURCE_ROOT; };
+		30F689E1133F635100E1EB86 /* undo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = undo.h; path = ../undo.h; sourceTree = SOURCE_ROOT; };
+		30F689E2133F635100E1EB86 /* undo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = undo.c; path = ../undo.c; sourceTree = SOURCE_ROOT; };
 		F5A47A9D01A0482F01D3D55B /* SDLMain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = SOURCE_ROOT; };
 		F5A47A9E01A0483001D3D55B /* SDLMain.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -160,6 +164,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				30F689E1133F635100E1EB86 /* undo.h */,
+				30F689E2133F635100E1EB86 /* undo.c */,
 				2D1A354509B6939B00FEE1D0 /* util.c */,
 				2DA801AF099059B900D40525 /* colours.h */,
 				308284E812FEBF390096A207 /* preferences.c */,
@@ -212,6 +218,7 @@
 				2DA801C3099059B900D40525 /* raw.h in Headers */,
 				2DA801C5099059B900D40525 /* SDLemu.h in Headers */,
 				308284EB12FEBF390096A207 /* preferences.h in Headers */,
+				30F689E3133F635100E1EB86 /* undo.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +265,7 @@
 				2DA801C6099059B900D40525 /* title.c in Sources */,
 				2D1A354609B6939B00FEE1D0 /* util.c in Sources */,
 				308284EA12FEBF390096A207 /* preferences.c in Sources */,
+				30F689E4133F635100E1EB86 /* undo.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
