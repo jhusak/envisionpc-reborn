@@ -125,8 +125,9 @@ free(fname);\
 #define KEYMOD_CTRL 256
 #define KEYMOD_SHIFT 512
 
+#define FONT_DIFFER(a,b) (memcmp((a),(b),1024))
 
-enum {MBUTTON_LEFT=1, MBUTTON_MIDDLE, MBUTTON_RIGHT};
+enum {MBUTTON_LEFT=1, MBUTTON_MIDDLE ,MBUTTON_RIGHT};
 enum {DIALOG_LEFT=-3, DIALOG_CENTER, DIALOG_RIGHT};
 enum {VIEW_MAP, VIEW_TILE, VIEW_MASK};
 enum {MAP_NO_ALLOC,MAP_ALLOC};
@@ -143,7 +144,8 @@ extern int fontmode[10];
 // delete after putting into func
 extern unsigned char  *fontbank[10];
 extern unsigned char  tpal[3*256];
-extern int default_font_mode; 
+extern int default_font_mode;
+extern int eight_bit_preview_on;
 
 // title.c
 int title();
