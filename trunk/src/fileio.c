@@ -20,6 +20,7 @@
 //unsigned char secbuf[256];
 //unsigned char VTOCsec[128];
 
+
 long flength(FILE * in)
 {
 	long len;
@@ -302,6 +303,20 @@ int read_file_map(char *file, unsigned char *font, view *map, int raw)
 							
 							fread(mask->map,mask->w*mask->h,1,in);
 							break;
+						case 3:
+							i=fgetc(in); // read font num
+							if (IN_RANGE(i,0,9)) {
+								int activefont = fgetc(in);
+								fontmode[i]=fgetc(in); // font mode
+								fread(fontbank[i],1024,1,in); //font data
+								if (activefont==1)
+								{
+									font=fontbank[i];
+									mode=fontmode[i];
+									bank=i;
+								}
+							}
+							break;
 						default:
 							break;
 							
@@ -337,6 +352,7 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 {
 	FILE *out;
 	unsigned char head[16];
+	int i;
 
 	if(!(out=openFile(file,"wb","Cannot save map!"))) return -1;
 
@@ -389,8 +405,22 @@ int write_file_map(char *file, unsigned char *font, view *map, int raw)
 			 * so it is not nessesary to put them in the file
 			 * I see no particular reason to have map of different size than main map.
 			 */
-			fputc(2,out); /* signal tilemap type 1 block */		
+			fputc(2,out); /* signal maskmap type 2 block */		
 			fwrite(mask->map,mask->w*mask->h,1,out);
+			
+			for (i=0; i<10; i++) {
+				if FONT_DIFFER(fontbank[i],dfont)
+					{
+						fputc(3,out); /* signal font type 3 block */
+						fputc(i,out); // font num
+						if (!FONT_DIFFER(fontbank[i],font))
+							fputc(1,out); // active font
+						else
+							fputc(0,out); // intactive font
+						fputc(fontmode[i],out); //font mode
+						fwrite(fontbank[i],1024,1,out); // font data
+					}
+			}
 			
 			fputc(0,out); /* signal end of blocks */
 			break;

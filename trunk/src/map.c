@@ -162,6 +162,9 @@ int map_panel()
 		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*set mask");	cmds[++cmdcnt]='s';
 		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*clear mask");	cmds[++cmdcnt]='c';
 		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"set from *map");	cmds[++cmdcnt]='m';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"set from map *bit");	cmds[++cmdcnt]='b';
+		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"copy to map *Bit");	cmds[++cmdcnt]='B';
+		
 	}
 	
 	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*go to XY");	cmds[++cmdcnt]='g';
@@ -529,6 +532,24 @@ int map_command(int cmd, int sym)
 			SDLstring(CONFIG.screenWidth-172,15,TILE_MODE?"Please probe the tile":"Please probe the char");
 			do_probe=1;
 			break;
+		case 'B':
+		{
+			int i,j;
+			unsigned char * store= currentView->map;
+			unsigned char * look= mask->map;
+			i=get_number("Which map bit to copy to (1-8)?",8,8);
+			if (i>=1 && i<=8)
+			{
+				// TODO: implement ratio
+				i=1<<(i-1);
+				for (j=0; j<currentView->w*currentView->h; j++)
+				{
+					*store &=!*look?~i:0xff;
+					*store++ |= *look++?i:0;
+				}
+			}
+		}	
+			break;
 		case 'm': 
 			if MASK_EDIT_MODE {
 				int i;
@@ -674,10 +695,27 @@ int map_command(int cmd, int sym)
 			break;
 			
 		case 'b': 
-			set_mapview(tileEditMode?VIEW_MAP:VIEW_TILE);
-			map_panel();
-			if (!cacheOk)
-				draw_header(0);
+			if MASK_EDIT_MODE {
+				int i,j;
+				unsigned char * look= currentView->map;
+				unsigned char *store= mask->map;
+				i=get_number("Which map bit to get from (1-8)?",8,8);
+				if (i>=1 && i<=8)
+				{
+					// TODO: implement ratio
+					i=1<<(i-1);
+					for (j=0; j<currentView->w*currentView->h; j++)
+						*store++=(*look++)&i?1:0;
+				}
+				else
+					error_dialog("Wrong bit!");
+			}	else {
+				
+				set_mapview(tileEditMode?VIEW_MAP:VIEW_TILE);
+				map_panel();
+				if (!cacheOk)
+					draw_header(0);
+			}
 			break;
 		case 'a':
 			cacheOk=0;

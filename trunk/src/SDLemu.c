@@ -408,7 +408,7 @@ int SDLplotchr(int sx, int sy, int chr, int typ, unsigned char *fnt)
 {
 
 	unsigned char clr, *dat;
-	dat=fnt+(chr*8);
+	dat=fnt+((chr&0x7f)*8);
 	if (typ>16) {
 		typ-=16;
 	}

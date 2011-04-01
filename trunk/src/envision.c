@@ -47,6 +47,8 @@ int andit[8]={127,191,223,239,247,251,253,254};
 
 char * preferences_filepath;
 int commands_allowed[64];
+int eight_bit_preview_on;
+
 
 
 config CONFIG;
@@ -242,7 +244,11 @@ void update_color_chooser(){
 	int i,j;
 	setpal();
 	for (j=0;j<4;++j)
-		SDLBox(EDIT_GRID_X+(j<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(j<<4),EDIT_GRID_Y+78,clut[j]);
+	{
+		i=(eight_bit_preview_on && j==3)?4:j;
+		SDLBox(EDIT_GRID_X+(j<<4),EDIT_GRID_Y+68,EDIT_GRID_X+15+(j<<4),EDIT_GRID_Y+78,clut[i]);
+	}
+	
 	for (j=0; j<3; j++)
 		for (i=2; i<=10; i+=4)
 			SDLBox(EDIT_GRID_X+(edc[j]<<4)+i,EDIT_GRID_Y+68,EDIT_GRID_X+i+2+(edc[j]<<4),EDIT_GRID_Y+72,4);
@@ -320,7 +326,9 @@ int grid(int chr, int remember)
 		for(y=0;y<8;y++) {
 			c=*(dat+y);
 			for(x=0;x<4;x++) {
-				clr=clut[(c&0xc0)>>6];
+				clr=(c&0xc0)>>6;
+				if (eight_bit_preview_on && clr==3) clr=4;
+				clr=clut[clr];
 				SDLBox(EDIT_GRID_X+x*16,EDIT_GRID_Y+y*8,EDIT_GRID_X+x*16+15,EDIT_GRID_Y+7+y*8,clr);
 				c<<=2;
 			}
@@ -332,8 +340,8 @@ int grid(int chr, int remember)
 
 	topos(echr,&x,&y);
 	if (mode==4 || mode==5) setpal();
-	SDLBox(x,y,x+7,y+7,clut[0]);
-	SDLplotchr(x,y,echr,m,font);
+	SDLBox(x,y,x+7,y+7,0);
+	SDLplotchr(x,y,echr | eight_bit_preview_on,m,font);
 	echr=chr;
 	topos(echr,&x,&y);
 	SDLBox(x,y,x+7,y+7,148);
@@ -345,7 +353,7 @@ int grid(int chr, int remember)
 	SDLSetContext(UpdContext);
 	SDLClear(0);
 	
-	show_char_typefaces(echr);
+	show_char_typefaces(echr | eight_bit_preview_on);
 	
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,EDIT_GRID_X+72,EDIT_GRID_Y-2,UpdContext,0,0,32,66);
@@ -392,6 +400,7 @@ int panel(int tp)
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*copy"); cmds[++idxcnt]='c';
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*x-copy"); cmds[++idxcnt]='x';
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*transcopy"); cmds[++idxcnt]='t';
+	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"8bit to*ggle"); cmds[++idxcnt]='g';
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*pick colors"); cmds[++idxcnt]='p';
 	//drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"RestorFont"); cmds[++idxcnt]='A';
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*save font"); cmds[++idxcnt]='s';
@@ -400,10 +409,10 @@ int panel(int tp)
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*ImprtPalette"); cmds[++idxcnt]='I';
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"*options"); cmds[++idxcnt]='o';
 	drawbutton(0,idxcnt*BUTTON_HEIGHT+8,"de*faults"); cmds[++idxcnt]='f';
-	// dfgjknqwyz
+	// dgjknqwyz
 	cmds[0]=idxcnt*BUTTON_HEIGHT+8;
 	SDLSetContext(MainContext);
-	SDLContextBlt(MainContext,EDIT_MENU_X,EDIT_MENU_Y,UpdContext,0,0,BUTTON_WIDTH*8,cmds[0]);
+	SDLContextBlt(MainContext,EDIT_MENU_X,EDIT_MENU_Y,UpdContext,0,0,BUTTON_WIDTH*8+5,cmds[0]);
 	return 1;
 }
 
@@ -597,7 +606,7 @@ int update_font(int b)
 	if (mode!=fontmode[b]) {
 		mode=fontmode[b];
 		do_mode(mode);
-//		draw_edit();
+		draw_edit();
 	}
 	
 	SDLSetContext(DialogContext);
@@ -606,7 +615,7 @@ int update_font(int b)
 	sx=0; sy=0;
 	m=get_8x8_mode(mode);
 	for(i=0;i<128;i++) {
-		SDLplotchr(sx,sy,i,m,font);
+		SDLplotchr(sx,sy,i | eight_bit_preview_on,m ,font);
 		sx+=8;
 		if (sx>248) { sx=0; sy+=8; }
 	}
@@ -737,6 +746,7 @@ int setup(int zoom, int fullScreen)
 	control_pressed=0;
 	default_font_mode=0;
 	do_copy=COPY_NONE;
+	eight_bit_preview_on=0;
 	initUndo();
 	memset(&copy_buffer, 0, sizeof (copy_buffer));
 	memset(peek,0,64);
@@ -805,7 +815,7 @@ int update(int x, int y)
 	SDLSetContext(UpdContext);
 	SDLClear(0);
 	
-	show_char_typefaces(echr);
+	show_char_typefaces(echr | eight_bit_preview_on);
 	
 	SDLSetContext(MainContext);
 	SDLContextBlt(MainContext,EDIT_GRID_X+72,EDIT_GRID_Y-2,UpdContext,0,0,32,66);
@@ -1011,9 +1021,11 @@ int click(int x, int y, int b)
 					case 5:
 						xe4=xe&0xfffffff0;
 						if IN_RANGE(b,1,3) {
-							col44=clut[edc[b-1]];
-							bit4=edc[b-1];
+							int rcol=edc[b-1];
+							bit4=rcol;
+							if (eight_bit_preview_on && rcol==3) rcol=4;
 							setpal();
+							col44=clut[rcol];
 							SDLBox(xe4,ye,xe4+15,ye+7,col44);
 							setdefaultpal();
 							update2bits((xe4-EDIT_GRID_X)>>4,(ye-EDIT_GRID_Y)>>3,bit4&3);
@@ -1234,6 +1246,7 @@ int command(int cmd, int sym)
 		case '8':
 		case '9':
 				  update_font(cmd-'0');
+			
 				  break;
 		case 'b':
 				  memset(dat,0,8);
@@ -1256,6 +1269,11 @@ int command(int cmd, int sym)
 				  memcpy(dat,undo,8);
 				  memcpy(undo,work,8);
                   break;
+		case 'g':
+			eight_bit_preview_on ^= 0x80;
+			update_font(bank);
+			break;
+			
 		case 'h':
 				  for(i=0;i<8;i++) {
 					  l=work[i];

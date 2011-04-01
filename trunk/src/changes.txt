@@ -120,3 +120,11 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - added block copypaste map commands (copy with shift copies either map or mask; paste with shift advances the cursor vertically instead of horizontally)
 - added default mode switch by clicking on the draw chars (upper right corner in map edit mode)
 - added cursor positioning by control-click (places the cursor without drawing) - useful when copying.
+
+2011-03-29 (rev49)
+- added create mask from map bit 1-8; useful when drawing attributes
+- added copy mask to map bit 1-8; useful when applying changes
+- added toggle 7 bit in modes 4 and 5 in font edit mode
+- fixed bug with update font mode in font edit mode
+- fixed bug with font background color in font edit mode
+- all changed fonts are saved along with map during map save and active one is set
