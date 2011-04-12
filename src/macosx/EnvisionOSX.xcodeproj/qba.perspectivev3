@@ -197,7 +197,48 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array/>
+	<array>
+		<dict>
+			<key>Content</key>
+			<dict>
+				<key>PBXProjectModuleGUID</key>
+				<string>309FAD371347B0970086E83A</string>
+				<key>PBXProjectModuleLabel</key>
+				<string>envision.h</string>
+				<key>PBXSplitModuleInNavigatorKey</key>
+				<dict>
+					<key>Split0</key>
+					<dict>
+						<key>PBXProjectModuleGUID</key>
+						<string>309FAD381347B0970086E83A</string>
+						<key>PBXProjectModuleLabel</key>
+						<string>envision.h</string>
+						<key>_historyCapacity</key>
+						<integer>0</integer>
+						<key>bookmark</key>
+						<string>30432DEB13542B4700901537</string>
+						<key>history</key>
+						<array>
+							<string>309FAD471349D4980086E83A</string>
+						</array>
+					</dict>
+					<key>SplitCount</key>
+					<string>1</string>
+				</dict>
+				<key>StatusBarVisibility</key>
+				<true/>
+			</dict>
+			<key>Geometry</key>
+			<dict>
+				<key>Frame</key>
+				<string>{{0, 20}, {1202, 858}}</string>
+				<key>PBXModuleWindowStatusBarHidden2</key>
+				<false/>
+				<key>RubberWindowFrame</key>
+				<string>15 98 1202 899 0 0 1280 1002 </string>
+			</dict>
+		</dict>
+	</array>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>1280</integer>
@@ -280,13 +321,12 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>22</integer>
-									<integer>4</integer>
-									<integer>0</integer>
+									<integer>41</integer>
+									<integer>32</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 17}, {204, 884}}</string>
+							<string>{{0, 0}, {204, 884}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -321,7 +361,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>30DD212C12F3DB6600B92FCD</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>changes.txt</string>
+								<string>envision.c</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -329,11 +369,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>30DD212D12F3DB6600B92FCD</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>changes.txt</string>
+										<string>envision.c</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>309FACDA1345806F0086E83A</string>
+										<string>30432DEA13542B4700901537</string>
 										<key>history</key>
 										<array>
 											<string>3080DC9B12FB685B00605DE0</string>
@@ -343,23 +383,23 @@
 											<string>309DC97013048AA900B51016</string>
 											<string>300D89F1130601A90026BB42</string>
 											<string>302FBC39131E6CE10097E524</string>
-											<string>302FBD83132C3A730097E524</string>
 											<string>302FBE14133351BC0097E524</string>
 											<string>30DD6E791334C7C000A1E8F8</string>
-											<string>30DD6E7A1334C7C000A1E8F8</string>
 											<string>30F68963133F551700E1EB86</string>
 											<string>30F6899B133F5D0800E1EB86</string>
 											<string>309FAC5513456C180086E83A</string>
-											<string>309FAC7B134576A20086E83A</string>
-											<string>309FAC8D1345781F0086E83A</string>
-											<string>309FAC8E1345781F0086E83A</string>
 											<string>309FAC901345781F0086E83A</string>
-											<string>309FAC911345781F0086E83A</string>
 											<string>309FACCB13457F440086E83A</string>
-											<string>309FACCF13457FB60086E83A</string>
-											<string>309FACD41345806F0086E83A</string>
-											<string>309FACD51345806F0086E83A</string>
-											<string>309FACD61345806F0086E83A</string>
+											<string>309FAD031345ED030086E83A</string>
+											<string>309FAD041345ED030086E83A</string>
+											<string>309FAD291347B0970086E83A</string>
+											<string>309FAD2A1347B0970086E83A</string>
+											<string>30432DD413542B4700901537</string>
+											<string>30432DD513542B4700901537</string>
+											<string>30432DD613542B4700901537</string>
+											<string>30432DD713542B4700901537</string>
+											<string>30432DD813542B4700901537</string>
+											<string>30432DD913542B4700901537</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -367,44 +407,37 @@
 											<string>3029150912FA18600045DF5F</string>
 											<string>3029150A12FA18600045DF5F</string>
 											<string>3029165C12FA5A0D0045DF5F</string>
-											<string>3028D08F12FC5DB00056BE67</string>
 											<string>308284D612FDEBCD0096A207</string>
 											<string>308284D812FDEBCD0096A207</string>
 											<string>309DC9BB13048CEE00B51016</string>
 											<string>30E4FF6B1309846E007A84F8</string>
-											<string>30E4FFE0130994BD007A84F8</string>
 											<string>30E402B1130DC4C0007A84F8</string>
-											<string>302FBDC0132CDE290097E524</string>
 											<string>30DD6DC31333950A00A1E8F8</string>
 											<string>300D88BB1305AF210026BB42</string>
-											<string>30A282E61336749400904042</string>
 											<string>30F68969133F551700E1EB86</string>
-											<string>309FAC1E1344F3940086E83A</string>
-											<string>309FAC3B134502A50086E83A</string>
-											<string>309FAC3C134502A50086E83A</string>
-											<string>309FAC42134503850086E83A</string>
-											<string>309FAC4B1345044B0086E83A</string>
-											<string>309FAC5B13456C180086E83A</string>
-											<string>309FAC5C13456C180086E83A</string>
-											<string>309FAC5D13456C180086E83A</string>
-											<string>309FAC6F134572750086E83A</string>
-											<string>309FAC71134572750086E83A</string>
 											<string>309FAC7D134576A20086E83A</string>
-											<string>309FAC7E134576A20086E83A</string>
-											<string>309FAC7F134576A20086E83A</string>
-											<string>309FAC80134576A20086E83A</string>
 											<string>309FAC82134576A20086E83A</string>
-											<string>309FAC951345781F0086E83A</string>
-											<string>309FAC961345781F0086E83A</string>
-											<string>309FAC971345781F0086E83A</string>
-											<string>309FAC991345781F0086E83A</string>
-											<string>309FAC9A1345781F0086E83A</string>
-											<string>309FAC9B1345781F0086E83A</string>
 											<string>309FACB813457CFC0086E83A</string>
-											<string>309FACD113457FB60086E83A</string>
-											<string>309FACD71345806F0086E83A</string>
-											<string>309FACD81345806F0086E83A</string>
-											<string>309FACD91345806F0086E83A</string>
+											<string>309FAD061345ED030086E83A</string>
+											<string>309FAD1613464C920086E83A</string>
+											<string>309FAD1813464C920086E83A</string>
+											<string>309FAD1D13464C920086E83A</string>
+											<string>30432DDA13542B4700901537</string>
+											<string>30432DDB13542B4700901537</string>
+											<string>30432DDC13542B4700901537</string>
+											<string>30432DDD13542B4700901537</string>
+											<string>30432DDE13542B4700901537</string>
+											<string>30432DDF13542B4700901537</string>
+											<string>30432DE013542B4700901537</string>
+											<string>30432DE113542B4700901537</string>
+											<string>30432DE213542B4700901537</string>
+											<string>30432DE313542B4700901537</string>
+											<string>30432DE413542B4700901537</string>
+											<string>30432DE513542B4700901537</string>
+											<string>30432DE613542B4700901537</string>
+											<string>30432DE713542B4700901537</string>
+											<string>30432DE813542B4700901537</string>
+											<string>30432DE913542B4700901537</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -527,11 +560,11 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>309FAC13134493730086E83A</string>
+				<string>30432DBA1354285900901537</string>
 				<string>1CA23ED40692098700951B8B</string>
-				<string>309FAC14134493730086E83A</string>
+				<string>30432DBB1354285900901537</string>
 				<string>30DD212C12F3DB6600B92FCD</string>
-				<string>309FAC15134493730086E83A</string>
+				<string>30432DBC1354285900901537</string>
 				<string>1CA23EDF0692099D00951B8B</string>
 				<string>1CA23EE00692099D00951B8B</string>
 				<string>1CA23EE10692099D00951B8B</string>
@@ -678,14 +711,14 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>309FAC16134493730086E83A</string>
+				<string>30432DBD1354285900901537</string>
 				<string>1CCC7628064C1048000F2A68</string>
 				<string>1CCC7629064C1048000F2A68</string>
-				<string>309FAC17134493730086E83A</string>
-				<string>309FAC18134493730086E83A</string>
-				<string>309FAC19134493730086E83A</string>
-				<string>309FAC1A134493730086E83A</string>
-				<string>309FAC1B134493730086E83A</string>
+				<string>30432DBE1354285900901537</string>
+				<string>30432DBF1354285900901537</string>
+				<string>30432DC01354285900901537</string>
+				<string>30432DC11354285900901537</string>
+				<string>30432DC21354285900901537</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>
@@ -715,6 +748,7 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>309FAD371347B0970086E83A</string>
 		<string>/Users/qba/devel/envisionpc-reborn/src/macosx/EnvisionOSX.xcodeproj</string>
 	</array>
 	<key>WindowString</key>

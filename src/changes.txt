@@ -128,3 +128,6 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 - fixed bug with update font mode in font edit mode
 - fixed bug with font background color in font edit mode
 - all changed fonts are saved along with map during map save and active one is set
+
+2011-04-15 (rev 50)
+- added filename store for every font.

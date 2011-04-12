@@ -1309,10 +1309,10 @@ int command(int cmd, int sym)
 			if (values==3) values=0;
 			break;
 		case 's':
-			OBJECT_IO("Save font:",1,save_font_file_name,"Font saved.",write_font(fname,font))
+			OBJECT_IO("Save font:",1,save_font_file_name[bank],"Font saved.",write_font(fname,font))
 			break;
 		case 'l':		
-			OBJECT_IO("Load font:",0,save_font_file_name,NULL,read_font(fname,font))
+			OBJECT_IO("Load font:",0,save_font_file_name[bank],NULL,read_font(fname,font))
 			update_font(bank);
 			break;
 		case 'I':

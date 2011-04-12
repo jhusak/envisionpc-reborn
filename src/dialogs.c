@@ -287,12 +287,19 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 char *get_filename(char *title, char * initial)
 {
 	char *r;
+	int py;
 	int tmpx;
 	int tmpy=EDIT_OFFSET_Y;
-
-	tmpx=openDblBufferDialog(DIALOG_CENTER, 64+tmpy, 320, 32, title, 0);
-	//SDLstring(tmpx+4,68+tmpy,title);
-	r=ginput(tmpx+4,78+tmpy,tmpx+312,38,initial,0);
+	py=64+tmpy;
+	tmpx=openDblBufferDialog(DIALOG_CENTER, py, 320, 32, title, 0);
+	py+=14;
+#if 0
+	if (strlen(CONFIG.pathname)>0) {
+		SDLstring(tmpx+4,py,CONFIG.pathname);
+		py+=10;
+	}
+#endif
+	r=ginput(tmpx+4,py,tmpx+312,38,initial,0);
 	closeLastDblBufferDialog();
 	return r;
 }
@@ -420,14 +427,12 @@ int do_options()
 
 	yp=EDIT_OFFSET_Y+64;
 	
-	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 208, 88, "Default Options",1);
-	//SDL_ShowCursor(SDL_DISABLE); /* 144 */
-	//yp+=2;
-	//SDLstring(tmpx+44,yp,"Default Options");
+	tmpx=openDblBufferDialog(DIALOG_CENTER, yp, 320, 98, "Default Options",1);
+
 	yp+=22;
-	
-	SDLstring(tmpx+3,yp,"Export format:");
-	SDLstring(tmpx+3+15*8,yp,names[options.write_tp]);
+	tmpx+=8;
+	SDLstring(tmpx+3,yp,"Current Export format:");
+	SDLstring(tmpx+3+23*8,yp,names[options.write_tp]);
 	yp+=12;
 
 	SDLstring(tmpx+3,yp,"Select new export format:");
@@ -447,8 +452,8 @@ int do_options()
 	c=oldname-hot;
 	yp-=8;
 	SDLBox(tmpx+3,yp,tmpx+206,yp+16,148);
-	SDLstring(tmpx+3,yp,"Export format:");
-	SDLstring(tmpx+3+15*8,yp,names[c]);
+	SDLstring(tmpx+3,yp,"New export format:");
+	SDLstring(tmpx-1+19*8,yp,names[c]);
 	tmp_write_tp=c;
 	if ((!c)||(c==2)) {
 		yp+=10;
@@ -472,10 +477,23 @@ int do_options()
 	} else {
 		tmp_base=tmp_step=0;
 	}
+	yp+=12;
+#if 0
+	SDLstring(tmpx+3,yp,"Base pathname:");
+	yp+=12;
+	char * path=ginput(tmpx-1,yp,tmpx+305,38,CONFIG.pathname,0);
+	
+	if (!path) goto exit;
+	
+	strncpy(CONFIG.pathname,path,PATHNAME_LEN-1);
+	free(path);
+	CONFIG.pathname[PATHNAME_LEN-1]='\0';
 	yp+=20;
-	drawbutton(tmpx+59,yp,"Okay");
+#endif
+	
+	drawbutton(tmpx+97,yp,"Okay?");
 	c=SDLgetch(1);
-	if (c==27) goto exit; 
+	if (tolower(c)!='o' && tolower(c)!='y' && c!=13) goto exit; 
 	
 	// Commit dialog values
 	free_name=0;
@@ -503,6 +521,7 @@ void handler_config_reset()
 	CONFIG.defaultMapHeight=24;
 	CONFIG.color_display_mode=0;
 	CONFIG.maxMapSize=4096*1024;
+	CONFIG.pathname[0]='\0';
 }
 
 void handler_chmap_reset()
