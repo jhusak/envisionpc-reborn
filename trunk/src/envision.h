@@ -27,13 +27,15 @@ typedef struct runtime_storage
 		char save_map_file_name[128];
 		char save_raw_map_file_name[128];
 		char save_raw_mask_file_name[128];
-		char save_font_file_name[128];
+		char save_font_file_name[10][128];
 		char export_font_file_name[128];
 		char dummy[128];
 	} runtime_storage;
 
 typedef enum {COLOR_DISPLAY_HEX, COLOR_DISPLAY_DEC, COLOR_DISPLAY_MAX} color_display_type;
 enum {COPY_NONE,COPY_MAP,COPY_MASK};
+
+#define PATHNAME_LEN 128
 typedef struct config
 	{
 		int checkersHi;
@@ -45,6 +47,7 @@ typedef struct config
 		int defaultMapHeight;
 		color_display_type color_display_mode; // hex/dec
 		int maxMapSize;
+		char pathname[PATHNAME_LEN];
 		
 	} config;
 
