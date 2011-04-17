@@ -216,10 +216,10 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>30432DEB13542B4700901537</string>
+						<string>301E654C135AEE43009DADDC</string>
 						<key>history</key>
 						<array>
-							<string>309FAD471349D4980086E83A</string>
+							<string>30432DF813542E2300901537</string>
 						</array>
 					</dict>
 					<key>SplitCount</key>
@@ -321,8 +321,9 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>41</integer>
-									<integer>32</integer>
+									<integer>21</integer>
+									<integer>4</integer>
+									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -361,7 +362,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>30DD212C12F3DB6600B92FCD</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>envision.c</string>
+								<string>title.c</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -369,11 +370,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>30DD212D12F3DB6600B92FCD</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>envision.c</string>
+										<string>title.c</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>30432DEA13542B4700901537</string>
+										<string>301E654B135AEE43009DADDC</string>
 										<key>history</key>
 										<array>
 											<string>3080DC9B12FB685B00605DE0</string>
@@ -390,16 +391,16 @@
 											<string>309FAC5513456C180086E83A</string>
 											<string>309FAC901345781F0086E83A</string>
 											<string>309FACCB13457F440086E83A</string>
-											<string>309FAD031345ED030086E83A</string>
-											<string>309FAD041345ED030086E83A</string>
 											<string>309FAD291347B0970086E83A</string>
 											<string>309FAD2A1347B0970086E83A</string>
-											<string>30432DD413542B4700901537</string>
 											<string>30432DD513542B4700901537</string>
 											<string>30432DD613542B4700901537</string>
-											<string>30432DD713542B4700901537</string>
 											<string>30432DD813542B4700901537</string>
-											<string>30432DD913542B4700901537</string>
+											<string>301E64F1135AD81B009DADDC</string>
+											<string>301E653F135AEDED009DADDC</string>
+											<string>301E6540135AEDED009DADDC</string>
+											<string>301E6541135AEDED009DADDC</string>
+											<string>301E6542135AEDED009DADDC</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -422,22 +423,21 @@
 											<string>309FAD1613464C920086E83A</string>
 											<string>309FAD1813464C920086E83A</string>
 											<string>309FAD1D13464C920086E83A</string>
-											<string>30432DDA13542B4700901537</string>
-											<string>30432DDB13542B4700901537</string>
-											<string>30432DDC13542B4700901537</string>
 											<string>30432DDD13542B4700901537</string>
-											<string>30432DDE13542B4700901537</string>
-											<string>30432DDF13542B4700901537</string>
-											<string>30432DE013542B4700901537</string>
-											<string>30432DE113542B4700901537</string>
-											<string>30432DE213542B4700901537</string>
-											<string>30432DE313542B4700901537</string>
-											<string>30432DE413542B4700901537</string>
-											<string>30432DE513542B4700901537</string>
-											<string>30432DE613542B4700901537</string>
-											<string>30432DE713542B4700901537</string>
-											<string>30432DE813542B4700901537</string>
-											<string>30432DE913542B4700901537</string>
+											<string>30432DF513542E2300901537</string>
+											<string>301E64AA1358EBCE009DADDC</string>
+											<string>301E64F3135AD81B009DADDC</string>
+											<string>301E64F4135AD81B009DADDC</string>
+											<string>301E64FE135AD911009DADDC</string>
+											<string>301E652C135AEB67009DADDC</string>
+											<string>301E652D135AEB67009DADDC</string>
+											<string>301E652E135AEB67009DADDC</string>
+											<string>301E652F135AEB67009DADDC</string>
+											<string>301E6530135AEB67009DADDC</string>
+											<string>301E6531135AEB67009DADDC</string>
+											<string>301E6543135AEDED009DADDC</string>
+											<string>301E6544135AEDED009DADDC</string>
+											<string>301E6545135AEDED009DADDC</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -560,11 +560,11 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>30432DBA1354285900901537</string>
+				<string>301E649D1358EB05009DADDC</string>
 				<string>1CA23ED40692098700951B8B</string>
-				<string>30432DBB1354285900901537</string>
+				<string>301E649E1358EB05009DADDC</string>
 				<string>30DD212C12F3DB6600B92FCD</string>
-				<string>30432DBC1354285900901537</string>
+				<string>301E649F1358EB05009DADDC</string>
 				<string>1CA23EDF0692099D00951B8B</string>
 				<string>1CA23EE00692099D00951B8B</string>
 				<string>1CA23EE10692099D00951B8B</string>
@@ -613,12 +613,12 @@
 					<key>GeometryConfiguration</key>
 					<dict>
 						<key>Frame</key>
-						<string>{{0, 0}, {1280, 269}}</string>
+						<string>{{0, 0}, {1280, 153}}</string>
 					</dict>
 					<key>Module</key>
 					<string>PBXDebugCLIModule</string>
 					<key>Proportion</key>
-					<string>269pt</string>
+					<string>153pt</string>
 				</dict>
 				<dict>
 					<key>ContentConfiguration</key>
@@ -637,8 +637,8 @@
 								<string>yes</string>
 								<key>sizes</key>
 								<array>
-									<string>{{0, 0}, {625, 307}}</string>
-									<string>{{625, 0}, {655, 307}}</string>
+									<string>{{0, 0}, {625, 364}}</string>
+									<string>{{625, 0}, {655, 364}}</string>
 								</array>
 							</dict>
 							<key>VerticalSplitView</key>
@@ -653,8 +653,8 @@
 								<string>yes</string>
 								<key>sizes</key>
 								<array>
-									<string>{{0, 0}, {1280, 307}}</string>
-									<string>{{0, 307}, {1280, 321}}</string>
+									<string>{{0, 0}, {1280, 364}}</string>
+									<string>{{0, 364}, {1280, 380}}</string>
 								</array>
 							</dict>
 						</dict>
@@ -674,7 +674,7 @@
 						<key>DebugSTDIOWindowFrame</key>
 						<string>{{200, 200}, {500, 300}}</string>
 						<key>Frame</key>
-						<string>{{0, 274}, {1280, 628}}</string>
+						<string>{{0, 158}, {1280, 744}}</string>
 						<key>PBXDebugSessionStackFrameViewKey</key>
 						<dict>
 							<key>DebugVariablesTableConfiguration</key>
@@ -687,13 +687,13 @@
 								<real>192</real>
 							</array>
 							<key>Frame</key>
-							<string>{{625, 0}, {655, 307}}</string>
+							<string>{{625, 0}, {655, 364}}</string>
 						</dict>
 					</dict>
 					<key>Module</key>
 					<string>PBXDebugSessionModule</string>
 					<key>Proportion</key>
-					<string>628pt</string>
+					<string>744pt</string>
 				</dict>
 			</array>
 			<key>Name</key>
@@ -711,14 +711,14 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>30432DBD1354285900901537</string>
+				<string>301E64A01358EB05009DADDC</string>
 				<string>1CCC7628064C1048000F2A68</string>
 				<string>1CCC7629064C1048000F2A68</string>
-				<string>30432DBE1354285900901537</string>
-				<string>30432DBF1354285900901537</string>
-				<string>30432DC01354285900901537</string>
-				<string>30432DC11354285900901537</string>
-				<string>30432DC21354285900901537</string>
+				<string>301E64A11358EB05009DADDC</string>
+				<string>301E64A21358EB05009DADDC</string>
+				<string>301E64A31358EB05009DADDC</string>
+				<string>301E64A41358EB05009DADDC</string>
+				<string>301E64A51358EB05009DADDC</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>
@@ -748,6 +748,8 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>301E64B31358EDD2009DADDC</string>
+		<string>301E64B41358EDD2009DADDC</string>
 		<string>309FAD371347B0970086E83A</string>
 		<string>/Users/qba/devel/envisionpc-reborn/src/macosx/EnvisionOSX.xcodeproj</string>
 	</array>

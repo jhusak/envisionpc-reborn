@@ -131,3 +131,7 @@ Those are changes and bugfixes made by Jakub Husak to version 0.8 of EnvisionPC
 
 2011-04-15 (rev 50)
 - added filename store for every font.
+
+2011-04-17 (rev 51)
+- fixed bug - "gotopos" out of map
+- fized bug - segfault or glitches after map resize in some cuircumstances;

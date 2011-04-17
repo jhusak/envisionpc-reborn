@@ -905,7 +905,7 @@ int get_number(char *title, int def, int max)
 unsigned char * resize_map(view * map_view, int x, int y) {
 	unsigned char * look, * newmap, *result;
 	int loop, i;
-	
+
 	look=newmap=map_view->map;
 	if (x<map_view->w) {
 		for(loop=0;loop<map_view->h;loop++) {
@@ -918,13 +918,15 @@ unsigned char * resize_map(view * map_view, int x, int y) {
 	if (newmap) {
 		result=newmap;
 		if (x>map_view->w) {
-			look=result+x*y-map_view->w*map_view->h;
-			memmove(look,result,map_view->w*map_view->h);
-			for(loop=0;loop<map_view->h;loop++)
-				for(i=0;i<x;i++)
-					if (i<map_view->w) *newmap++=*look++;
-					else *newmap++=0;
+			look=result+y*map_view->w;
+			newmap=result+y*x;
+			for(loop=y-1;loop>=0;loop--)
+				for(i=x-1;i>=0;i--)
+					if (i<map_view->w) *(--newmap)=*(--look);
+					else *(--newmap)=0;
+			
 		}
+		
 		if (y>map_view->h)
 			memset(result+x*map_view->h,0,x*y-x*map_view->h);
 	} else {
@@ -1051,39 +1053,43 @@ int do_move(view *map, int tile_mode)
 		loop=1;
 		do {
 			size=ginput(tmpx+100,68+tmpy,tmpx+164,6,buf,1);
-			if (size) {
-				x=num2val(size);
-				free(size);
-				if (IN_RANGE(x,0,255))
-					loop=0;
-			} else loop=1;
+			if (!size) goto exit;
+			x=num2val(size);
+			free(size);
+			if (IN_RANGE(x,0,255))
+				loop=0;
 		} while(loop);
 		y=x/16; x=x-y*16;
 		x=x*tsx; y=y*tsy;
 	} else {
 		SDLstring(tmpx+4,68+tmpy,"Move to X:");
 		sprintf(buf,"%d",map->scx+map->cx);
-		size=ginput(tmpx+92,68+tmpy,tmpx+92+64,6,buf,1);
-		if (size) {
+		loop=1;
+		do {
+			size=ginput(tmpx+92,68+tmpy,tmpx+92+64,6,buf,1);
+			if (!size) goto exit;
 			x=num2val(size);
 			free(size);
-			if (IN_RANGE(x,0,map->w-1))
-				loop=0;
-		} else goto exit;
+			if (IN_RANGE(x,0,map->w-1)) loop=0;
+				else sprintf(buf,"%d",map->w-1);
+		} while (loop);
+		
 		SDLBox(tmpx+91,67+tmpy,tmpx+92+65,77+tmpy,148);
 		sprintf(buf,"%d",x);
 		SDLstring(tmpx+93,68+tmpy,buf);
 
-		
 		SDLstring(tmpx+4,78+tmpy,"Move to Y:");
 		sprintf(buf,"%d",map->scy+map->cy);
-		size=ginput(tmpx+92,78+tmpy,tmpx+92+64,6,buf,1);
-		if (size) {
+		loop=1;
+		do {
+			size=ginput(tmpx+92,78+tmpy,tmpx+92+64,6,buf,1);
+			if (!size) goto exit;			
 			y=num2val(size);
 			free(size);
-			if (IN_RANGE(y,0,map->h-1))
-				loop=0;
-		} else goto exit;
+			if (IN_RANGE(y,0,map->h-1)) loop=0;
+			else sprintf(buf,"%d",map->h-1);
+		} while (loop);
+		
 	}
 
 	mw=CONFIG.screenWidth/map->cw;
