@@ -1,0 +1,1 @@
+This project arrised in need of  good cross-multi-platform map editor. As a source the EnvisionPC project by Mark Schmelzenbach. The last version has the number of 0.8, released in 2006. We try to improve some annoyances, fix some bugs and even add new features. This is not serious project, rather a fun.
