@@ -1,3 +1,4 @@
+# This makefile works (tested) with ElCapitan and Mojave
 CFLAGS  = -O3 `sdl-config --cflags` `sdl-config --libs` -Wall -I/Library/Frameworks/SDL.framework/Versions/A/Headers/
 L       = -O3 -lSDL
 L       += -O3 `sdl-config --cflags` `sdl-config --libs`
