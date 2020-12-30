@@ -1,4 +1,4 @@
-EnvisionPC: Release 0.8.xx
+EnvisionPC: Release 0.8.51
 
 by Mark Schmelzenbach
 
@@ -6,7 +6,7 @@ modified by:
 Jakub Husak
 STC (4-colour char edit mode) 
 Copyright (c)1997-2006
-
+WARNING: this file refers to original EnvisionPC in description. Command review below is updated and describes current state.
 
 Introduction
 
@@ -65,7 +65,7 @@ Installation
 
 The zip file includes the following files:
 
-envision.txt: this file
+README.txt: this file
 envision.exe: the Windows executable, now built with MingW.
 SDL.dll: the SDL library.
 LGPL.txt: the license for libSDL
