@@ -35,7 +35,7 @@ int drawbevelledbox(int x, int y, int w, int h)
 int drawbuttonwidth(int x, int y, char *txt, int width,int height)
 {
 	int l,o,c;
-	char *f,btxt[16];
+	char *f,btxt[32];
 
 	btxt[0]=c=o=0;
 	f=strchr(txt,'*');
