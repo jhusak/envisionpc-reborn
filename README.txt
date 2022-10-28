@@ -2,7 +2,7 @@ EnvisionPC: Release 0.8.52
 
 by Mark Schmelzenbach
 
-modified by:
+extended by:
 Jakub Husak 
 STC (4-colour char edit mode) 
 
