@@ -240,16 +240,15 @@ char *ginput(int xp, int yp, int slen, int len, char *init, int tp)
 				cc=10;
 				dd=500;
 			} else { // rest chars
-				if ((cp<len)&&(cx+8<slen)&&((isalnum(c))||(c=='$')||(c=='.')
-											||(c=='\\')||(c=='/')||(TILDE_ALLOWED && c=='~')))
+				if ((cp<len)&&(cx+8<slen)&&((isalnum(c))||(c=='-')||(c=='_')||(c=='$')||(c=='.')
+					||(c=='\\')||(c=='/')||(TILDE_ALLOWED && c=='~')))
 				{
 					if ((tp==1)&&(!cp)&&(!isdigit(c))&&(c!='$')); // first char neither digit nor $ 
 					else if ((tp==1)&&cp&&(buffer[0]!='$')&&(!isdigit(c))) ; // first char digit and adjacent not digit
 					else if ((tp==1)&&cp&&(buffer[0]=='$')&&(hex2dec(c)<0)); // first dollar and adjacent not hex
-					else if ((tp==2)&&((c=='/')||(c=='\\')||(cp==12)
-									   ||((c=='.')&&(strchr(buffer,'.'))))) ;
+					else if ((tp==2)&&((c=='/')||(c=='\\')||(cp==50))) ;
 					else {
-						if (tp==2) c=toupper(c);
+						//if (tp==2) c=toupper(c);
 						if (tp==1 && buffer[0]=='$') c=toupper(c);
 						buffer[cp]=c;
 						cp++;
@@ -299,7 +298,7 @@ char *get_filename(char *title, char * initial)
 		py+=10;
 	}
 #endif
-	r=ginput(tmpx+4,py,tmpx+312,38,initial,0);
+	r=ginput(tmpx+4,py,tmpx+312,38,initial,2);
 	closeLastDblBufferDialog();
 	return r;
 }

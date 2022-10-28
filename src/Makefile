@@ -1,6 +1,6 @@
-CFLAGS  = -O3 -I/usr/include/SDL -Wall -I/Library/Frameworks/SDL.framework/Versions/A/Headers/
+CFLAGS  = -O3 -I/usr/include/SDL -I/usr/local/include/SDL -Wall -I/Library/Frameworks/SDL.framework/Versions/A/Headers/
 L       = -O3 -lSDL
-L       = -O3 -L /Library/Frameworks/SDL.framework/Versions/A/SDL
+#L       = -O3 -L /Library/Frameworks/SDL.framework/Versions/A/SDL
 CC      = gcc
 
 .c.s:
@@ -9,7 +9,7 @@ CC      = gcc
 all:    prog
 
 OBJS    = \
-	dialogs.o envision.o fileio.o map.o title.o SDLemu.o util.o
+	dialogs.o envision.o fileio.o map.o title.o SDLemu.o util.o undo.o preferences.o
 
 prog : $(OBJS)
 	$(CC) -o envision $(OBJS) $(L)

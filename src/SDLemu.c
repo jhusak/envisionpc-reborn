@@ -338,21 +338,6 @@ int SDLCharEngine(int sx, int sy, int chr, int typ, unsigned char clr, unsigned 
 				ch=typ==5?16:8;
 				break;
 			}
-	/*	case 6: {
-				for(y=0;y<8;y++) {
-					c=*(dat+y);
-					int tcol;
-					for(x=0;x<8;x++) {
-						tcol=(c&128)?clr:0;
-						SDLPlot(sx+x*2,sy+y,clut[tcol]);
-						SDLPlot(sx+(x*2+1),sy+y,clut[tcol]);
-						c=c<<1;
-					}
-				}
-				cw=16; ch=8;
-				break;
-			}
-	 */
 		case 6: /* Gr. 1 */
 		case 7: { /* Gr. 2 */
 				for(y=0;y<8;y++) {
