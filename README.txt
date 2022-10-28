@@ -6,7 +6,8 @@ modified by:
 Jakub Husak
 STC (4-colour char edit mode) 
 Copyright (c)1997-2006
-WARNING: this file refers to original EnvisionPC in description. Command review below is updated and describes current state.
+(JH)WARNING: this file refers to original EnvisionPC in description. Command review below is updated and describes current state.
+(JH)WARNING2: This code works under Windows, Linux and OSX. There is no compiled linux binary, but Windows and OSX versions are in app folder.
 
 Introduction
 
