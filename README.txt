@@ -1,13 +1,17 @@
-EnvisionPC: Release 0.8.51
+EnvisionPC: Release 0.8.52
 
 by Mark Schmelzenbach
 
 modified by:
-Jakub Husak
+Jakub Husak 
 STC (4-colour char edit mode) 
-Copyright (c)1997-2006
+
+Copyright (c)1997-2022
+
 (JH)WARNING: this file refers to original EnvisionPC in description. Command review below is updated and describes current state.
 (JH)WARNING2: This code works under Windows, Linux and OSX. There is no compiled linux binary, but Windows and OSX versions are in app folder.
+
+-- original content by Mark Schmelzenbach --
 
 Introduction
 
