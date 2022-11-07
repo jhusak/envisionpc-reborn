@@ -1,4 +1,4 @@
-EnvisionPC: Release 0.8.52
+EnvisionPC: Release 0.8.53
 
 by Mark Schmelzenbach
 
@@ -258,6 +258,7 @@ Available commands in the map editor:
    left mouse button).  This command is affected by the current ratio (below).
    A ratio of 100 will fill the entire map with the draw character.  Smaller
    ratios will result in characters 'spotting' the map.
+   'C' - fills the map with 0 to 255 ascending alues - not affected by ratio yet
 
 'r': ratio
    This commands sets the ratio value for the find and clear commands.  A
