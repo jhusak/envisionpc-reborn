@@ -18,7 +18,7 @@ int credits(int x, int y)
 	int center;
 	SDLBox(8,CONFIG.screenHeight-12,CONFIG.screenWidth-8,CONFIG.screenHeight-5,1);
 	SDLBox(8,CONFIG.screenHeight-24,CONFIG.screenWidth-8,CONFIG.screenHeight-17,1);
-	char * title="v0.8.52 by Jakub Husak with help of STC.";
+	char * title="v0.8.53 by Jakub Husak with help of STC.";
 	center=(CONFIG.screenWidth-strlen(title)*8)/2;
 	SDLstring(center,CONFIG.screenHeight-24,title);
 	title="v0.8 Programmed by Mark Schmelzenbach";

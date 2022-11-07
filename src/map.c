@@ -169,11 +169,13 @@ int map_panel()
 	
 	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*go to XY");	cmds[++cmdcnt]='g';
 	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"ctl(shft)-*copy");	cmds[++cmdcnt]='c'+KEYMOD_CTRL;
-	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"ctl(shft)-*paste");	cmds[++cmdcnt]='v'+KEYMOD_CTRL; // look below at add_allowed_commands
+	drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"ctl(shft)-*vpaste");	cmds[++cmdcnt]='v'+KEYMOD_CTRL; // look below at add_allowed_commands
 	if (NOT_MASK_EDIT_MODE && !tileEditMode)  { drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"M*ask edit");	cmds[++cmdcnt]='a';}
 		drawbutton_map(0,cmdcnt*BUTTON_HEIGHT,"*hide");	cmds[++cmdcnt]='h';
 	// wolne:ajknoqvxy
 	MAP_MENU_HEIGHT=cmdcnt*BUTTON_HEIGHT;
+
+	cmds[++cmdcnt]='C'; // for clear with fill
 	
 	set_allowed_commands(cmds,cmdcnt,1);
 	add_allowed_command('v'+KEYMOD_CTRL+KEYMOD_SHIFT); // missing ctrl-shift paste (vertical)
@@ -498,6 +500,7 @@ int map_command(int cmd, int sym)
 			break;
 		case 'u':
 			break;
+		case 'C':
 		case 'c':
 			if MASK_EDIT_MODE {
 				storeUndo(VIEW_MASK,mask->map, mask->h*mask->w);
@@ -507,6 +510,15 @@ int map_command(int cmd, int sym)
 			} else {
 				if (ratio==100) {
 					memset(currentView->map,currentView->dc[0],currentView->w*currentView->h);
+					if (cmd=='C')
+					{
+						int j=currentView->w*currentView->h;
+						if (j>256) j=256;
+						for (i=0; i<j; i++)
+						{
+							*(currentView->map+i)=i;
+						}
+					}
 				} else {
 					fill_draw_char(currentView, 0, 0);
 				}
