@@ -1,22 +1,22 @@
-# This makefile works (tested) with ElCapitan and Mojave
-CFLAGS  = -O3 `sdl-config --cflags` `sdl-config --libs` -Wall -I/Library/Frameworks/SDL.framework/Versions/A/Headers/
-L       = -O3 -lSDL
-L       += -O3 `sdl-config --cflags` `sdl-config --libs`
+# This makefile works (tested) with ElCapitan and Mojave, Ventura
+CFLAGS  = -O3 `sdl-config --cflags` -Wall -I/Library/Frameworks/SDL.framework/Versions/A/Headers/
+L       = -O3 `sdl-config --libs`
 CC      = gcc
+PROG	= envision
 
 .c.s:
 	$(CC) $(CFLAGS) -c $<
 
-all:    prog
+all:    $(PROG)
 
 OBJS    = \
 	dialogs.o envision.o fileio.o map.o title.o SDLemu.o util.o undo.o preferences.o
 
-prog : $(OBJS)
-	$(CC) -o envision $(OBJS) $(L)
+$(PROG) : $(OBJS)
+	$(CC) -o $@ $^ $(L)
 
 clean:
-	rm *.o *~ envision
+	rm *.o *~ $(PROG)
 
 dialogs.o: SDLemu.h envision.h
 envision.o: SDLemu.h colours.h font.h envision.h
